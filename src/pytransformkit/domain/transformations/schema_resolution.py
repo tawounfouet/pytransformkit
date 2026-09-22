@@ -121,8 +121,8 @@ class OutputSchemaResolver:
             return input_schema
 
         if isinstance(transformation, DeduplicateTransformation):
-            for key in transformation.keys:
-                input_schema.field(str(key))
+            for field_path in transformation.keys:
+                input_schema.field(str(field_path))
             return input_schema
 
         raise UnsupportedTransformationError(

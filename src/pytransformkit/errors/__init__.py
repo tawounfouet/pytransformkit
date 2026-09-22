@@ -2,6 +2,13 @@
 
 from pytransformkit.errors.base import PyTransformKitError
 from pytransformkit.errors.codes import ErrorCode
+from pytransformkit.errors.engine import (
+    AdapterError,
+    EngineError,
+    EngineNotFoundError,
+    ExecutionError,
+    UnsupportedEngineCapabilityError,
+)
 from pytransformkit.errors.expression import (
     ExpressionError,
     ExpressionTypeError,
@@ -27,8 +34,12 @@ from pytransformkit.errors.transformation import (
 )
 
 __all__ = [
+    "AdapterError",
     "DuplicateFieldError",
+    "EngineError",
+    "EngineNotFoundError",
     "ErrorCode",
+    "ExecutionError",
     "ExpressionError",
     "ExpressionTypeError",
     "FieldCollisionError",
@@ -43,5 +54,6 @@ __all__ = [
     "PyTransformKitError",
     "SchemaError",
     "TransformationError",
+    "UnsupportedEngineCapabilityError",
     "UnsupportedTransformationError",
 ]

@@ -56,6 +56,11 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 - Pandas eager execution for select, drop, rename, filter, limit, distinct, cast, derive, sort, and deduplicate.
 - Explicit rejection of unsupported Pandas lazy execution and mixed per-key NULL sort ordering.
 - Pandas adapter contract tests covering type/schema mapping, expressions, end-to-end execution, input immutability, and unsupported semantics.
+- `RunPipelineService` for explicit end-to-end application execution.
+- `PipelineExecutionResult` retaining execution identity, engine descriptor, LogicalPlan, output handle, and output Schema.
+- Pre-execution enforcement of requested engine identity, plan capabilities, and LAZY capability.
+- Post-execution enforcement of adapter output-engine identity and LogicalPlan Schema consistency.
+- Unit tests with structural fake adapters plus a Pandas integration contract for the application service.
 
 ### Changed
 

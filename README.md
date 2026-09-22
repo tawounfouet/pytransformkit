@@ -26,6 +26,7 @@ The following implementation lots are now in place:
 - **LOT-06 — Pipeline & DAG Core**
 - **LOT-07 — Engine Runtime Contracts**
 - **LOT-08 — Pandas Reference Adapter**
+- **LOT-09 — Application Execution Service**
 
 The logical data layer now provides:
 
@@ -45,7 +46,9 @@ The runtime boundary now defines portable engine capabilities and descriptors, o
 
 The first physical engine is now implemented as the optional `pytransformkit[pandas]` extra. The Pandas adapter provides a typed Dataset handle, conservative Schema inspection, logical/native type mapping, Expression compilation and eager execution for the initial Transformation set. Dedicated contract tests run separately from the Core suite.
 
-The next implementation lot is **LOT-09 — Application Execution Service**.
+The application layer now exposes `RunPipelineService`, which plans a Pipeline, resolves one explicitly requested engine from `EngineRegistry`, validates logical capabilities and execution mode, executes the adapter, and verifies output engine/schema contracts. `PipelineExecutionResult` retains the execution id, engine descriptor and LogicalPlan.
+
+The next implementation lot is **LOT-10 — Polars Adapter & Multi-Engine Contract**.
 
 The first release line targets `0.1.0a1`.
 

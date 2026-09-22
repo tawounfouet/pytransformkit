@@ -7,7 +7,6 @@ from pytransformkit.domain.pipelines.nodes import (
     InputNode,
     OutputNode,
     PipelineNode,
-    TransformationNode,
 )
 from pytransformkit.domain.shared.identifiers import NodeId
 from pytransformkit.errors.pipeline import (

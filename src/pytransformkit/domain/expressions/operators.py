@@ -1,9 +1,9 @@
 """Logical Expression operators."""
 
-from enum import Enum
+from enum import StrEnum
 
 
-class BinaryOperator(str, Enum):
+class BinaryOperator(StrEnum):
     EQ = "eq"
     NE = "ne"
     LT = "lt"
@@ -18,6 +18,6 @@ class BinaryOperator(str, Enum):
     OR = "or"
 
 
-class UnaryOperator(str, Enum):
+class UnaryOperator(StrEnum):
     NOT = "not"
     NEGATE = "negate"

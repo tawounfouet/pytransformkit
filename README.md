@@ -57,6 +57,19 @@ This closes the first engine-agnostic implementation cycle: Core → logical pla
 
 The first release line targets `0.1.0a1`.
 
+## Frozen roadmap to 1.0.0
+
+The official implementation roadmap from **LOT-11 through LOT-28** is frozen in
+`docs/ROADMAP_LOT_11_TO_1_0.md`.
+
+- Total roadmap: **29 lots** (`LOT-00` → `LOT-28`)
+- Completed: **11 lots** (`LOT-00` → `LOT-10`)
+- Remaining: **18 lots** (`LOT-11` → `LOT-28`)
+- Final lot: **LOT-28 — PyTransformKit 1.0.0 Stable Release**
+
+The roadmap is normative: material changes to lot ordering, boundaries, or 1.0.0
+acceptance criteria require an explicit roadmap amendment.
+
 ## Development
 
 ```bash

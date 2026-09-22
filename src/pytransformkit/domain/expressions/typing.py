@@ -133,8 +133,7 @@ class ExpressionTypeResolver:
             return ExpressionType(DateType(), False)
 
         raise ExpressionTypeError(
-            "Cannot infer a logical DataType for literal "
-            f"{type(value).__name__!r}."
+            f"Cannot infer a logical DataType for literal {type(value).__name__!r}."
         )
 
     def _resolve_binary(
@@ -200,30 +199,22 @@ class ExpressionTypeResolver:
     ) -> ExpressionType:
         name = expression.function.value
         arguments = tuple(
-            self.resolve(argument, schema)
-            for argument in expression.arguments
+            self.resolve(argument, schema) for argument in expression.arguments
         )
 
         if name in {"core.lower", "core.upper", "core.trim"}:
             if len(arguments) != 1:
-                raise ExpressionTypeError(
-                    f"{name} requires exactly one argument."
-                )
+                raise ExpressionTypeError(f"{name} requires exactly one argument.")
             argument = arguments[0]
             if not isinstance(argument.data_type, StringType):
-                raise ExpressionTypeError(
-                    f"{name} requires a String Expression."
-                )
+                raise ExpressionTypeError(f"{name} requires a String Expression.")
             return ExpressionType(StringType(), argument.nullable)
 
         if name == "core.concat":
             if not arguments:
-                raise ExpressionTypeError(
-                    "core.concat requires at least one argument."
-                )
+                raise ExpressionTypeError("core.concat requires at least one argument.")
             if any(
-                not isinstance(argument.data_type, StringType)
-                for argument in arguments
+                not isinstance(argument.data_type, StringType) for argument in arguments
             ):
                 raise ExpressionTypeError(
                     "core.concat requires only String Expressions."
@@ -253,9 +244,7 @@ def _resolve_numeric_result(
 ) -> DataType:
     numeric_types = (IntegerType, FloatType, DecimalType)
     if not isinstance(left, numeric_types) or not isinstance(right, numeric_types):
-        raise ExpressionTypeError(
-            "Arithmetic operations require numeric Expressions."
-        )
+        raise ExpressionTypeError("Arithmetic operations require numeric Expressions.")
 
     if isinstance(left, DecimalType) or isinstance(right, DecimalType):
         raise ExpressionTypeError(

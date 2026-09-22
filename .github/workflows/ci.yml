@@ -47,6 +47,21 @@ jobs:
       - name: Run tests
         run: pytest --cov=pytransformkit --cov-report=term-missing
 
+  pandas-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install Pandas adapter dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,pandas]"
+      - name: Run Pandas adapter contracts
+        run: pytest tests/contract/engines/pandas -ra
+
   build:
     runs-on: ubuntu-latest
     steps:

@@ -43,6 +43,9 @@ dev = [
   "pytest-cov>=6,<8",
   "ruff>=0.11,<1",
 ]
+pandas = [
+  "pandas>=2.2,<4",
+]
 
 [project.urls]
 Repository = "https://github.com/tawounfouet/pytransformkit"
@@ -88,3 +91,7 @@ branch = true
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
+
+[[tool.mypy.overrides]]
+module = ["pandas", "pandas.*"]
+ignore_missing_imports = true

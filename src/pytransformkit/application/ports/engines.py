@@ -1,10 +1,15 @@
 """Runtime ports implemented by physical engine adapters."""
 
-from typing import Protocol, runtime_checkable
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from pytransformkit.application.execution.context import ExecutionContext
 from pytransformkit.domain.engines.descriptor import EngineDescriptor
 from pytransformkit.domain.pipelines.plan import LogicalPlan
+
+if TYPE_CHECKING:
+    from pytransformkit.application.execution.results import EngineExecutionResult
 
 
 @runtime_checkable
@@ -31,9 +36,6 @@ class EngineAdapter(Protocol):
         plan: LogicalPlan,
         input_handle: DatasetHandle,
         context: ExecutionContext,
-    ) -> "EngineExecutionResult":
+    ) -> EngineExecutionResult:
         """Execute a validated LogicalPlan using one physical engine."""
         ...
-
-
-from pytransformkit.application.execution.results import EngineExecutionResult

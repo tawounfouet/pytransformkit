@@ -80,6 +80,22 @@ def test_literal_type_inference(
     assert resolved.nullable is nullable
 
 
+@pytest.mark.parametrize(
+    "value",
+    [
+        Decimal("NaN"),
+        Decimal("Infinity"),
+        Decimal("-Infinity"),
+    ],
+)
+def test_non_finite_decimal_literal_is_rejected(
+    schema: Schema,
+    value: Decimal,
+) -> None:
+    with pytest.raises(ExpressionTypeError, match="Non-finite Decimal"):
+        ExpressionTypeResolver().resolve(lit(value), schema)
+
+
 def test_comparison_resolves_boolean_and_nullability(schema: Schema) -> None:
     resolved = ExpressionTypeResolver().resolve(
         col("amount") > 0,

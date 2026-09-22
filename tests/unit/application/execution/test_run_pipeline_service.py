@@ -57,9 +57,7 @@ class FakeAdapter:
         self.execute_count += 1
         return EngineExecutionResult(
             output_handle=(
-                self.output_handle
-                if self.output_handle is not None
-                else input_handle
+                self.output_handle if self.output_handle is not None else input_handle
             ),
             output_schema=(
                 self.output_schema

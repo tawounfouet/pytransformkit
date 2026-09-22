@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from decimal import Decimal
 
 import pytest
@@ -62,7 +62,7 @@ def test_missing_column_raises_schema_error(schema: Schema) -> None:
         (Decimal("12.30"), DecimalType(4, 2), False),
         (date(2026, 9, 22), DateType(), False),
         (
-            datetime(2026, 9, 22, 12, tzinfo=timezone.utc),
+            datetime(2026, 9, 22, 12, tzinfo=UTC),
             TimestampType(timezone="UTC"),
             False,
         ),

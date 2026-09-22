@@ -15,6 +15,16 @@ class DatasetReference:
     version: Version | None = None
     fingerprint: Fingerprint | None = None
 
+    def __post_init__(self) -> None:
+        if not isinstance(self.dataset_id, DatasetId):
+            raise TypeError("Dataset reference id must be a DatasetId.")
+        if self.version is not None and not isinstance(self.version, Version):
+            raise TypeError("Dataset reference version must be a Version.")
+        if self.fingerprint is not None and not isinstance(
+            self.fingerprint, Fingerprint
+        ):
+            raise TypeError("Dataset reference fingerprint must be a Fingerprint.")
+
 
 @dataclass(frozen=True, slots=True)
 class LogicalDatasetReference:

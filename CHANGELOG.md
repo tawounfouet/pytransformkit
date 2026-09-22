@@ -43,6 +43,13 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 - `PipelinePlanner` that validates and resolves the complete logical chain before physical execution.
 - Public `Pipeline` export from the top-level `pytransformkit` package.
 - Stable `PTK-PIPE-*` Pipeline error codes and DAG/planner contract tests.
+- Portable `EngineCapability` and immutable `EngineDescriptor`.
+- Runtime `DatasetHandle` and `EngineAdapter` protocols with no physical-engine dependency.
+- Immutable `ExecutionContext`, `ExecutionMode`, and `EngineExecutionResult`.
+- Explicit `EngineRegistry` that never performs silent engine fallback.
+- Logical-plan capability analysis and pre-execution `EngineCompatibilityService`.
+- Stable `PTK-ENGINE-*` and `PTK-EXEC-*` error codes.
+- Engine runtime contract tests including structural protocols, explicit lookup, and missing-capability rejection.
 
 ### Changed
 

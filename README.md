@@ -24,6 +24,7 @@ The following implementation lots are now in place:
 - **LOT-04 — Expression AST Core**
 - **LOT-05 — Transformation Model MVP**
 - **LOT-06 — Pipeline & DAG Core**
+- **LOT-07 — Engine Runtime Contracts**
 
 The logical data layer now provides:
 
@@ -39,7 +40,9 @@ The Transformation layer now models projection, row selection, casting, derivati
 
 The Pipeline layer now provides an immutable single-input/single-output DAG, explicit dependencies, structural validation, deterministic topological ordering, static Schema propagation and an engine-independent LogicalPlan. The public package now exposes `Pipeline`.
 
-The next implementation lot is **LOT-07 — Engine Runtime Contracts**.
+The runtime boundary now defines portable engine capabilities and descriptors, opaque Dataset handles, an EngineAdapter protocol, immutable execution context/results, an explicit EngineRegistry and pre-execution capability compatibility checks. No physical engine is imported by the Core.
+
+The next implementation lot is **LOT-08 — Pandas Reference Adapter**.
 
 The first release line targets `0.1.0a1`.
 

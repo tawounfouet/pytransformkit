@@ -12,9 +12,9 @@ from pytransformkit.application.execution.context import (
 from pytransformkit.application.execution.registry import EngineRegistry
 from pytransformkit.application.execution.results import EngineExecutionResult
 from pytransformkit.application.ports.engines import DatasetHandle
+from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.engines import EngineCapability, EngineDescriptor
 from pytransformkit.domain.pipelines import LogicalPlan, Pipeline, PipelinePlanner
-from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.shared.identifiers import ExecutionId
 from pytransformkit.errors.engine import (
     AdapterError,

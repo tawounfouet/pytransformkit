@@ -14,6 +14,11 @@ from pytransformkit.errors.schema import (
     FieldNotFoundError,
     SchemaError,
 )
+from pytransformkit.errors.transformation import (
+    InvalidTransformationError,
+    TransformationError,
+    UnsupportedTransformationError,
+)
 
 __all__ = [
     "DuplicateFieldError",
@@ -24,6 +29,9 @@ __all__ = [
     "FieldNotFoundError",
     "FunctionNotFoundError",
     "InvalidBooleanUsageError",
+    "InvalidTransformationError",
     "PyTransformKitError",
     "SchemaError",
+    "TransformationError",
+    "UnsupportedTransformationError",
 ]

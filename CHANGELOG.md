@@ -22,6 +22,14 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 - Logical immutable `Dataset` aggregate with identity-based equality and no physical data payload.
 - Unit tests for Shared Kernel, DataTypes, FieldPath, Field, Schema, Dataset metadata/statistics/references, Dataset identity, and Schema errors.
 - Architecture tests preventing Domain imports from engine libraries or Infrastructure.
+- Engine-independent immutable Expression AST with column references, literals, binary/unary operators, NULL predicates, and logical function calls.
+- Public Expression DSL with `col()`, `lit()`, `lower()`, `upper()`, `trim()`, and `concat()`.
+- Python operator overloading for comparisons, arithmetic, boolean composition, and unary logical/negation operations.
+- Expression static type resolution with nullability propagation and basic numeric promotion.
+- Expression dependency extraction for future lineage, projection analysis, and optimization.
+- Canonical SHA-256 structural Expression fingerprints.
+- Expression error hierarchy with stable `PTK-EXPR-*` error codes.
+- Tests covering AST construction, bool-coercion protection, literal inference, functions, dependencies, fingerprints, and non-finite Decimal rejection.
 
 ### Changed
 

@@ -21,6 +21,7 @@ The following implementation lots are now in place:
 - **LOT-01 — Shared Kernel**
 - **LOT-02 — Type System & Schema Core**
 - **LOT-03 — Dataset Domain Model**
+- **LOT-04 — Expression AST Core**
 
 The logical data layer now provides:
 
@@ -30,7 +31,9 @@ The logical data layer now provides:
 - `DatasetReference` and `LogicalDatasetReference`;
 - an immutable logical `Dataset` whose identity is independent from any DataFrame, Table, Relation, or other physical engine object.
 
-The next implementation lot is **LOT-04 — Expression AST Core**.
+The Expression layer now provides a portable immutable AST, public `col/lit` DSL, string functions, static logical typing, NULL-aware nullability propagation, dependency extraction, and canonical structural fingerprints.
+
+The next implementation lot is **LOT-05 — Transformation Model MVP**.
 
 The first release line targets `0.1.0a1`.
 

@@ -86,7 +86,7 @@ class Pipeline:
         *,
         input_name: str = "input",
         output_name: str = "output",
-    ) -> "Pipeline":
+    ) -> Pipeline:
         input_node = InputNode.create(input_name, input_schema)
         output_node = OutputNode.create(output_name)
 
@@ -129,7 +129,7 @@ class Pipeline:
     def then(
         self,
         transformation: TransformationSpec,
-    ) -> "Pipeline":
+    ) -> Pipeline:
         """Append a Transformation before the Pipeline output."""
         if not isinstance(transformation, TransformationSpec):
             raise TypeError(
@@ -176,30 +176,30 @@ class Pipeline:
             dependencies=dependencies,
         )
 
-    def select(self, *fields: str) -> "Pipeline":
+    def select(self, *fields: str) -> Pipeline:
         return self.then(
             SelectTransformation(
                 fields=tuple(FieldPath.of(field) for field in fields)
             )
         )
 
-    def drop(self, *fields: str) -> "Pipeline":
+    def drop(self, *fields: str) -> Pipeline:
         return self.then(
             DropTransformation(
                 fields=tuple(FieldPath.of(field) for field in fields)
             )
         )
 
-    def rename(self, mapping: Mapping[str, str]) -> "Pipeline":
+    def rename(self, mapping: Mapping[str, str]) -> Pipeline:
         return self.then(RenameTransformation.from_mapping(mapping))
 
-    def filter(self, condition: Expression) -> "Pipeline":
+    def filter(self, condition: Expression) -> Pipeline:
         return self.then(FilterTransformation(condition=condition))
 
-    def limit(self, count: int) -> "Pipeline":
+    def limit(self, count: int) -> Pipeline:
         return self.then(LimitTransformation(count=count))
 
-    def distinct(self) -> "Pipeline":
+    def distinct(self) -> Pipeline:
         return self.then(DistinctTransformation())
 
     def cast(
@@ -208,7 +208,7 @@ class Pipeline:
         target_type: DataType,
         *,
         policy: CastPolicy = CastPolicy.RAISE,
-    ) -> "Pipeline":
+    ) -> Pipeline:
         return self.then(
             CastTransformation(
                 field=FieldPath.of(field),
@@ -223,7 +223,7 @@ class Pipeline:
         expression: Expression,
         *,
         replace_existing: bool = False,
-    ) -> "Pipeline":
+    ) -> Pipeline:
         return self.then(
             DeriveTransformation(
                 field_name=field_name,
@@ -237,7 +237,7 @@ class Pipeline:
         *fields: str,
         direction: SortDirection = SortDirection.ASC,
         nulls: NullOrder = NullOrder.LAST,
-    ) -> "Pipeline":
+    ) -> Pipeline:
         return self.then(
             SortTransformation(
                 keys=tuple(
@@ -256,7 +256,7 @@ class Pipeline:
         *,
         keys: tuple[str, ...],
         keep: DeduplicationStrategy = DeduplicationStrategy.FIRST,
-    ) -> "Pipeline":
+    ) -> Pipeline:
         return self.then(
             DeduplicateTransformation(
                 keys=tuple(FieldPath.of(key) for key in keys),

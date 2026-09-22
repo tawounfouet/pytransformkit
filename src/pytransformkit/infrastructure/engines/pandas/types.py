@@ -17,7 +17,10 @@ from pytransformkit.domain.data.data_types import (
     TimestampType,
     UnknownType,
 )
+from pytransformkit.domain.data.field import Field
+from pytransformkit.domain.data.schema import Schema
 from pytransformkit.errors.engine import AdapterError
+from pytransformkit.errors.schema import DuplicateFieldError
 
 
 class PandasTypeMapper:
@@ -86,10 +89,7 @@ class PandasSchemaInspector:
     def __init__(self, type_mapper: PandasTypeMapper | None = None) -> None:
         self._type_mapper = type_mapper or PandasTypeMapper()
 
-    def inspect(self, dataframe: Any):
-        from pytransformkit.domain.data.field import Field
-        from pytransformkit.domain.data.schema import Schema
-        from pytransformkit.errors.schema import DuplicateFieldError
+    def inspect(self, dataframe: Any) -> Schema:
 
         if not isinstance(dataframe, pd.DataFrame):
             raise TypeError("Pandas schema inspection requires a DataFrame.")

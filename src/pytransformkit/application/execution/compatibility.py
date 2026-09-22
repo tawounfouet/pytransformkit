@@ -95,6 +95,5 @@ def _capability_for(
             return capability
 
     raise UnsupportedTransformationError(
-        "No engine capability mapping exists for "
-        f"{type(transformation).__name__!r}."
+        f"No engine capability mapping exists for {type(transformation).__name__!r}."
     )

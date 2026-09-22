@@ -13,14 +13,52 @@ PyTransformKit is an engine-agnostic Python framework for defining typed, compos
 - Make schema propagation, validation, lineage, observability, and optimization first-class concerns.
 - Prove semantic consistency through contract and cross-engine tests.
 
-## Initial roadmap
+## Current implementation status
 
-The first implementation milestone establishes the repository, typed Domain primitives, logical schemas, expressions, transformations, pipelines, and a logical plan before adding the Pandas reference adapter.
+The repository bootstrap (**LOT-00**) is in place and the Shared Kernel (**LOT-01**) has started with:
 
-## Development status
+- typed UUID-backed domain identifiers;
+- immutable `Version` value object;
+- immutable `Fingerprint` value object;
+- unit tests for the Shared Kernel.
 
-Repository bootstrap is in progress. The first release line targets `0.1.0a1`.
+The next implementation lot is **LOT-02 — Type System & Schema Core**.
+
+The first release line targets `0.1.0a1`.
+
+## Development
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -e ".[dev]"
+
+ruff check .
+ruff format --check .
+mypy src/pytransformkit
+pytest
+python -m build
+```
+
+On Windows PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+## Architectural invariants
+
+- No engine-specific types in the Domain.
+- No hidden engine fallback.
+- Optional engines remain optional dependencies.
+- Public semantic behavior is test-driven.
+- A capability is not `SUPPORTED` until its contract tests pass.
+
+## Documentation
+
+Architecture and functional specifications belong under `docs/specifications/` as they are added to the repository.
 
 ## License
 
-License selection is pending.
+License selection is pending and should be made explicitly before a public stable release.

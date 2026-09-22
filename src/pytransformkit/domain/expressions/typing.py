@@ -271,9 +271,7 @@ def _resolve_numeric_result(
 
 def _decimal_type(value: Decimal) -> DecimalType:
     if not value.is_finite():
-        raise ExpressionTypeError(
-            "Non-finite Decimal literals are not supported."
-        )
+        raise ExpressionTypeError("Non-finite Decimal literals are not supported.")
 
     _, digits, raw_exponent = value.as_tuple()
     exponent = cast(int, raw_exponent)

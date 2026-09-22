@@ -10,6 +10,10 @@ from pytransformkit.application.execution.context import (
 )
 from pytransformkit.application.execution.registry import EngineRegistry
 from pytransformkit.application.execution.results import EngineExecutionResult
+from pytransformkit.application.execution.service import (
+    PipelineExecutionResult,
+    RunPipelineService,
+)
 
 __all__ = [
     "EngineCapabilityAnalyzer",
@@ -18,4 +22,6 @@ __all__ = [
     "EngineRegistry",
     "ExecutionContext",
     "ExecutionMode",
+    "PipelineExecutionResult",
+    "RunPipelineService",
 ]

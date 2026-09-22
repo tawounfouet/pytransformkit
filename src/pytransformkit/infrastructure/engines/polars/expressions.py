@@ -66,22 +66,25 @@ class PolarsExpressionCompiler:
     def _compile_binary(self, expression: BinaryExpression) -> Any:
         operator = expression.operator
 
-        if (
-            operator
-            in {
-                BinaryOperator.EQ,
-                BinaryOperator.NE,
-                BinaryOperator.LT,
-                BinaryOperator.LE,
-                BinaryOperator.GT,
-                BinaryOperator.GE,
-            }
-            and (
-                _is_null_literal(expression.left)
-                or _is_null_literal(expression.right)
-            )
+        if operator in {
+            BinaryOperator.EQ,
+            BinaryOperator.NE,
+            BinaryOperator.LT,
+            BinaryOperator.LE,
+            BinaryOperator.GT,
+            BinaryOperator.GE,
+        } and (
+            _is_null_literal(expression.left)
+            or _is_null_literal(expression.right)
         ):
-            return pl.lit(None, dtype=pl.Boolean)
+            anchor_expression = (
+                expression.right
+                if _is_null_literal(expression.left)
+                else expression.left
+            )
+            anchor = self.compile(anchor_expression)
+            row_anchor = anchor.is_null() | anchor.is_not_null()
+            return row_anchor & pl.lit(None, dtype=pl.Boolean)
 
         left = self.compile(expression.left)
         right = self.compile(expression.right)

@@ -156,9 +156,7 @@ def test_adapter_rejects_lazy_execution() -> None:
             "amount": ["1"],
         }
     )
-    plan = PipelinePlanner().plan(
-        Pipeline.create("customers", _schema())
-    )
+    plan = PipelinePlanner().plan(Pipeline.create("customers", _schema()))
 
     with pytest.raises(AdapterError, match="LAZY"):
         PandasAdapter().execute(

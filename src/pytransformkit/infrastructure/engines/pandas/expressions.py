@@ -49,14 +49,10 @@ class PandasExpressionCompiler:
             )
 
         if isinstance(expression, IsNullExpression):
-            return self._is_null(
-                self.compile(expression.operand, dataframe)
-            )
+            return self._is_null(self.compile(expression.operand, dataframe))
 
         if isinstance(expression, IsNotNullExpression):
-            return ~self._is_null(
-                self.compile(expression.operand, dataframe)
-            )
+            return ~self._is_null(self.compile(expression.operand, dataframe))
 
         if isinstance(expression, FunctionCall):
             return self._compile_function(expression, dataframe)
@@ -74,18 +70,14 @@ class PandasExpressionCompiler:
         right = self.compile(expression.right, dataframe)
         operator = expression.operator
 
-        if (
-            (_is_null_scalar(left) or _is_null_scalar(right))
-            and operator
-            in {
-                BinaryOperator.EQ,
-                BinaryOperator.NE,
-                BinaryOperator.LT,
-                BinaryOperator.LE,
-                BinaryOperator.GT,
-                BinaryOperator.GE,
-            }
-        ):
+        if (_is_null_scalar(left) or _is_null_scalar(right)) and operator in {
+            BinaryOperator.EQ,
+            BinaryOperator.NE,
+            BinaryOperator.LT,
+            BinaryOperator.LE,
+            BinaryOperator.GT,
+            BinaryOperator.GE,
+        }:
             return pd.Series(
                 pd.NA,
                 index=dataframe.index,
@@ -117,9 +109,7 @@ class PandasExpressionCompiler:
         if operator is BinaryOperator.OR:
             return left | right
 
-        raise AdapterError(
-            f"Unsupported binary operator {operator.value!r}."
-        )
+        raise AdapterError(f"Unsupported binary operator {operator.value!r}.")
 
     def _compile_function(
         self,
@@ -128,8 +118,7 @@ class PandasExpressionCompiler:
     ) -> Any:
         name = expression.function.value
         arguments = tuple(
-            self.compile(argument, dataframe)
-            for argument in expression.arguments
+            self.compile(argument, dataframe) for argument in expression.arguments
         )
 
         if name == "core.lower":
@@ -141,9 +130,7 @@ class PandasExpressionCompiler:
         if name == "core.concat":
             return _concat(arguments)
 
-        raise AdapterError(
-            f"Pandas does not compile logical function {name!r}."
-        )
+        raise AdapterError(f"Pandas does not compile logical function {name!r}.")
 
     @staticmethod
     def _is_null(value: Any) -> Any:

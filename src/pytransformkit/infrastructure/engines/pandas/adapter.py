@@ -77,9 +77,7 @@ class PandasAdapter:
         expression_compiler: PandasExpressionCompiler | None = None,
         type_mapper: PandasTypeMapper | None = None,
     ) -> None:
-        self._expression_compiler = (
-            expression_compiler or PandasExpressionCompiler()
-        )
+        self._expression_compiler = expression_compiler or PandasExpressionCompiler()
         self._type_mapper = type_mapper or PandasTypeMapper()
         self._compatibility = EngineCompatibilityService()
 
@@ -99,17 +97,11 @@ class PandasAdapter:
         context: ExecutionContext,
     ) -> EngineExecutionResult:
         if context.mode is ExecutionMode.LAZY:
-            raise AdapterError(
-                "Pandas does not support LAZY execution mode."
-            )
+            raise AdapterError("Pandas does not support LAZY execution mode.")
         if not isinstance(input_handle, PandasDatasetHandle):
-            raise AdapterError(
-                "PandasAdapter requires a PandasDatasetHandle."
-            )
+            raise AdapterError("PandasAdapter requires a PandasDatasetHandle.")
         if input_handle.engine_id != self.descriptor.id:
-            raise AdapterError(
-                "Input DatasetHandle engine does not match Pandas."
-            )
+            raise AdapterError("Input DatasetHandle engine does not match Pandas.")
 
         self._compatibility.validate(plan, self.descriptor)
         dataframe = input_handle.dataframe.copy(deep=False)
@@ -141,10 +133,7 @@ class PandasAdapter:
             return dataframe.drop(columns=names).copy()
 
         if isinstance(transformation, RenameTransformation):
-            mapping = {
-                str(item.source): item.target
-                for item in transformation.renames
-            }
+            mapping = {str(item.source): item.target for item in transformation.renames}
             return dataframe.rename(columns=mapping).copy()
 
         if isinstance(transformation, FilterTransformation):
@@ -173,9 +162,7 @@ class PandasAdapter:
                 transformation.expression,
                 dataframe,
             )
-            return dataframe.assign(
-                **{transformation.field_name: value}
-            )
+            return dataframe.assign(**{transformation.field_name: value})
 
         if isinstance(transformation, SortTransformation):
             return _sort(dataframe, transformation)
@@ -198,23 +185,15 @@ class PandasAdapter:
         transformation: CastTransformation,
     ) -> Any:
         data_type = transformation.target_type
-        errors = (
-            "coerce"
-            if transformation.policy is CastPolicy.NULL
-            else "raise"
-        )
+        errors = "coerce" if transformation.policy is CastPolicy.NULL else "raise"
 
         if isinstance(data_type, IntegerType):
             converted = pd.to_numeric(series, errors=errors)
-            return converted.astype(
-                self._type_mapper.to_native(data_type)
-            )
+            return converted.astype(self._type_mapper.to_native(data_type))
 
         if isinstance(data_type, FloatType):
             converted = pd.to_numeric(series, errors=errors)
-            return converted.astype(
-                self._type_mapper.to_native(data_type)
-            )
+            return converted.astype(self._type_mapper.to_native(data_type))
 
         if isinstance(data_type, StringType):
             return series.astype("string")
@@ -227,21 +206,16 @@ class PandasAdapter:
             if data_type.timezone is not None:
                 timezone = getattr(converted.dt, "tz", None)
                 if timezone is None:
-                    converted = converted.dt.tz_localize(
-                        data_type.timezone
-                    )
+                    converted = converted.dt.tz_localize(data_type.timezone)
                 else:
-                    converted = converted.dt.tz_convert(
-                        data_type.timezone
-                    )
+                    converted = converted.dt.tz_convert(data_type.timezone)
             return converted
 
         if isinstance(data_type, DateType):
             return pd.to_datetime(series, errors=errors).dt.date
 
         raise AdapterError(
-            "Pandas casting is not implemented for "
-            f"{type(data_type).__name__!r}."
+            f"Pandas casting is not implemented for {type(data_type).__name__!r}."
         )
 
 
@@ -272,10 +246,7 @@ def _sort(
 
     return dataframe.sort_values(
         by=[str(key.field) for key in transformation.keys],
-        ascending=[
-            key.direction.value == "asc"
-            for key in transformation.keys
-        ],
+        ascending=[key.direction.value == "asc" for key in transformation.keys],
         na_position=next(iter(null_orders)),
         kind="mergesort",
     ).copy()

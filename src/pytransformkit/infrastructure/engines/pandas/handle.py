@@ -14,9 +14,7 @@ class PandasDatasetHandle:
 
     def __post_init__(self) -> None:
         if not isinstance(self.dataframe, pd.DataFrame):
-            raise TypeError(
-                "PandasDatasetHandle dataframe must be a pandas.DataFrame."
-            )
+            raise TypeError("PandasDatasetHandle dataframe must be a pandas.DataFrame.")
 
     @property
     def engine_id(self) -> str:

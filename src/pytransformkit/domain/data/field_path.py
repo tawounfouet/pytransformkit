@@ -12,6 +12,8 @@ class FieldPath:
     parts: tuple[str, ...]
 
     def __post_init__(self) -> None:
+        if not isinstance(self.parts, tuple):
+            raise TypeError("Field path parts must be provided as a tuple.")
         if not self.parts:
             raise ValueError("Field path must contain at least one part.")
         if any(not part or not part.strip() for part in self.parts):

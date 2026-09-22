@@ -30,6 +30,12 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 - Canonical SHA-256 structural Expression fingerprints.
 - Expression error hierarchy with stable `PTK-EXPR-*` error codes.
 - Tests covering AST construction, bool-coercion protection, literal inference, functions, dependencies, fingerprints, and non-finite Decimal rejection.
+- Immutable Transformation specifications for select, drop, rename, filter, limit, distinct, cast, derive, sort, and deduplicate.
+- Explicit Transformation semantic properties for determinism, portability, purity, cardinality effects, and Schema effects.
+- Cast, sort, and deduplication policies represented as engine-independent Domain values.
+- Static `OutputSchemaResolver` covering the full initial Transformation set without executing data.
+- Transformation error hierarchy with stable `PTK-TRANSFORM-*` codes.
+- Contract tests for Transformation invariants and output Schema propagation.
 
 ### Changed
 

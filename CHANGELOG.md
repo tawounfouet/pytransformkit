@@ -71,6 +71,9 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 - Pandas/Polars cross-engine contract tests proving equivalent results for the same logical Pipeline and equivalent UNKNOWN/NULL filter semantics.
 - Completion of the initial implementation roadmap, LOT-00 through LOT-10.
 - Frozen implementation roadmap for LOT-11 through LOT-28, ending with PyTransformKit 1.0.0 stable.
+- Local experimentation notebook under `notebooks/`.
+- Equivalent executable local experimentation script under `scripts/`.
+- `docs/GETTING_STARTED.md` covering installation, first Pipeline, Pandas/Polars execution, lazy execution, and test commands.
 
 ### Changed
 

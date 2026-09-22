@@ -102,6 +102,13 @@ On Windows PowerShell:
 
 ## Documentation
 
+Start with:
+
+- `docs/GETTING_STARTED.md` — installation, first Pipeline, Pandas/Polars execution and local testing;
+- `notebooks/00 - Local Experimentation.ipynb` — interactive first experiment;
+- `scripts/00_local_experimentation.py` — executable equivalent of the notebook;
+- `docs/ROADMAP_LOT_11_TO_1_0.md` — frozen implementation roadmap to 1.0.0.
+
 Architecture and functional specifications belong under `docs/specifications/` as they are added to the repository.
 
 ## License

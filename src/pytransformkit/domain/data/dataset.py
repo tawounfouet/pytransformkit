@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
 
 from pytransformkit.domain.data.metadata import DatasetMetadata
 from pytransformkit.domain.data.references import DatasetReference
@@ -32,8 +31,18 @@ class Dataset:
             raise TypeError("Dataset schema must be a Schema.")
         if not isinstance(self.metadata, DatasetMetadata):
             raise TypeError("Dataset metadata must be DatasetMetadata.")
+        if self.version is not None and not isinstance(self.version, Version):
+            raise TypeError("Dataset version must be a Version.")
+        if self.fingerprint is not None and not isinstance(
+            self.fingerprint, Fingerprint
+        ):
+            raise TypeError("Dataset fingerprint must be a Fingerprint.")
+        if self.statistics is not None and not isinstance(
+            self.statistics, DatasetStatistics
+        ):
+            raise TypeError("Dataset statistics must be DatasetStatistics.")
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Dataset):
             return NotImplemented
         return self.id == other.id

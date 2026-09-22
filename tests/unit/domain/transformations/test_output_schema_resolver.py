@@ -129,9 +129,7 @@ def test_filter_preserves_schema(
     resolver: OutputSchemaResolver,
 ) -> None:
     output = resolver.resolve(
-        FilterTransformation(
-            condition=col("customer_id").is_not_null()
-        ),
+        FilterTransformation(condition=col("customer_id").is_not_null()),
         schema,
     )
 
@@ -245,9 +243,7 @@ def test_sort_validates_key_presence(
 ) -> None:
     with pytest.raises(FieldNotFoundError):
         resolver.resolve(
-            SortTransformation(
-                keys=(SortKey(FieldPath.of("missing")),)
-            ),
+            SortTransformation(keys=(SortKey(FieldPath.of("missing")),)),
             schema,
         )
 
@@ -258,9 +254,7 @@ def test_deduplicate_validates_key_presence(
 ) -> None:
     with pytest.raises(FieldNotFoundError):
         resolver.resolve(
-            DeduplicateTransformation(
-                keys=(FieldPath.of("missing"),)
-            ),
+            DeduplicateTransformation(keys=(FieldPath.of("missing"),)),
             schema,
         )
 

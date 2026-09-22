@@ -49,16 +49,12 @@ def test_select_is_portable_projection_spec() -> None:
 
 def test_select_rejects_duplicate_fields() -> None:
     with pytest.raises(InvalidTransformationError, match="unique"):
-        SelectTransformation(
-            fields=(FieldPath.of("email"), FieldPath.of("email"))
-        )
+        SelectTransformation(fields=(FieldPath.of("email"), FieldPath.of("email")))
 
 
 def test_drop_rejects_duplicate_fields() -> None:
     with pytest.raises(InvalidTransformationError, match="unique"):
-        DropTransformation(
-            fields=(FieldPath.of("email"), FieldPath.of("email"))
-        )
+        DropTransformation(fields=(FieldPath.of("email"), FieldPath.of("email")))
 
 
 def test_rename_can_be_built_from_mapping() -> None:

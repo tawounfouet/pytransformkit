@@ -8,6 +8,12 @@ from pytransformkit.errors.expression import (
     FunctionNotFoundError,
     InvalidBooleanUsageError,
 )
+from pytransformkit.errors.pipeline import (
+    InvalidPipelineError,
+    PipelineCycleError,
+    PipelineError,
+    PipelineNodeNotFoundError,
+)
 from pytransformkit.errors.schema import (
     DuplicateFieldError,
     FieldCollisionError,
@@ -29,7 +35,11 @@ __all__ = [
     "FieldNotFoundError",
     "FunctionNotFoundError",
     "InvalidBooleanUsageError",
+    "InvalidPipelineError",
     "InvalidTransformationError",
+    "PipelineCycleError",
+    "PipelineError",
+    "PipelineNodeNotFoundError",
     "PyTransformKitError",
     "SchemaError",
     "TransformationError",

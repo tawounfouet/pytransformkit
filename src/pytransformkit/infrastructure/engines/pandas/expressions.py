@@ -74,20 +74,23 @@ class PandasExpressionCompiler:
         right = self.compile(expression.right, dataframe)
         operator = expression.operator
 
-        if _is_null_scalar(left) or _is_null_scalar(right):
-            if operator in {
+        if (
+            (_is_null_scalar(left) or _is_null_scalar(right))
+            and operator
+            in {
                 BinaryOperator.EQ,
                 BinaryOperator.NE,
                 BinaryOperator.LT,
                 BinaryOperator.LE,
                 BinaryOperator.GT,
                 BinaryOperator.GE,
-            }:
-                return pd.Series(
-                    pd.NA,
-                    index=dataframe.index,
-                    dtype="boolean",
-                )
+            }
+        ):
+            return pd.Series(
+                pd.NA,
+                index=dataframe.index,
+                dtype="boolean",
+            )
 
         if operator is BinaryOperator.EQ:
             return left == right

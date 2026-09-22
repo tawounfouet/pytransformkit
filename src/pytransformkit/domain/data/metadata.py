@@ -16,5 +16,7 @@ class DatasetMetadata:
             raise ValueError("Dataset metadata name must not be blank.")
         if self.description is not None and not self.description.strip():
             raise ValueError("Dataset metadata description must not be blank.")
+        if not isinstance(self.tags, frozenset):
+            raise TypeError("Dataset metadata tags must be provided as a frozenset.")
         if any(not tag or not tag.strip() for tag in self.tags):
             raise ValueError("Dataset metadata tags must not be blank.")

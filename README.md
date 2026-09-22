@@ -20,10 +20,17 @@ The following implementation lots are now in place:
 - **LOT-00 — Repository Bootstrap**
 - **LOT-01 — Shared Kernel**
 - **LOT-02 — Type System & Schema Core**
+- **LOT-03 — Dataset Domain Model**
 
-The logical type system currently includes primitive engine-independent DataTypes plus immutable `FieldPath`, `Field`, and ordered `Schema` objects. Schema operations and architecture boundaries are covered by tests.
+The logical data layer now provides:
 
-The next implementation lot is **LOT-03 — Dataset Domain Model**.
+- engine-independent primitive DataTypes;
+- immutable `FieldPath`, `Field`, and ordered `Schema`;
+- `DatasetMetadata` and `DatasetStatistics`;
+- `DatasetReference` and `LogicalDatasetReference`;
+- an immutable logical `Dataset` whose identity is independent from any DataFrame, Table, Relation, or other physical engine object.
+
+The next implementation lot is **LOT-04 — Expression AST Core**.
 
 The first release line targets `0.1.0a1`.
 
@@ -51,6 +58,7 @@ On Windows PowerShell:
 ## Architectural invariants
 
 - No engine-specific types in the Domain.
+- A logical Dataset never stores native engine data.
 - No hidden engine fallback.
 - Optional engines remain optional dependencies.
 - Public semantic behavior is test-driven.

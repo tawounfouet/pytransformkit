@@ -88,7 +88,11 @@ class RunPipelineService:
             input_handle,
             execution_context,
         )
-        self._validate_result_contract(plan, result)
+        self._validate_result_contract(
+            plan,
+            result,
+            adapter.descriptor,
+        )
 
         return PipelineExecutionResult(
             execution_id=execution_context.execution_id,
@@ -115,10 +119,11 @@ class RunPipelineService:
     def _validate_result_contract(
         plan: LogicalPlan,
         result: EngineExecutionResult,
+        descriptor: EngineDescriptor,
     ) -> None:
-        if result.output_handle.engine_id == "":
+        if result.output_handle.engine_id != descriptor.id:
             raise ExecutionError(
-                "EngineAdapter returned an output handle without engine_id."
+                "EngineAdapter returned an output handle for a different engine."
             )
 
         if result.output_schema != plan.output_schema:

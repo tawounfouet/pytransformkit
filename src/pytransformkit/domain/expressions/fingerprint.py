@@ -60,17 +60,11 @@ def canonical_expression(expression: Expression) -> str:
 
     if isinstance(expression, FunctionCall):
         arguments = ",".join(
-            canonical_expression(argument)
-            for argument in expression.arguments
+            canonical_expression(argument) for argument in expression.arguments
         )
-        return (
-            f"function:{_quoted(expression.function.value)}:"
-            f"({arguments})"
-        )
+        return f"function:{_quoted(expression.function.value)}:({arguments})"
 
-    raise ExpressionError(
-        f"Unsupported Expression node {type(expression).__name__!r}."
-    )
+    raise ExpressionError(f"Unsupported Expression node {type(expression).__name__!r}.")
 
 
 def _quoted(value: str) -> str:

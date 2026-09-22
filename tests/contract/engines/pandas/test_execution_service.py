@@ -71,9 +71,7 @@ def test_application_service_executes_pandas_without_core_coupling() -> None:
 
 def test_application_service_rejects_pandas_lazy_before_execution() -> None:
     dataframe = pd.DataFrame({"customer_id": [1]})
-    schema = Schema(
-        fields=(Field("customer_id", IntegerType(), nullable=False),)
-    )
+    schema = Schema(fields=(Field("customer_id", IntegerType(), nullable=False),))
     pipeline = Pipeline.create("customers", schema)
 
     registry = EngineRegistry()

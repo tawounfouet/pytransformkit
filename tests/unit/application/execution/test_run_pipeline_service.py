@@ -70,15 +70,11 @@ class FakeAdapter:
 
 
 def _schema() -> Schema:
-    return Schema(
-        fields=(Field("customer_id", IntegerType(), nullable=False),)
-    )
+    return Schema(fields=(Field("customer_id", IntegerType(), nullable=False),))
 
 
 def _pipeline() -> Pipeline:
-    return Pipeline.create("customers", _schema()).filter(
-        col("customer_id") > 0
-    )
+    return Pipeline.create("customers", _schema()).filter(col("customer_id") > 0)
 
 
 def _descriptor(

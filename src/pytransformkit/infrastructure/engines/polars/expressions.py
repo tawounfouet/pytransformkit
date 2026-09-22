@@ -73,10 +73,7 @@ class PolarsExpressionCompiler:
             BinaryOperator.LE,
             BinaryOperator.GT,
             BinaryOperator.GE,
-        } and (
-            _is_null_literal(expression.left)
-            or _is_null_literal(expression.right)
-        ):
+        } and (_is_null_literal(expression.left) or _is_null_literal(expression.right)):
             anchor_expression = (
                 expression.right
                 if _is_null_literal(expression.left)

@@ -7,8 +7,8 @@ from pytransformkit.domain.data.data_types import (
     FloatType,
     IntegerType,
     StringType,
-    TimeType,
     TimestampType,
+    TimeType,
 )
 
 

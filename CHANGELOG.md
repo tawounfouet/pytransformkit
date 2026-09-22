@@ -17,7 +17,10 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 - Engine-independent logical DataTypes for strings, booleans, integers, floats, decimals, dates, times, timestamps, binary values, and unknown values.
 - Immutable `FieldPath`, `Field`, and ordered `Schema` models.
 - Schema operations for lookup, selection, drop, rename, append, and replacement.
-- Unit tests for Shared Kernel, DataTypes, FieldPath, Field, Schema, and Schema errors.
+- Immutable `DatasetMetadata` and lightweight `DatasetStatistics`.
+- Portable `DatasetReference` and `LogicalDatasetReference`.
+- Logical immutable `Dataset` aggregate with identity-based equality and no physical data payload.
+- Unit tests for Shared Kernel, DataTypes, FieldPath, Field, Schema, Dataset metadata/statistics/references, Dataset identity, and Schema errors.
 - Architecture tests preventing Domain imports from engine libraries or Infrastructure.
 
 ### Changed

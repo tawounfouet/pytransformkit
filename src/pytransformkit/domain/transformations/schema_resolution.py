@@ -63,10 +63,7 @@ class OutputSchemaResolver:
 
         if isinstance(transformation, RenameTransformation):
             return input_schema.rename(
-                {
-                    str(item.source): item.target
-                    for item in transformation.renames
-                }
+                {str(item.source): item.target for item in transformation.renames}
             )
 
         if isinstance(transformation, FilterTransformation):
@@ -90,9 +87,7 @@ class OutputSchemaResolver:
             field_name = str(transformation.field)
             current = input_schema.field(field_name)
             nullable = (
-                True
-                if transformation.policy is CastPolicy.NULL
-                else current.nullable
+                True if transformation.policy is CastPolicy.NULL else current.nullable
             )
             return input_schema.replace(
                 replace(
@@ -115,9 +110,7 @@ class OutputSchemaResolver:
 
             if input_schema.has_field(transformation.field_name):
                 if not transformation.replace_existing:
-                    raise FieldCollisionError(
-                        transformation.field_name
-                    )
+                    raise FieldCollisionError(transformation.field_name)
                 return input_schema.replace(derived_field)
 
             return input_schema.append(derived_field)
@@ -133,6 +126,5 @@ class OutputSchemaResolver:
             return input_schema
 
         raise UnsupportedTransformationError(
-            "No output Schema resolver exists for "
-            f"{type(transformation).__name__!r}."
+            f"No output Schema resolver exists for {type(transformation).__name__!r}."
         )

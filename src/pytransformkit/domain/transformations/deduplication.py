@@ -42,18 +42,10 @@ class DeduplicateTransformation(TransformationSpec):
         if not isinstance(self.keys, tuple):
             raise TypeError("Deduplication keys must be provided as a tuple.")
         if not self.keys:
-            raise InvalidTransformationError(
-                "Deduplication requires at least one key."
-            )
+            raise InvalidTransformationError("Deduplication requires at least one key.")
         if any(not isinstance(key, FieldPath) for key in self.keys):
-            raise TypeError(
-                "Deduplication keys must contain only FieldPath values."
-            )
+            raise TypeError("Deduplication keys must contain only FieldPath values.")
         if len(set(self.keys)) != len(self.keys):
-            raise InvalidTransformationError(
-                "Deduplication keys must be unique."
-            )
+            raise InvalidTransformationError("Deduplication keys must be unique.")
         if not isinstance(self.keep, DeduplicationStrategy):
-            raise TypeError(
-                "Deduplication keep must be a DeduplicationStrategy."
-            )
+            raise TypeError("Deduplication keep must be a DeduplicationStrategy.")

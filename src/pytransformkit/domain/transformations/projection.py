@@ -72,9 +72,7 @@ class RenameField:
         if not isinstance(self.source, FieldPath):
             raise TypeError("Rename source must be a FieldPath.")
         if not self.target or not self.target.strip():
-            raise InvalidTransformationError(
-                "Rename target must not be empty."
-            )
+            raise InvalidTransformationError("Rename target must not be empty.")
 
 
 @dataclass(frozen=True, slots=True)
@@ -90,22 +88,16 @@ class RenameTransformation(TransformationSpec):
         if not isinstance(self.renames, tuple):
             raise TypeError("Rename entries must be provided as a tuple.")
         if not self.renames:
-            raise InvalidTransformationError(
-                "Rename requires at least one field."
-            )
+            raise InvalidTransformationError("Rename requires at least one field.")
         if any(not isinstance(item, RenameField) for item in self.renames):
             raise TypeError("Rename entries must contain only RenameField values.")
 
         sources = tuple(item.source for item in self.renames)
         targets = tuple(item.target for item in self.renames)
         if len(set(sources)) != len(sources):
-            raise InvalidTransformationError(
-                "Rename sources must be unique."
-            )
+            raise InvalidTransformationError("Rename sources must be unique.")
         if len(set(targets)) != len(targets):
-            raise InvalidTransformationError(
-                "Rename targets must be unique."
-            )
+            raise InvalidTransformationError("Rename targets must be unique.")
 
     @classmethod
     def from_mapping(
@@ -132,6 +124,4 @@ def _validate_field_paths(
     if any(not isinstance(field, FieldPath) for field in fields):
         raise TypeError(f"{operation} fields must contain only FieldPath values.")
     if len(set(fields)) != len(fields):
-        raise InvalidTransformationError(
-            f"{operation} fields must be unique."
-        )
+        raise InvalidTransformationError(f"{operation} fields must be unique.")

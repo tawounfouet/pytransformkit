@@ -51,9 +51,7 @@ class LimitTransformation(TransformationSpec):
         if isinstance(self.count, bool) or not isinstance(self.count, int):
             raise TypeError("Limit count must be an integer.")
         if self.count < 0:
-            raise InvalidTransformationError(
-                "Limit count must be non-negative."
-            )
+            raise InvalidTransformationError("Limit count must be non-negative.")
 
 
 @dataclass(frozen=True, slots=True)

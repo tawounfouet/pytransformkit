@@ -35,8 +35,6 @@ class DeriveTransformation(TransformationSpec):
 
     def __post_init__(self) -> None:
         if not self.field_name or not self.field_name.strip():
-            raise InvalidTransformationError(
-                "Derived field name must not be empty."
-            )
+            raise InvalidTransformationError("Derived field name must not be empty.")
         if not isinstance(self.expression, Expression):
             raise TypeError("Derived field expression must be an Expression.")

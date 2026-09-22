@@ -61,14 +61,10 @@ class SortTransformation(TransformationSpec):
         if not isinstance(self.keys, tuple):
             raise TypeError("Sort keys must be provided as a tuple.")
         if not self.keys:
-            raise InvalidTransformationError(
-                "Sort requires at least one key."
-            )
+            raise InvalidTransformationError("Sort requires at least one key.")
         if any(not isinstance(key, SortKey) for key in self.keys):
             raise TypeError("Sort keys must contain only SortKey values.")
 
         fields = tuple(key.field for key in self.keys)
         if len(set(fields)) != len(fields):
-            raise InvalidTransformationError(
-                "Sort fields must be unique."
-            )
+            raise InvalidTransformationError("Sort fields must be unique.")

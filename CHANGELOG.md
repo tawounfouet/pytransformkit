@@ -50,6 +50,12 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 - Logical-plan capability analysis and pre-execution `EngineCompatibilityService`.
 - Stable `PTK-ENGINE-*` and `PTK-EXEC-*` error codes.
 - Engine runtime contract tests including structural protocols, explicit lookup, and missing-capability rejection.
+- Optional `pytransformkit[pandas]` dependency extra with a dedicated Pandas contract CI job.
+- `PandasDatasetHandle`, `PandasTypeMapper`, and conservative `PandasSchemaInspector`.
+- Portable Expression compilation to Pandas Series/scalars with explicit NULL/UNKNOWN filter semantics.
+- Pandas eager execution for select, drop, rename, filter, limit, distinct, cast, derive, sort, and deduplicate.
+- Explicit rejection of unsupported Pandas lazy execution and mixed per-key NULL sort ordering.
+- Pandas adapter contract tests covering type/schema mapping, expressions, end-to-end execution, input immutability, and unsupported semantics.
 
 ### Changed
 

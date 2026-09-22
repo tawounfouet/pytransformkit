@@ -128,6 +128,5 @@ def test_graph_validator_rejects_branching_in_initial_mvp() -> None:
                 Dependency(input_node.id, first.id),
                 Dependency(input_node.id, second.id),
                 Dependency(first.id, output_node.id),
-                Dependency(second.id, output_node.id),
             ),
         )

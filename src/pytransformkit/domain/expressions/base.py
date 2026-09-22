@@ -28,22 +28,22 @@ class Expression:
 
         return self._binary(BinaryOperator.NE, other)
 
-    def __lt__(self, other: object) -> Expression:
+    def __lt__(self, other: object) -> Expression:  # type: ignore[override]
         from pytransformkit.domain.expressions.operators import BinaryOperator
 
         return self._binary(BinaryOperator.LT, other)
 
-    def __le__(self, other: object) -> Expression:
+    def __le__(self, other: object) -> Expression:  # type: ignore[override]
         from pytransformkit.domain.expressions.operators import BinaryOperator
 
         return self._binary(BinaryOperator.LE, other)
 
-    def __gt__(self, other: object) -> Expression:
+    def __gt__(self, other: object) -> Expression:  # type: ignore[override]
         from pytransformkit.domain.expressions.operators import BinaryOperator
 
         return self._binary(BinaryOperator.GT, other)
 
-    def __ge__(self, other: object) -> Expression:
+    def __ge__(self, other: object) -> Expression:  # type: ignore[override]
         from pytransformkit.domain.expressions.operators import BinaryOperator
 
         return self._binary(BinaryOperator.GE, other)

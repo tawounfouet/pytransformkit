@@ -36,6 +36,13 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 - Static `OutputSchemaResolver` covering the full initial Transformation set without executing data.
 - Transformation error hierarchy with stable `PTK-TRANSFORM-*` codes.
 - Contract tests for Transformation invariants and output Schema propagation.
+- Immutable single-input/single-output Pipeline DAG with typed Input, Transformation, and Output nodes.
+- Explicit data dependencies, structural graph validation, cycle detection, and deterministic topological ordering.
+- Sequential immutable Pipeline DSL for select, drop, rename, filter, limit, distinct, cast, derive, sort, and deduplicate.
+- Engine-independent `LogicalPlan` and `LogicalPlanNode` with statically propagated input/output Schemas.
+- `PipelinePlanner` that validates and resolves the complete logical chain before physical execution.
+- Public `Pipeline` export from the top-level `pytransformkit` package.
+- Stable `PTK-PIPE-*` Pipeline error codes and DAG/planner contract tests.
 
 ### Changed
 

@@ -23,6 +23,7 @@ The following implementation lots are now in place:
 - **LOT-03 — Dataset Domain Model**
 - **LOT-04 — Expression AST Core**
 - **LOT-05 — Transformation Model MVP**
+- **LOT-06 — Pipeline & DAG Core**
 
 The logical data layer now provides:
 
@@ -36,7 +37,9 @@ The Expression layer now provides a portable immutable AST, public `col/lit` DSL
 
 The Transformation layer now models projection, row selection, casting, derivation, sorting and deduplication as immutable engine-independent specifications. Output Schemas are resolved statically before any physical execution.
 
-The next implementation lot is **LOT-06 — Pipeline & DAG Core**.
+The Pipeline layer now provides an immutable single-input/single-output DAG, explicit dependencies, structural validation, deterministic topological ordering, static Schema propagation and an engine-independent LogicalPlan. The public package now exposes `Pipeline`.
+
+The next implementation lot is **LOT-07 — Engine Runtime Contracts**.
 
 The first release line targets `0.1.0a1`.
 

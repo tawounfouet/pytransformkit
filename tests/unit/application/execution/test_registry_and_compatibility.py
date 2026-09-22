@@ -107,13 +107,9 @@ def test_compatibility_accepts_complete_engine() -> None:
 
 
 def test_compatibility_rejects_missing_capabilities() -> None:
-    descriptor = _descriptor(
-        frozenset({EngineCapability.SELECT})
-    )
+    descriptor = _descriptor(frozenset({EngineCapability.SELECT}))
 
-    with pytest.raises(
-        UnsupportedEngineCapabilityError
-    ) as error:
+    with pytest.raises(UnsupportedEngineCapabilityError) as error:
         EngineCompatibilityService().validate(_plan(), descriptor)
 
     assert error.value.engine_id == "fake"

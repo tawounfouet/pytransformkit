@@ -116,17 +116,10 @@ def topological_order(
         indegree[dependency.target] += 1
         targets[dependency.source].append(dependency.target)
 
-    node_position = {
-        node.id: position
-        for position, node in enumerate(nodes)
-    }
+    node_position = {node.id: position for position, node in enumerate(nodes)}
     ready = deque(
         sorted(
-            (
-                node_id
-                for node_id, degree in indegree.items()
-                if degree == 0
-            ),
+            (node_id for node_id, degree in indegree.items() if degree == 0),
             key=node_position.__getitem__,
         )
     )
@@ -145,9 +138,7 @@ def topological_order(
                 ready.append(target)
 
     if len(ordered) != len(nodes):
-        raise PipelineCycleError(
-            "Pipeline dependencies must form an acyclic graph."
-        )
+        raise PipelineCycleError("Pipeline dependencies must form an acyclic graph.")
 
     return tuple(ordered)
 

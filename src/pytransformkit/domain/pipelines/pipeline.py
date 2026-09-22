@@ -65,9 +65,7 @@ class Pipeline:
         if not isinstance(self.nodes, tuple):
             raise TypeError("Pipeline nodes must be provided as a tuple.")
         if not isinstance(self.dependencies, tuple):
-            raise TypeError(
-                "Pipeline dependencies must be provided as a tuple."
-            )
+            raise TypeError("Pipeline dependencies must be provided as a tuple.")
         PipelineGraphValidator().validate(self.nodes, self.dependencies)
 
     def __eq__(self, other: object) -> bool:
@@ -104,26 +102,16 @@ class Pipeline:
 
     @property
     def input_node(self) -> InputNode:
-        return next(
-            node
-            for node in self.nodes
-            if isinstance(node, InputNode)
-        )
+        return next(node for node in self.nodes if isinstance(node, InputNode))
 
     @property
     def output_node(self) -> OutputNode:
-        return next(
-            node
-            for node in self.nodes
-            if isinstance(node, OutputNode)
-        )
+        return next(node for node in self.nodes if isinstance(node, OutputNode))
 
     @property
     def transformation_nodes(self) -> tuple[TransformationNode, ...]:
         return tuple(
-            node
-            for node in self.nodes
-            if isinstance(node, TransformationNode)
+            node for node in self.nodes if isinstance(node, TransformationNode)
         )
 
     def then(
@@ -132,9 +120,7 @@ class Pipeline:
     ) -> Pipeline:
         """Append a Transformation before the Pipeline output."""
         if not isinstance(transformation, TransformationSpec):
-            raise TypeError(
-                "Pipeline transformation must be a TransformationSpec."
-            )
+            raise TypeError("Pipeline transformation must be a TransformationSpec.")
 
         output_node = self.output_node
         incoming_to_output = tuple(
@@ -161,9 +147,7 @@ class Pipeline:
         )
 
         nodes = tuple(
-            node
-            for node in self.nodes
-            if not isinstance(node, OutputNode)
+            node for node in self.nodes if not isinstance(node, OutputNode)
         ) + (
             new_node,
             output_node,
@@ -178,16 +162,12 @@ class Pipeline:
 
     def select(self, *fields: str) -> Pipeline:
         return self.then(
-            SelectTransformation(
-                fields=tuple(FieldPath.of(field) for field in fields)
-            )
+            SelectTransformation(fields=tuple(FieldPath.of(field) for field in fields))
         )
 
     def drop(self, *fields: str) -> Pipeline:
         return self.then(
-            DropTransformation(
-                fields=tuple(FieldPath.of(field) for field in fields)
-            )
+            DropTransformation(fields=tuple(FieldPath.of(field) for field in fields))
         )
 
     def rename(self, mapping: Mapping[str, str]) -> Pipeline:

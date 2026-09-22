@@ -45,9 +45,7 @@ def test_create_pipeline_has_single_input_and_output() -> None:
 def test_then_returns_new_immutable_pipeline_with_same_identity() -> None:
     original = Pipeline.create("customers", _schema())
     transformed = original.then(
-        FilterTransformation(
-            condition=col("customer_id").is_not_null()
-        )
+        FilterTransformation(condition=col("customer_id").is_not_null())
     )
 
     assert transformed is not original
@@ -64,8 +62,7 @@ def test_then_inserts_transformation_before_output() -> None:
 
     transformation_node = pipeline.transformation_nodes[0]
     edges = {
-        (dependency.source, dependency.target)
-        for dependency in pipeline.dependencies
+        (dependency.source, dependency.target) for dependency in pipeline.dependencies
     }
 
     assert (
@@ -91,8 +88,7 @@ def test_sequential_dsl_builds_expected_transformation_specs() -> None:
     )
 
     transformations = tuple(
-        node.transformation
-        for node in pipeline.transformation_nodes
+        node.transformation for node in pipeline.transformation_nodes
     )
 
     assert len(transformations) == 4
@@ -116,9 +112,7 @@ def test_transformation_node_step_ids_are_unique() -> None:
     )
 
     step_ids = tuple(
-        node.step_id
-        for node in pipeline.nodes
-        if isinstance(node, TransformationNode)
+        node.step_id for node in pipeline.nodes if isinstance(node, TransformationNode)
     )
 
     assert len(step_ids) == len(set(step_ids))

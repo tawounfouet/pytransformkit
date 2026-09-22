@@ -65,15 +65,13 @@ class TransformationNode(PipelineNode):
         super(TransformationNode, self).__post_init__()
         if self.kind is not PipelineNodeKind.TRANSFORMATION:
             raise TypeError(
-                "TransformationNode kind must be "
-                "PipelineNodeKind.TRANSFORMATION."
+                "TransformationNode kind must be PipelineNodeKind.TRANSFORMATION."
             )
         if not isinstance(self.step_id, StepId):
             raise TypeError("Transformation node step_id must be a StepId.")
         if not isinstance(self.transformation, TransformationSpec):
             raise TypeError(
-                "Transformation node transformation must be a "
-                "TransformationSpec."
+                "Transformation node transformation must be a TransformationSpec."
             )
 
     @classmethod

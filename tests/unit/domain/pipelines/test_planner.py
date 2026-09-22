@@ -46,19 +46,13 @@ def test_planner_propagates_schema_through_pipeline() -> None:
         "amount",
         "normalized_email",
     )
-    assert plan.output_schema.field(
-        "normalized_email"
-    ).data_type == StringType()
-    assert plan.output_schema.field(
-        "normalized_email"
-    ).nullable is True
+    assert plan.output_schema.field("normalized_email").data_type == StringType()
+    assert plan.output_schema.field("normalized_email").nullable is True
 
 
 def test_logical_plan_preserves_node_order_and_step_identity() -> None:
     pipeline = (
-        Pipeline.create("customers", _schema())
-        .filter(col("customer_id") > 0)
-        .limit(10)
+        Pipeline.create("customers", _schema()).filter(col("customer_id") > 0).limit(10)
     )
 
     plan = PipelinePlanner().plan(pipeline)
@@ -75,10 +69,7 @@ def test_logical_plan_preserves_node_order_and_step_identity() -> None:
         for node in plan.nodes
         if node.kind is PipelineNodeKind.TRANSFORMATION
     )
-    pipeline_steps = tuple(
-        node.step_id
-        for node in pipeline.transformation_nodes
-    )
+    pipeline_steps = tuple(node.step_id for node in pipeline.transformation_nodes)
 
     assert planned_steps == pipeline_steps
 
@@ -98,9 +89,7 @@ def test_output_node_preserves_final_schema() -> None:
 
 
 def test_input_plan_node_has_no_input_schema() -> None:
-    plan = PipelinePlanner().plan(
-        Pipeline.create("customers", _schema())
-    )
+    plan = PipelinePlanner().plan(Pipeline.create("customers", _schema()))
 
     assert plan.nodes[0].kind is PipelineNodeKind.INPUT
     assert plan.nodes[0].input_schema is None
@@ -108,9 +97,7 @@ def test_input_plan_node_has_no_input_schema() -> None:
 
 
 def test_planner_rejects_non_boolean_filter() -> None:
-    pipeline = Pipeline.create("customers", _schema()).filter(
-        col("email")
-    )
+    pipeline = Pipeline.create("customers", _schema()).filter(col("email"))
 
     with pytest.raises(ExpressionTypeError, match="BooleanType"):
         PipelinePlanner().plan(pipeline)

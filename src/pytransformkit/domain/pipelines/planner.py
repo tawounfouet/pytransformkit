@@ -29,9 +29,7 @@ class PipelinePlanner:
         self,
         output_schema_resolver: OutputSchemaResolver | None = None,
     ) -> None:
-        self._output_schema_resolver = (
-            output_schema_resolver or OutputSchemaResolver()
-        )
+        self._output_schema_resolver = output_schema_resolver or OutputSchemaResolver()
 
     def plan(self, pipeline: Pipeline) -> LogicalPlan:
         PipelineGraphValidator().validate(
@@ -74,9 +72,7 @@ class PipelinePlanner:
     ) -> LogicalPlanNode:
         if isinstance(node, InputNode):
             if predecessor_ids:
-                raise InvalidPipelineError(
-                    "Input nodes cannot have predecessors."
-                )
+                raise InvalidPipelineError("Input nodes cannot have predecessors.")
             return LogicalPlanNode(
                 node_id=node.id,
                 kind=node.kind,
@@ -126,7 +122,4 @@ def _predecessors(
     for dependency in pipeline.dependencies:
         values[dependency.target].append(dependency.source)
 
-    return {
-        node.id: tuple(values[node.id])
-        for node in pipeline.nodes
-    }
+    return {node.id: tuple(values[node.id]) for node in pipeline.nodes}

@@ -9,8 +9,8 @@ from pytransformkit.domain.data.data_types import (
     FloatType,
     IntegerType,
     StringType,
-    TimeType,
     TimestampType,
+    TimeType,
     UnknownType,
 )
 from pytransformkit.domain.data.field import Field

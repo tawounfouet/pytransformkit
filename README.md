@@ -27,6 +27,7 @@ The following implementation lots are now in place:
 - **LOT-07 — Engine Runtime Contracts**
 - **LOT-08 — Pandas Reference Adapter**
 - **LOT-09 — Application Execution Service**
+- **LOT-10 — Polars Adapter & Multi-Engine Contract**
 
 The logical data layer now provides:
 
@@ -48,7 +49,11 @@ The first physical engine is now implemented as the optional `pytransformkit[pan
 
 The application layer now exposes `RunPipelineService`, which plans a Pipeline, resolves one explicitly requested engine from `EngineRegistry`, validates logical capabilities and execution mode, executes the adapter, and verifies output engine/schema contracts. `PipelineExecutionResult` retains the execution id, engine descriptor and LogicalPlan.
 
-The next implementation lot is **LOT-10 — Polars Adapter & Multi-Engine Contract**.
+The first implementation roadmap, **LOT-00 through LOT-10**, is now complete.
+
+Polars is available through the optional `pytransformkit[polars]` extra with both eager `DataFrame` and lazy `LazyFrame` execution. The same logical Pipeline, Expression AST, Transformation specifications and LogicalPlan are executed without Domain changes across Pandas and Polars. Dedicated cross-engine contract tests verify semantic equivalence, including NULL comparison/filter behavior.
+
+This closes the first engine-agnostic implementation cycle: Core → logical planning → explicit runtime contracts → Pandas → Polars → cross-engine semantic conformance.
 
 The first release line targets `0.1.0a1`.
 

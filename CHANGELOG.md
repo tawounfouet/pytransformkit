@@ -61,6 +61,15 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 - Pre-execution enforcement of requested engine identity, plan capabilities, and LAZY capability.
 - Post-execution enforcement of adapter output-engine identity and LogicalPlan Schema consistency.
 - Unit tests with structural fake adapters plus a Pandas integration contract for the application service.
+- Optional `pytransformkit[polars]` dependency extra with dedicated Polars and cross-engine CI jobs.
+- `PolarsDatasetHandle` supporting both eager `DataFrame` and lazy `LazyFrame`.
+- `PolarsTypeMapper` and non-materializing `PolarsSchemaInspector` using lazy Schema inspection.
+- Portable Expression compilation to native Polars expressions, including canonical three-valued NULL comparison semantics.
+- Polars eager and lazy execution for select, drop, rename, filter, limit, distinct, cast, derive, sort, and deduplicate.
+- Explicit Polars `LAZY` capability integrated with `RunPipelineService`.
+- Polars adapter contracts covering type mapping, Schema inspection, expressions, eager execution, lazy execution, and application-service integration.
+- Pandas/Polars cross-engine contract tests proving equivalent results for the same logical Pipeline and equivalent UNKNOWN/NULL filter semantics.
+- Completion of the initial implementation roadmap, LOT-00 through LOT-10.
 
 ### Changed
 

@@ -114,16 +114,11 @@ class PolarsExpressionCompiler:
         if operator is BinaryOperator.OR:
             return left | right
 
-        raise AdapterError(
-            f"Unsupported binary operator {operator.value!r}."
-        )
+        raise AdapterError(f"Unsupported binary operator {operator.value!r}.")
 
     def _compile_function(self, expression: FunctionCall) -> Any:
         name = expression.function.value
-        arguments = tuple(
-            self.compile(argument)
-            for argument in expression.arguments
-        )
+        arguments = tuple(self.compile(argument) for argument in expression.arguments)
 
         if name == "core.lower":
             return arguments[0].str.to_lowercase()
@@ -138,9 +133,7 @@ class PolarsExpressionCompiler:
                 ignore_nulls=False,
             )
 
-        raise AdapterError(
-            f"Polars does not compile logical function {name!r}."
-        )
+        raise AdapterError(f"Polars does not compile logical function {name!r}.")
 
 
 def _is_null_literal(expression: Expression) -> bool:

@@ -70,9 +70,7 @@ class PolarsAdapter:
         expression_compiler: PolarsExpressionCompiler | None = None,
         type_mapper: PolarsTypeMapper | None = None,
     ) -> None:
-        self._expression_compiler = (
-            expression_compiler or PolarsExpressionCompiler()
-        )
+        self._expression_compiler = expression_compiler or PolarsExpressionCompiler()
         self._type_mapper = type_mapper or PolarsTypeMapper()
         self._compatibility = EngineCompatibilityService()
 
@@ -92,9 +90,7 @@ class PolarsAdapter:
         context: ExecutionContext,
     ) -> EngineExecutionResult:
         if not isinstance(input_handle, PolarsDatasetHandle):
-            raise AdapterError(
-                "PolarsAdapter requires a PolarsDatasetHandle."
-            )
+            raise AdapterError("PolarsAdapter requires a PolarsDatasetHandle.")
 
         self._compatibility.validate(plan, self.descriptor)
         frame = self._prepare_frame(input_handle.frame, context.mode)
@@ -107,10 +103,7 @@ class PolarsAdapter:
                 node.transformation,
             )
 
-        if (
-            context.mode is ExecutionMode.EAGER
-            and isinstance(frame, pl.LazyFrame)
-        ):
+        if context.mode is ExecutionMode.EAGER and isinstance(frame, pl.LazyFrame):
             frame = frame.collect()
 
         return EngineExecutionResult(
@@ -138,21 +131,14 @@ class PolarsAdapter:
         transformation: TransformationSpec,
     ) -> Any:
         if isinstance(transformation, SelectTransformation):
-            return frame.select(
-                [str(field) for field in transformation.fields]
-            )
+            return frame.select([str(field) for field in transformation.fields])
 
         if isinstance(transformation, DropTransformation):
-            return frame.drop(
-                [str(field) for field in transformation.fields]
-            )
+            return frame.drop([str(field) for field in transformation.fields])
 
         if isinstance(transformation, RenameTransformation):
             return frame.rename(
-                {
-                    str(item.source): item.target
-                    for item in transformation.renames
-                }
+                {str(item.source): item.target for item in transformation.renames}
             )
 
         if isinstance(transformation, FilterTransformation):
@@ -171,9 +157,7 @@ class PolarsAdapter:
         if isinstance(transformation, CastTransformation):
             field_name = str(transformation.field)
             expression = pl.col(field_name).cast(
-                self._type_mapper.to_native(
-                    transformation.target_type
-                ),
+                self._type_mapper.to_native(transformation.target_type),
                 strict=transformation.policy is not CastPolicy.NULL,
             )
             return frame.with_columns(expression.alias(field_name))
@@ -183,21 +167,15 @@ class PolarsAdapter:
                 transformation.expression,
                 frame,
             )
-            return frame.with_columns(
-                expression.alias(transformation.field_name)
-            )
+            return frame.with_columns(expression.alias(transformation.field_name))
 
         if isinstance(transformation, SortTransformation):
             return frame.sort(
                 by=[str(key.field) for key in transformation.keys],
                 descending=[
-                    key.direction.value == "desc"
-                    for key in transformation.keys
+                    key.direction.value == "desc" for key in transformation.keys
                 ],
-                nulls_last=[
-                    key.nulls.value == "last"
-                    for key in transformation.keys
-                ],
+                nulls_last=[key.nulls.value == "last" for key in transformation.keys],
                 maintain_order=True,
             )
 

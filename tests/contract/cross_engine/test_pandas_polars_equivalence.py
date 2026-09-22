@@ -102,10 +102,7 @@ def _normalize_records(
     records: list[dict[str, object]],
 ) -> list[dict[str, object]]:
     return [
-        {
-            key: _normalize_value(value)
-            for key, value in record.items()
-        }
+        {key: _normalize_value(value) for key, value in record.items()}
         for record in records
     ]
 
@@ -130,13 +127,9 @@ def test_same_pipeline_produces_same_pandas_and_polars_result() -> None:
     )
 
     pandas_records = _normalize_records(
-        pandas_result.output_handle.dataframe.to_dict(
-            orient="records"
-        )
+        pandas_result.output_handle.dataframe.to_dict(orient="records")
     )
-    polars_records = _normalize_records(
-        polars_result.output_handle.frame.to_dicts()
-    )
+    polars_records = _normalize_records(polars_result.output_handle.frame.to_dicts())
 
     assert pandas_result.logical_plan.output_schema == (
         polars_result.logical_plan.output_schema

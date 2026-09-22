@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal
+from typing import cast
 
 from pytransformkit.domain.data.data_types import (
     BooleanType,
@@ -269,7 +270,13 @@ def _resolve_numeric_result(
 
 
 def _decimal_type(value: Decimal) -> DecimalType:
-    _, digits, exponent = value.as_tuple()
+    if not value.is_finite():
+        raise ExpressionTypeError(
+            "Non-finite Decimal literals are not supported."
+        )
+
+    _, digits, raw_exponent = value.as_tuple()
+    exponent = cast(int, raw_exponent)
     digits_count = max(len(digits), 1)
 
     if exponent >= 0:

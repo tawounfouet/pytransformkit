@@ -15,14 +15,15 @@ PyTransformKit is an engine-agnostic Python framework for defining typed, compos
 
 ## Current implementation status
 
-The repository bootstrap (**LOT-00**) is in place and the Shared Kernel (**LOT-01**) has started with:
+The following implementation lots are now in place:
 
-- typed UUID-backed domain identifiers;
-- immutable `Version` value object;
-- immutable `Fingerprint` value object;
-- unit tests for the Shared Kernel.
+- **LOT-00 — Repository Bootstrap**
+- **LOT-01 — Shared Kernel**
+- **LOT-02 — Type System & Schema Core**
 
-The next implementation lot is **LOT-02 — Type System & Schema Core**.
+The logical type system currently includes primitive engine-independent DataTypes plus immutable `FieldPath`, `Field`, and ordered `Schema` objects. Schema operations and architecture boundaries are covered by tests.
+
+The next implementation lot is **LOT-03 — Dataset Domain Model**.
 
 The first release line targets `0.1.0a1`.
 

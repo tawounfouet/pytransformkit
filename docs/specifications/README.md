@@ -33,3 +33,5 @@ Cross-framework architecture and vocabulary are defined in:
 - `PYKIT_ECOSYSTEM_V2_ARCHITECTURE_AND_CANONICAL_VOCABULARY.md` — normative clean-slate V2 architecture and canonical public vocabulary for PyIngestKit, PyTransformKit and PyWorkflowKit.
 
 The V2 vocabulary baseline is intended to drive the future PyIngestKit 2.0 and PyWorkflowKit 2.0 redesigns and the pre-1.0 PyTransformKit API cleanup.
+
+- `PYKIT_ECOSYSTEM_V2_PUBLIC_API_DESIGN_PRINCIPLES.md` — normative cross-framework rules for authoring APIs, immutable domain values, runtime separation, validation layers, canonical verbs, package-root exports, typed results, errors, extensions and API conformance.

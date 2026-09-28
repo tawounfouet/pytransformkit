@@ -67,3 +67,7 @@ The V2 vocabulary baseline is intended to drive the future PyIngestKit 2.0 and P
 - `PYKIT_ECOSYSTEM_V2_END_TO_END_ACCEPTANCE_CRITERIA.md` — normative ecosystem release gate aggregating public-model, dependency, identity, retry/uncertainty, data, lineage, observability, serialization, security, packaging, migration, Customer 360 and auditable release qualification criteria.
 
 - `PYKIT_ECOSYSTEM_V2_DECLARATION_PLAN_RUNTIME_MODEL.md` — normative Phase 0 rationalization of authoring declarations, compiled plans and runtime records across PyIngestKit, PyTransformKit and PyWorkflowKit, explicitly removing artificial public graph/plan symmetry.
+
+## PyTransformKit V1 target architecture
+
+- `PYTRANSFORMKIT_V1_TARGET_ARCHITECTURE.md` — normative PyTransformKit 1.0 target architecture covering engine-neutral domain boundaries, TransformationPlan and LogicalPlan, runtime execution, bindings, engine adapters, physical I/O limits, lineage, observability, serialization, plugins, migration from legacy Pipeline/RunPipelineService and 1.0 acceptance gates.

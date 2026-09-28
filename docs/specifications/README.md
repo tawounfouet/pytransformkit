@@ -83,3 +83,7 @@ The V2 vocabulary baseline is intended to drive the future PyIngestKit 2.0 and P
 ## PyTransformKit V1 public API
 
 - `PYTRANSFORMKIT_V1_PUBLIC_API_SPEC.md` — normative PyTransformKit 1.0 public API contract covering root exports, logical data/schema/expression authoring, TransformationPlan builder ergonomics, LogicalPlan compilation, engine registry and adapter protocols, physical bindings, runtime execution, structured results/failures, lineage, serialization, plugins, stable adapters and migration from Pipeline/RunPipelineService.
+
+## PyIngestKit V2 public API
+
+- `PYINGESTKIT_V2_PUBLIC_API_SPEC.md` — normative PyIngestKit 2.0 public API contract covering Source/IngestionDefinition authoring, acquisition connectors, RAW/artifact evidence, Decoder and validation contracts, DatasetVersion/PublishedDataset, ArtifactStore/DatasetVersionStore/Target separation, publication/reconciliation, replay, runtime execution, structured results/failures, serialization, plugins, provider extras and optional PyTransformKit integration.

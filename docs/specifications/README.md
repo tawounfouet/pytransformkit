@@ -55,3 +55,5 @@ The V2 vocabulary baseline is intended to drive the future PyIngestKit 2.0 and P
 - `PYKIT_ECOSYSTEM_V2_SERIALIZATION_AND_WIRE_CONTRACTS.md` — normative wire-contract model for explicit contract IDs and versions, canonical JSON, strict decoding, fingerprints, migrations, golden fixtures, safe serialization, historical compatibility and cross-framework payload conformance.
 
 - `PYKIT_ECOSYSTEM_V2_ARCHITECTURE_CONFORMANCE_AND_TEST_STRATEGY.md` — normative architecture-as-code strategy covering invariant traceability, import boundaries, domain purity, engine/connector conformance, retry/recovery fault injection, wire golden fixtures, packaging matrices, reference-application scenarios and release qualification evidence.
+
+- `PYKIT_ECOSYSTEM_V2_SECURITY_AND_TRUST_BOUNDARIES.md` — normative security baseline for trust boundaries, credential references, least privilege, resource validation, plugin activation, executable-code surfaces, subprocess isolation, telemetry redaction, multi-tenant posture and security conformance.

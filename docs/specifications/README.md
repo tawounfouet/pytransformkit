@@ -65,3 +65,5 @@ The V2 vocabulary baseline is intended to drive the future PyIngestKit 2.0 and P
 - `PYKIT_ECOSYSTEM_V2_IMPLEMENTATION_SEQUENCE_AND_MIGRATION_PLAN.md` — normative implementation order for PyTransformKit 1.0, PyIngestKit 2.0 and PyWorkflowKit 2.0, including public-model rationalization, portable contracts, migration strategy, sibling-integration gates, Customer 360, conformance phases and stable-release sequencing.
 
 - `PYKIT_ECOSYSTEM_V2_END_TO_END_ACCEPTANCE_CRITERIA.md` — normative ecosystem release gate aggregating public-model, dependency, identity, retry/uncertainty, data, lineage, observability, serialization, security, packaging, migration, Customer 360 and auditable release qualification criteria.
+
+- `PYKIT_ECOSYSTEM_V2_DECLARATION_PLAN_RUNTIME_MODEL.md` — normative Phase 0 rationalization of authoring declarations, compiled plans and runtime records across PyIngestKit, PyTransformKit and PyWorkflowKit, explicitly removing artificial public graph/plan symmetry.

@@ -24,3 +24,12 @@ is defined in:
 
 This roadmap freezes `LOT-11` through `LOT-28`, with `LOT-28` producing
 PyTransformKit `1.0.0`.
+
+## Ecosystem architecture
+
+Cross-framework architecture and vocabulary are defined in:
+
+- `PYTRANSFORMKIT_PYINGESTKIT_PYWORKFLOWKIT_BOUNDARIES_AND_INTEGRATION.md` — bounded contexts, ownership and integration rules;
+- `PYKIT_ECOSYSTEM_V2_ARCHITECTURE_AND_CANONICAL_VOCABULARY.md` — normative clean-slate V2 architecture and canonical public vocabulary for PyIngestKit, PyTransformKit and PyWorkflowKit.
+
+The V2 vocabulary baseline is intended to drive the future PyIngestKit 2.0 and PyWorkflowKit 2.0 redesigns and the pre-1.0 PyTransformKit API cleanup.

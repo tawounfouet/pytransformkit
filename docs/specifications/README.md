@@ -45,3 +45,5 @@ The V2 vocabulary baseline is intended to drive the future PyIngestKit 2.0 and P
 - `PYKIT_ECOSYSTEM_V2_DATASET_RESOURCE_AND_ARTIFACT_INTEROPERABILITY.md` — normative interoperability model for Source, Resource, Artifact, RAW, Dataset, DatasetVersion, PhysicalHandle, bindings, materialization, publication, portability, retention and cross-framework data handoff.
 
 - `PYKIT_ECOSYSTEM_V2_LINEAGE_PROVENANCE_AND_TRACEABILITY_MODEL.md` — normative model for ingestion provenance, logical and field-level transformation lineage, workflow/task execution lineage, replay/recovery traceability, cross-framework composition and lineage confidence.
+
+- `PYKIT_ECOSYSTEM_V2_OBSERVABILITY_EVENTS_AND_TELEMETRY_MODEL.md` — normative observability model for events, logs, metrics, traces, diagnostics, manifests, correlation propagation, telemetry sinks, redaction, cardinality control and cross-framework aggregation.

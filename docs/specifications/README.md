@@ -59,3 +59,5 @@ The V2 vocabulary baseline is intended to drive the future PyIngestKit 2.0 and P
 - `PYKIT_ECOSYSTEM_V2_SECURITY_AND_TRUST_BOUNDARIES.md` — normative security baseline for trust boundaries, credential references, least privilege, resource validation, plugin activation, executable-code surfaces, subprocess isolation, telemetry redaction, multi-tenant posture and security conformance.
 
 - `PYKIT_ECOSYSTEM_V2_REFERENCE_APPLICATION_SPEC.md` — normative Customer 360 reference application proving end-to-end composition across PyIngestKit, PyTransformKit and PyWorkflowKit, including DatasetVersion handoff, publication boundaries, execution identity, lineage, observability, serialization, retry, recovery and security scenarios.
+
+- `PYKIT_ECOSYSTEM_V2_RELEASE_COMPATIBILITY_AND_VERSIONING_POLICY.md` — normative policy for independent package versioning, stability levels, SemVer, wire/plugin/event version separation, tested sibling compatibility ranges, deprecation, migration, release candidates, artifact qualification and auditable release evidence.

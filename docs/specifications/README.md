@@ -51,3 +51,5 @@ The V2 vocabulary baseline is intended to drive the future PyIngestKit 2.0 and P
 - `PYKIT_ECOSYSTEM_V2_INTEGRATION_AND_ANTI_CORRUPTION_LAYER_MODEL.md` — normative cross-framework integration model defining allowed dependency directions, anti-corruption layers, provider/consumer responsibilities, adapter contracts, retry/cancellation/recovery boundaries, optional dependencies and producer-consumer conformance tests.
 
 - `PYKIT_ECOSYSTEM_V2_DEPENDENCY_PACKAGING_AND_OPTIONAL_EXTRAS_STRATEGY.md` — normative packaging strategy for core versus optional dependencies, sibling integration extras, backend extras, plugin discovery/activation, version ranges, import isolation, CI compatibility matrices and package-graph enforcement.
+
+- `PYKIT_ECOSYSTEM_V2_SERIALIZATION_AND_WIRE_CONTRACTS.md` — normative wire-contract model for explicit contract IDs and versions, canonical JSON, strict decoding, fingerprints, migrations, golden fixtures, safe serialization, historical compatibility and cross-framework payload conformance.

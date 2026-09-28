@@ -79,3 +79,7 @@ The V2 vocabulary baseline is intended to drive the future PyIngestKit 2.0 and P
 ## PyWorkflowKit V2 target architecture
 
 - `PYWORKFLOWKIT_V2_TARGET_ARCHITECTURE.md` — normative PyWorkflowKit 2.0 target architecture covering WorkflowDefinition/TaskDefinition, ExecutionPlan, WorkflowRun/TaskRun/TaskAttempt state machines, retry, timeout, cancellation, ExternalRunRef, recovery/reconciliation, executors, metadata stores, observability, serialization, security, optional sibling integrations and V1-to-V2 migration.
+
+## PyTransformKit V1 public API
+
+- `PYTRANSFORMKIT_V1_PUBLIC_API_SPEC.md` — normative PyTransformKit 1.0 public API contract covering root exports, logical data/schema/expression authoring, TransformationPlan builder ergonomics, LogicalPlan compilation, engine registry and adapter protocols, physical bindings, runtime execution, structured results/failures, lineage, serialization, plugins, stable adapters and migration from Pipeline/RunPipelineService.

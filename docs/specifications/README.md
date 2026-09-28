@@ -41,3 +41,5 @@ The V2 vocabulary baseline is intended to drive the future PyIngestKit 2.0 and P
 - `PYKIT_ECOSYSTEM_V2_EXECUTION_IDENTITY_AND_CORRELATION_MODEL.md` — normative execution identity model for WorkflowRunId, TaskRunId, TaskAttemptId, IngestionRunId, TransformationExecutionId, correlation, causation, retry/recovery identity and cross-runtime propagation.
 
 - `PYKIT_ECOSYSTEM_V2_ERROR_FAILURE_RETRY_AND_UNCERTAINTY_MODEL.md` — normative failure semantics for error categories, retryability, idempotency, retry ownership, timeout, cancellation, unknown outcomes, reconciliation, recovery, replay and bounded retry across PyIngestKit, PyTransformKit and PyWorkflowKit.
+
+- `PYKIT_ECOSYSTEM_V2_DATASET_RESOURCE_AND_ARTIFACT_INTEROPERABILITY.md` — normative interoperability model for Source, Resource, Artifact, RAW, Dataset, DatasetVersion, PhysicalHandle, bindings, materialization, publication, portability, retention and cross-framework data handoff.

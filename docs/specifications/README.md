@@ -71,3 +71,7 @@ The V2 vocabulary baseline is intended to drive the future PyIngestKit 2.0 and P
 ## PyTransformKit V1 target architecture
 
 - `PYTRANSFORMKIT_V1_TARGET_ARCHITECTURE.md` — normative PyTransformKit 1.0 target architecture covering engine-neutral domain boundaries, TransformationPlan and LogicalPlan, runtime execution, bindings, engine adapters, physical I/O limits, lineage, observability, serialization, plugins, migration from legacy Pipeline/RunPipelineService and 1.0 acceptance gates.
+
+## PyIngestKit V2 target architecture
+
+- `PYINGESTKIT_V2_TARGET_ARCHITECTURE.md` — normative PyIngestKit 2.0 target architecture covering acquisition, RAW, Artifact, decoding, validation, DatasetVersion, publication, replay, ArtifactStore/Target/DatasetVersionStore separation, runtime identity, provenance, observability, serialization, security, optional PyTransformKit integration and V1-to-V2 migration.

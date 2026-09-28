@@ -75,3 +75,7 @@ The V2 vocabulary baseline is intended to drive the future PyIngestKit 2.0 and P
 ## PyIngestKit V2 target architecture
 
 - `PYINGESTKIT_V2_TARGET_ARCHITECTURE.md` — normative PyIngestKit 2.0 target architecture covering acquisition, RAW, Artifact, decoding, validation, DatasetVersion, publication, replay, ArtifactStore/Target/DatasetVersionStore separation, runtime identity, provenance, observability, serialization, security, optional PyTransformKit integration and V1-to-V2 migration.
+
+## PyWorkflowKit V2 target architecture
+
+- `PYWORKFLOWKIT_V2_TARGET_ARCHITECTURE.md` — normative PyWorkflowKit 2.0 target architecture covering WorkflowDefinition/TaskDefinition, ExecutionPlan, WorkflowRun/TaskRun/TaskAttempt state machines, retry, timeout, cancellation, ExternalRunRef, recovery/reconciliation, executors, metadata stores, observability, serialization, security, optional sibling integrations and V1-to-V2 migration.

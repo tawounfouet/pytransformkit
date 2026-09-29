@@ -8,11 +8,12 @@ from pytransformkit.domain.expressions.window import (
     WindowBoundaryKind,
     WindowFunction,
     WindowFunctionCall,
+    WindowNullOrder,
     WindowOrderKey,
+    WindowSortDirection,
     WindowSpec,
     as_window_argument,
 )
-from pytransformkit.domain.transformations.sorting import NullOrder, SortDirection
 
 
 def partition_by(*fields: str) -> WindowSpec:
@@ -30,12 +31,12 @@ def order_by(*fields: str | WindowOrderKey) -> WindowSpec:
 def asc(
     field: str,
     *,
-    nulls: NullOrder = NullOrder.LAST,
+    nulls: WindowNullOrder = WindowNullOrder.LAST,
 ) -> WindowOrderKey:
     """Create an ascending window order key."""
     return WindowOrderKey(
         field=FieldPath.of(field),
-        direction=SortDirection.ASC,
+        direction=WindowSortDirection.ASC,
         nulls=nulls,
     )
 
@@ -48,7 +49,7 @@ def desc(
     """Create a descending window order key."""
     return WindowOrderKey(
         field=FieldPath.of(field),
-        direction=SortDirection.DESC,
+        direction=WindowSortDirection.DESC,
         nulls=nulls,
     )
 
@@ -153,7 +154,9 @@ avg = mean
 
 __all__ = [
     "WindowBoundary",
+    "WindowNullOrder",
     "WindowOrderKey",
+    "WindowSortDirection",
     "WindowSpec",
     "asc",
     "avg",

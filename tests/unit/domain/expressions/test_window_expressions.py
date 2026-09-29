@@ -48,9 +48,7 @@ def test_window_spec_is_immutable() -> None:
 
 
 def test_row_number_requires_explicit_ordering(schema: Schema) -> None:
-    expression = window.row_number().over(
-        window.partition_by("customer_id")
-    )
+    expression = window.row_number().over(window.partition_by("customer_id"))
 
     with pytest.raises(ExpressionTypeError, match="order_by"):
         WindowExpressionTypeResolver().resolve(expression, schema)
@@ -93,9 +91,7 @@ def test_lag_rejects_incompatible_default(schema: Schema) -> None:
     expression = window.lag(
         col("status"),
         default=0,
-    ).over(
-        window.partition_by("customer_id").order_by("ordered_at")
-    )
+    ).over(window.partition_by("customer_id").order_by("ordered_at"))
 
     with pytest.raises(ExpressionTypeError, match="same logical DataType"):
         WindowExpressionTypeResolver().resolve(expression, schema)
@@ -148,18 +144,14 @@ def test_arbitrary_and_range_frames_remain_explicit_capability_shapes() -> None:
     assert window.sum(col("amount")).over(arbitrary).frame_kind is (
         WindowFrameKind.ROWS_ARBITRARY
     )
-    assert window.sum(col("amount")).over(ranged).frame_kind is (
-        WindowFrameKind.RANGE
-    )
+    assert window.sum(col("amount")).over(ranged).frame_kind is (WindowFrameKind.RANGE)
 
 
 def test_window_dependencies_include_value_partition_order_and_default() -> None:
     expression = window.lag(
         col("amount"),
         default=col("customer_id"),
-    ).over(
-        window.partition_by("status").order_by("ordered_at")
-    )
+    ).over(window.partition_by("status").order_by("ordered_at"))
 
     dependencies = ExpressionDependencyExtractor().extract(expression)
 

@@ -1,6 +1,7 @@
 """Explicit engine adapter registry."""
 
 from pytransformkit.application.ports.engines import EngineAdapter
+from pytransformkit.domain.engines import EngineCapability
 from pytransformkit.errors.engine import AdapterError, EngineNotFoundError
 
 
@@ -53,6 +54,6 @@ class EngineRegistry:
         """Canonical V1 registry inspection method."""
         return self.engine_ids()
 
-    def capabilities(self, engine_id: str):
+    def capabilities(self, engine_id: str) -> frozenset[EngineCapability]:
         """Return the immutable capability set for one engine."""
         return self.get(engine_id).descriptor.capabilities

@@ -1,5 +1,9 @@
 """Engine-independent logical Expression model."""
 
+from pytransformkit.domain.expressions.aggregate import (
+    AggregateExpression,
+    AggregateFunction,
+)
 from pytransformkit.domain.expressions.base import Expression, ensure_expression
 from pytransformkit.domain.expressions.binary import BinaryExpression
 from pytransformkit.domain.expressions.dependencies import (
@@ -24,12 +28,16 @@ from pytransformkit.domain.expressions.predicates import (
 )
 from pytransformkit.domain.expressions.references import ColumnReference
 from pytransformkit.domain.expressions.typing import (
+    AggregateExpressionTypeResolver,
     ExpressionType,
     ExpressionTypeResolver,
 )
 from pytransformkit.domain.expressions.unary import UnaryExpression
 
 __all__ = [
+    "AggregateExpression",
+    "AggregateExpressionTypeResolver",
+    "AggregateFunction",
     "BinaryExpression",
     "BinaryOperator",
     "ColumnReference",

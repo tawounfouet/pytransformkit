@@ -53,7 +53,7 @@ class TransformationPlan:
         return hash(self.id)
 
     @classmethod
-    def builder(cls, name: str) -> "TransformationPlanBuilder":
+    def builder(cls, name: str) -> TransformationPlanBuilder:
         """Create the canonical mutable authoring helper."""
         from pytransformkit.authoring.plan_builder import TransformationPlanBuilder
 

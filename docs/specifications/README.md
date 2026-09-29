@@ -87,3 +87,7 @@ The V2 vocabulary baseline is intended to drive the future PyIngestKit 2.0 and P
 ## PyIngestKit V2 public API
 
 - `PYINGESTKIT_V2_PUBLIC_API_SPEC.md` — normative PyIngestKit 2.0 public API contract covering Source/IngestionDefinition authoring, acquisition connectors, RAW/artifact evidence, Decoder and validation contracts, DatasetVersion/PublishedDataset, ArtifactStore/DatasetVersionStore/Target separation, publication/reconciliation, replay, runtime execution, structured results/failures, serialization, plugins, provider extras and optional PyTransformKit integration.
+
+## PyWorkflowKit V2 public API
+
+- `PYWORKFLOWKIT_V2_PUBLIC_API_SPEC.md` — normative PyWorkflowKit 2.0 public API contract covering WorkflowDefinition/TaskDefinition authoring, ExecutionPlan compilation, WorkflowRuntime, WorkflowRun/TaskRun/TaskAttempt identities and states, retry/timeout/cancellation, Executor and MetadataStore protocols, ExternalRunRef, recovery/reconciliation, serialization, plugins, optional sibling integrations and V1-to-V2 migration.

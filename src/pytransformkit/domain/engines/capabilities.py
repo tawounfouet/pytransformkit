@@ -37,7 +37,11 @@ class EngineCapability(StrEnum):
     WINDOW_RANGE = "window_range"
     PIVOT = "pivot"
     UNPIVOT = "unpivot"
+    EXPLODE = "explode"
+    FLATTEN = "flatten"
     NESTED = "nested"
+    TEMPORAL = "temporal"
+    DURATION = "duration"
 
     LAZY = "lazy"
     STREAMING = "streaming"

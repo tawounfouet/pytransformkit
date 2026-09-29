@@ -1,5 +1,8 @@
-"""Polars EngineAdapter with eager and lazy execution."""
+"""Polars EngineAdapter with eager, lazy and relational execution."""
 
+from __future__ import annotations
+
+from collections.abc import Mapping
 from importlib.metadata import PackageNotFoundError, version
 from typing import Any
 
@@ -12,9 +15,14 @@ from pytransformkit.application.execution.context import (
     ExecutionContext,
     ExecutionMode,
 )
-from pytransformkit.application.execution.results import EngineExecutionResult
-from pytransformkit.application.ports.engines import DatasetHandle
+from pytransformkit.application.execution.results import (
+    EngineExecutionResult,
+    NamedEngineOutput,
+)
+from pytransformkit.application.ports.engines import PhysicalHandle
+from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.engines import EngineCapability, EngineDescriptor
+from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
 from pytransformkit.domain.pipelines.plan import LogicalPlan
 from pytransformkit.domain.transformations.base import TransformationSpec
 from pytransformkit.domain.transformations.casting import (
@@ -34,6 +42,14 @@ from pytransformkit.domain.transformations.projection import (
     DropTransformation,
     RenameTransformation,
     SelectTransformation,
+)
+from pytransformkit.domain.transformations.relational import (
+    ExceptTransformation,
+    IntersectTransformation,
+    JoinTransformation,
+    JoinType,
+    NullJoinPolicy,
+    UnionTransformation,
 )
 from pytransformkit.domain.transformations.sorting import SortTransformation
 from pytransformkit.errors.engine import AdapterError
@@ -57,13 +73,23 @@ _POLARS_CAPABILITIES = frozenset(
         EngineCapability.DERIVE,
         EngineCapability.SORT,
         EngineCapability.DEDUPLICATE,
+        EngineCapability.JOIN_INNER,
+        EngineCapability.JOIN_LEFT,
+        EngineCapability.JOIN_RIGHT,
+        EngineCapability.JOIN_FULL,
+        EngineCapability.JOIN_SEMI,
+        EngineCapability.JOIN_ANTI,
+        EngineCapability.JOIN_CROSS,
+        EngineCapability.UNION,
+        EngineCapability.INTERSECT,
+        EngineCapability.EXCEPT,
         EngineCapability.LAZY,
     }
 )
 
 
 class PolarsAdapter:
-    """Polars adapter implementing the initial portable Transformation set."""
+    """Polars adapter implementing portable Transformation semantics."""
 
     def __init__(
         self,
@@ -83,32 +109,114 @@ class PolarsAdapter:
             capabilities=_POLARS_CAPABILITIES,
         )
 
+    def bind_native(self, value: object) -> PhysicalHandle:
+        """Wrap a native Polars DataFrame/LazyFrame in a physical handle."""
+        return PolarsDatasetHandle(value)
+
     def execute(
         self,
         plan: LogicalPlan,
-        input_handle: DatasetHandle,
+        input_handle: PhysicalHandle,
         context: ExecutionContext,
     ) -> EngineExecutionResult:
-        if not isinstance(input_handle, PolarsDatasetHandle):
-            raise AdapterError("PolarsAdapter requires a PolarsDatasetHandle.")
+        """Compatibility single-input execution path."""
+        if len(plan.input_names) != 1:
+            raise AdapterError(
+                "PolarsAdapter.execute requires a single-input LogicalPlan; "
+                "use execute_many for multi-input plans."
+            )
+        return self.execute_many(
+            plan,
+            {plan.input_names[0]: input_handle},
+            context,
+        )
 
+    def execute_many(
+        self,
+        plan: LogicalPlan,
+        input_handles: Mapping[str, PhysicalHandle],
+        context: ExecutionContext,
+    ) -> EngineExecutionResult:
+        """Execute a named-input LogicalPlan using Polars."""
         self._compatibility.validate(plan, self.descriptor)
-        frame = self._prepare_frame(input_handle.frame, context.mode)
+        values: dict[object, Any] = {}
 
         for node in plan.nodes:
-            if node.transformation is None:
+            if node.kind is PipelineNodeKind.INPUT:
+                if node.name is None or node.name not in input_handles:
+                    raise AdapterError(
+                        f"Missing Polars input handle for {node.name!r}."
+                    )
+                handle = input_handles[node.name]
+                if not isinstance(handle, PolarsDatasetHandle):
+                    raise AdapterError(
+                        "PolarsAdapter requires PolarsDatasetHandle inputs."
+                    )
+                values[node.node_id] = self._prepare_frame(
+                    handle.frame,
+                    context.mode,
+                )
                 continue
-            frame = self._execute_transformation(
-                frame,
-                node.transformation,
+
+            if node.kind is PipelineNodeKind.TRANSFORMATION:
+                inputs = tuple(values[item] for item in node.input_node_ids)
+                if node.transformation is None:
+                    raise AdapterError(
+                        "Transformation LogicalPlan node is missing its specification."
+                    )
+                if len(inputs) == 1:
+                    values[node.node_id] = self._execute_transformation(
+                        inputs[0],
+                        node.transformation,
+                    )
+                else:
+                    values[node.node_id] = self._execute_relational(
+                        inputs,
+                        node.transformation,
+                        node.output_schema,
+                    )
+                continue
+
+            if node.kind is PipelineNodeKind.OUTPUT:
+                if len(node.input_node_ids) != 1:
+                    raise AdapterError(
+                        "Output LogicalPlan node requires one predecessor."
+                    )
+                values[node.node_id] = values[node.input_node_ids[0]]
+                continue
+
+            raise AdapterError(
+                f"Unsupported LogicalPlan node kind {node.kind!r}."
             )
 
-        if context.mode is ExecutionMode.EAGER and isinstance(frame, pl.LazyFrame):
-            frame = frame.collect()
+        named_outputs: list[NamedEngineOutput] = []
+        for node in plan.nodes:
+            if node.kind is not PipelineNodeKind.OUTPUT:
+                continue
+            if node.name is None:
+                raise AdapterError("Output LogicalPlan node is missing its name.")
+            frame = values[node.node_id]
+            if context.mode is ExecutionMode.EAGER and isinstance(
+                frame,
+                pl.LazyFrame,
+            ):
+                frame = frame.collect()
+            named_outputs.append(
+                NamedEngineOutput(
+                    name=node.name,
+                    output_handle=PolarsDatasetHandle(frame),
+                    output_schema=node.output_schema,
+                )
+            )
 
+        if not named_outputs:
+            raise AdapterError("LogicalPlan did not produce any outputs.")
+
+        first = named_outputs[0]
         return EngineExecutionResult(
-            output_handle=PolarsDatasetHandle(frame),
-            output_schema=plan.output_schema,
+            output_handle=first.output_handle,
+            output_schema=first.output_schema,
+            named_outputs=tuple(named_outputs),
         )
 
     @staticmethod
@@ -191,9 +299,106 @@ class PolarsAdapter:
             f"{type(transformation).__name__!r}."
         )
 
+    def _execute_relational(
+        self,
+        inputs: tuple[Any, ...],
+        transformation: TransformationSpec,
+        output_schema: Schema,
+    ) -> Any:
+        if len(inputs) != 2:
+            raise AdapterError("Relational transformations require two inputs.")
+        left, right = inputs
+
+        if isinstance(transformation, JoinTransformation):
+            result = _join(left, right, transformation)
+        elif isinstance(transformation, UnionTransformation):
+            result = pl.concat(
+                [left, right],
+                how="vertical",
+            )
+            if not transformation.all:
+                result = result.unique(maintain_order=True)
+        elif isinstance(transformation, IntersectTransformation):
+            columns = list(output_schema.names())
+            result = (
+                left.join(
+                    right.unique(maintain_order=True),
+                    on=columns,
+                    how="semi",
+                    nulls_equal=True,
+                )
+                .unique(maintain_order=True)
+            )
+        elif isinstance(transformation, ExceptTransformation):
+            columns = list(output_schema.names())
+            result = (
+                left.join(
+                    right.unique(maintain_order=True),
+                    on=columns,
+                    how="anti",
+                    nulls_equal=True,
+                )
+                .unique(maintain_order=True)
+            )
+        else:
+            raise AdapterError(
+                "Polars relational execution is not implemented for "
+                f"{type(transformation).__name__!r}."
+            )
+
+        expected = list(output_schema.names())
+        return result.select(expected)
+
+    
+def _join(
+    left: Any,
+    right: Any,
+    transformation: JoinTransformation,
+) -> Any:
+    if transformation.how is JoinType.CROSS:
+        return left.join(
+            right,
+            how="cross",
+            suffix=transformation.right_suffix,
+        )
+
+    left_keys = [str(key.left) for key in transformation.keys]
+    right_keys = [str(key.right) for key in transformation.keys]
+    how = {
+        JoinType.INNER: "inner",
+        JoinType.LEFT: "left",
+        JoinType.RIGHT: "right",
+        JoinType.FULL: "full",
+        JoinType.SEMI: "semi",
+        JoinType.ANTI: "anti",
+    }[transformation.how]
+
+    kwargs = {
+        "left_on": left_keys,
+        "right_on": right_keys,
+        "how": how,
+        "suffix": transformation.right_suffix,
+    }
+    nulls_equal = transformation.nulls is NullJoinPolicy.MATCH
+
+    try:
+        return left.join(
+            right,
+            nulls_equal=nulls_equal,
+            coalesce=True,
+            **kwargs,
+        )
+    except TypeError:
+        # Compatibility with early Polars 1.x releases.
+        return left.join(
+            right,
+            join_nulls=nulls_equal,
+            **kwargs,
+        )
+
 
 def _package_version() -> str:
     try:
         return version("pytransformkit")
     except PackageNotFoundError:
-        return "0.1.0a1"
+        return "0.2.0a1"

@@ -7,7 +7,6 @@ from enum import StrEnum
 
 from pytransformkit.domain.data.field_path import FieldPath
 from pytransformkit.domain.expressions.base import Expression, ensure_expression
-from pytransformkit.domain.transformations.sorting import NullOrder, SortDirection
 from pytransformkit.errors.expression import ExpressionTypeError
 
 
@@ -24,6 +23,20 @@ class WindowFunction(StrEnum):
     MIN = "min"
     MAX = "max"
     MEAN = "mean"
+
+
+class WindowSortDirection(StrEnum):
+    """Portable window ordering direction."""
+
+    ASC = "asc"
+    DESC = "desc"
+
+
+class WindowNullOrder(StrEnum):
+    """Portable NULL positioning for window ordering."""
+
+    FIRST = "first"
+    LAST = "last"
 
 
 class WindowFrameMode(StrEnum):
@@ -147,16 +160,18 @@ class WindowOrderKey:
     """One ordered field in a WindowSpec."""
 
     field: FieldPath
-    direction: SortDirection = SortDirection.ASC
-    nulls: NullOrder = NullOrder.LAST
+    direction: WindowSortDirection = WindowSortDirection.ASC
+    nulls: WindowNullOrder = WindowNullOrder.LAST
 
     def __post_init__(self) -> None:
         if not isinstance(self.field, FieldPath):
             raise TypeError("Window order field must be a FieldPath.")
-        if not isinstance(self.direction, SortDirection):
-            raise TypeError("Window order direction must be a SortDirection.")
-        if not isinstance(self.nulls, NullOrder):
-            raise TypeError("Window null ordering must be a NullOrder.")
+        if not isinstance(self.direction, WindowSortDirection):
+            raise TypeError(
+                "Window order direction must be a WindowSortDirection."
+            )
+        if not isinstance(self.nulls, WindowNullOrder):
+            raise TypeError("Window null ordering must be a WindowNullOrder.")
 
 
 @dataclass(frozen=True, slots=True)

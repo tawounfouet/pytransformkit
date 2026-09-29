@@ -23,11 +23,6 @@ from pytransformkit.domain.expressions.aggregate import (
     AggregateExpression,
     AggregateFunction,
 )
-from pytransformkit.domain.expressions.window import (
-    WindowExpression,
-    WindowFunction,
-    validate_window_expression,
-)
 from pytransformkit.domain.expressions.base import Expression
 from pytransformkit.domain.expressions.binary import BinaryExpression
 from pytransformkit.domain.expressions.functions import FunctionCall
@@ -39,6 +34,11 @@ from pytransformkit.domain.expressions.predicates import (
 )
 from pytransformkit.domain.expressions.references import ColumnReference
 from pytransformkit.domain.expressions.unary import UnaryExpression
+from pytransformkit.domain.expressions.window import (
+    WindowExpression,
+    WindowFunction,
+    validate_window_expression,
+)
 from pytransformkit.errors.expression import (
     ExpressionTypeError,
     FunctionNotFoundError,

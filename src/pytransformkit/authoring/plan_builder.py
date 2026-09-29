@@ -9,6 +9,7 @@ from pytransformkit.domain.data.dataset import Dataset
 from pytransformkit.domain.data.field_path import FieldPath
 from pytransformkit.domain.data.metadata import DatasetMetadata
 from pytransformkit.domain.data.schema import Schema
+from pytransformkit.domain.expressions.aggregate import AggregateExpression
 from pytransformkit.domain.expressions.base import Expression
 from pytransformkit.domain.pipelines.dependencies import Dependency
 from pytransformkit.domain.pipelines.nodes import (
@@ -23,6 +24,7 @@ from pytransformkit.domain.shared.identifiers import (
     NodeId,
     TransformationPlanId,
 )
+from pytransformkit.domain.transformations.aggregation import AggregateTransformation
 from pytransformkit.domain.transformations.base import TransformationSpec
 from pytransformkit.domain.transformations.casting import (
     CastPolicy,
@@ -273,6 +275,24 @@ class TransformationPlanBuilder:
             transformation=DeduplicateTransformation(
                 keys=tuple(FieldPath.of(key) for key in keys),
                 keep=keep,
+            ),
+        )
+
+    def aggregate(
+        self,
+        name: str,
+        *,
+        source: Dataset,
+        group_by: tuple[Expression, ...] = (),
+        metrics: Mapping[str, AggregateExpression],
+    ) -> Dataset:
+        """Group rows and compute named aggregate metrics."""
+        return self.apply(
+            name,
+            source=source,
+            transformation=AggregateTransformation.from_mapping(
+                group_by=group_by,
+                metrics=metrics,
             ),
         )
 

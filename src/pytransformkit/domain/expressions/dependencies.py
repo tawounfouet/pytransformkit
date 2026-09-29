@@ -12,6 +12,7 @@ from pytransformkit.domain.expressions.predicates import (
 )
 from pytransformkit.domain.expressions.references import ColumnReference
 from pytransformkit.domain.expressions.unary import UnaryExpression
+from pytransformkit.domain.expressions.window import WindowExpression
 from pytransformkit.errors.expression import ExpressionError
 
 
@@ -26,6 +27,17 @@ class ExpressionDependencyExtractor:
             if expression.argument is None:
                 return frozenset()
             return self.extract(expression.argument)
+
+        if isinstance(expression, WindowExpression):
+            dependencies = frozenset(expression.spec.partition_keys)
+            dependencies = dependencies | frozenset(
+                key.field for key in expression.spec.order_keys
+            )
+            if expression.argument is not None:
+                dependencies = dependencies | self.extract(expression.argument)
+            if expression.default is not None:
+                dependencies = dependencies | self.extract(expression.default)
+            return dependencies
 
         if isinstance(expression, ColumnReference):
             return frozenset({expression.path})

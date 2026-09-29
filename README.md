@@ -32,8 +32,9 @@ The implementation baseline now covers:
 - **LOT-11 — V1 Public Model Migration & Relational Core**
 - **LOT-12 — Aggregation & Grouping**
 - **LOT-13 — Window & Analytical Semantics**
+- **LOT-14 — Reshaping, Temporal & Nested Semantics**
 
-The current development line targets **0.2.0b1**.
+The current development line targets **0.2.0**.
 
 ### Canonical V1 model
 
@@ -87,7 +88,10 @@ The portable Transformation model currently includes:
 - intersect;
 - except;
 - aggregate/group by;
-- analytical windows.
+- analytical windows;
+- pivot, unpivot, explode and flatten;
+- nested Struct field access;
+- temporal extraction, timestamp normalization, timezone conversion and duration expressions.
 
 LOT-11 adds multi-input logical dependencies, deterministic relational schema resolution, explicit join-key semantics, column-collision handling and configurable NULL join behavior.
 
@@ -95,11 +99,13 @@ LOT-12 adds a typed aggregate-expression context with `count`, `count_distinct`,
 
 LOT-13 adds immutable window specifications, explicit partition/order semantics, `row_number`, `rank`, `dense_rank`, `lag`, `lead`, partition aggregates, cumulative aggregates and moving ROWS aggregates. Window frame support is capability-gated so unsupported ROWS/RANGE shapes fail before physical execution.
 
+LOT-14 closes the 0.2.x transformation vocabulary with deterministic reshape semantics, logical `ListType`, `StructType`, `MapType` and `DurationType`, nested Struct paths, portable temporal functions, and explicit engine capabilities for reshape, nested and temporal execution.
+
 ### Runtime and engines
 
 Runtime input is expressed through `InputBinding`, separating logical Dataset values from physical native values. The runtime resolves one explicitly requested engine from `EngineRegistry`; there is no implicit engine fallback.
 
-Pandas and Polars are optional extras. Both implement the relational, aggregation and analytical-window contracts. Dedicated cross-engine tests verify semantic equivalence for joins, set operations, grouped/global aggregates, ranking, offsets, cumulative and moving windows, NULL handling and capability failures. Polars also supports lazy window execution.
+Pandas and Polars are optional extras. Both implement the relational, aggregation, analytical-window, reshape, nested-Struct and temporal contracts. Dedicated cross-engine tests verify semantic equivalence for joins, set operations, grouped/global aggregates, ranking, offsets, cumulative and moving windows, pivot/unpivot/explode/flatten, nested field access, timezone-aware temporal operations, durations, NULL handling and capability failures. Polars also supports qualified lazy execution.
 
 Public engine namespaces are available under:
 
@@ -176,9 +182,9 @@ The historical `docs/ROADMAP_LOT_11_TO_1_0.md` remains useful as project history
 Current count:
 
 - Total roadmap: **29 lots** (`LOT-00` → `LOT-28`)
-- Completed after LOT-13: **14 lots** (`LOT-00` → `LOT-13`)
-- Remaining: **15 lots** (`LOT-14` → `LOT-28`)
-- Next lot: **LOT-14 — Reshaping, Temporal and Nested Semantics**
+- Completed after LOT-14: **15 lots** (`LOT-00` → `LOT-14`)
+- Remaining: **14 lots** (`LOT-15` → `LOT-28`)
+- Next lot: **LOT-15 — Data Quality and Validation**
 - Final lot: **LOT-28 — PyTransformKit 1.0.0 Stable Release**
 
 ## Development

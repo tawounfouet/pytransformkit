@@ -1,0 +1,1026 @@
+# PyTransformKit V1 — Revised Implementation Roadmap
+
+> **Status:** NORMATIVE REVISED IMPLEMENTATION ROADMAP  
+> **Target release:** PyTransformKit 1.0.0  
+> **Date:** 2026-09-29  
+> **Supersedes for future implementation:** ROADMAP_LOT_11_TO_1_0.md dated 2026-09-22  
+> **Completed baseline retained:** LOT-00 through LOT-10  
+> **Remaining implementation sequence retained:** LOT-11 through LOT-28  
+> **Architecture generation:** PyKit Ecosystem V2  
+> **Depends on:** PYTRANSFORMKIT_V1_TARGET_ARCHITECTURE.md  
+> **Depends on:** PYTRANSFORMKIT_V1_PUBLIC_API_SPEC.md  
+> **Depends on:** PYKIT_ECOSYSTEM_V2_END_TO_END_ACCEPTANCE_CRITERIA.md  
+> **Depends on:** PYKIT_ECOSYSTEM_V2_IMPLEMENTATION_SEQUENCE_AND_MIGRATION_PLAN.md
+
+---
+
+# 1. Purpose
+
+This document replaces the future-facing implementation guidance of the original frozen LOT-11 to LOT-28 roadmap while preserving its completed LOT-00 to LOT-10 history and its final LOT-28 target.
+
+The revision is required because the PyKit Ecosystem V2 architecture has now frozen:
+
+- TransformationPlan as the canonical authoring root;
+- LogicalPlan as the public engine-neutral compiled representation;
+- TransformationRuntime as the canonical execution service;
+- TransformationExecutionId and TransformationResult;
+- InputBinding and OutputBinding;
+- ResourceReference versus PhysicalHandle;
+- no public TransformationGraph;
+- no public OptimizedLogicalPlan;
+- no universal public PhysicalPlan;
+- explicit engine capability and fallback semantics;
+- strict separation from ingestion and workflow responsibilities.
+
+The governing rule is:
+
+> **Preserve the useful implementation history, but let the V2 target architecture control every remaining lot.**
+
+---
+
+# 2. Baseline retained from LOT-00 through LOT-10
+
+The existing implementation history remains valid evidence:
+
+| Lot | Historical scope | Status |
+|---|---|---|
+| LOT-00 | Repository Bootstrap | DONE |
+| LOT-01 | Shared Kernel | DONE |
+| LOT-02 | Type System and Schema Core | DONE |
+| LOT-03 | Dataset Domain Model | DONE |
+| LOT-04 | Expression AST Core | DONE |
+| LOT-05 | Transformation Model MVP | DONE |
+| LOT-06 | Pipeline and DAG Core | DONE |
+| LOT-07 | Engine Runtime Contracts | DONE |
+| LOT-08 | Pandas Reference Adapter | DONE |
+| LOT-09 | Application Execution Service | DONE |
+| LOT-10 | Polars Adapter and Multi-Engine Contract | DONE |
+
+These lots prove useful foundations but do not freeze legacy public naming.
+
+In particular:
+
+~~~text
+legacy Pipeline
+    does not override
+TransformationPlan target API
+
+legacy RunPipelineService
+    does not override
+TransformationRuntime target API
+~~~
+
+---
+
+# 3. Revision strategy
+
+The lot numbering remains LOT-11 through LOT-28 to preserve project continuity.
+
+The architectural content of each remaining lot is revised where necessary.
+
+The new dependency chain is:
+
+~~~text
+LOT-11  V1 Model Migration + Relational Foundation
+   ↓
+LOT-12  Aggregation
+   ↓
+LOT-13  Windows
+   ↓
+LOT-14  Reshape / Temporal / Nested
+   ↓
+LOT-15  Data Quality
+   ↓
+LOT-16  Logical + Field Lineage
+   ↓
+LOT-17  Runtime Evidence / Identity / Observability
+   ↓
+LOT-18  PyArrow
+   ↓
+LOT-19  DuckDB
+   ↓
+LOT-20  Physical I/O Boundary
+   ↓
+LOT-21  Serialization / Canonical IR
+   ↓
+LOT-22  Logical Optimizer
+   ↓
+LOT-23  Plugins / Extension Contracts
+   ↓
+LOT-24  Cross-Engine Conformance + Customer 360
+   ↓
+LOT-25  Performance Qualification
+   ↓
+LOT-26  Public API / Security / Migration Freeze
+   ↓
+LOT-27  1.0 Release Candidate
+   ↓
+LOT-28  1.0.0 Stable
+~~~
+
+---
+
+# 4. Mandatory V1 migration gate
+
+LOT-11 cannot close until the codebase aligns with the frozen V1 vocabulary.
+
+Required refactors include:
+
+~~~text
+Pipeline
+    → TransformationPlan
+
+RunPipelineService
+    → TransformationRuntime
+
+runtime input data
+    → InputBinding
+
+runtime output destination
+    → OutputBinding
+
+native runtime object
+    → PhysicalHandle where abstraction is needed
+
+portable physical location
+    → ResourceReference
+
+execution invocation
+    → TransformationExecutionId + TransformationResult
+~~~
+
+The migration gate also requires:
+
+- no new public TransformationGraph;
+- no new public OptimizedLogicalPlan;
+- no stable universal PhysicalPlan;
+- root exports aligned with the Public API Specification;
+- legacy names treated as migration concerns, not architectural authorities.
+
+---
+
+# Phase A — Authoring Migration and Relational Semantics
+
+# 5. LOT-11 — V1 Public Model Migration and Relational Core
+
+**Target milestone:** 0.2.0a1
+
+## Scope
+
+Implement the mandatory V1 migration gate and portable multi-input relational semantics.
+
+Work includes:
+
+~~~text
+TransformationPlan canonical authoring root
+TransformationPlanBuilder
+migration from Pipeline public naming
+TransformationRuntime canonical execution service
+TransformationExecutionId
+TransformationResult
+InputBinding / OutputBinding
+ResourceReference / PhysicalHandle separation
+
+JoinTransformation
+UnionTransformation
+IntersectTransformation
+ExceptTransformation
+multi-input plan dependencies
+deterministic schema resolution
+join-key model
+column collision policy
+NULL join semantics
+Pandas implementation
+Polars implementation
+~~~
+
+## Architectural objective
+
+Move from the initial pre-1.0 Pipeline implementation to the stable V1 declaration/runtime vocabulary while proving that multi-input relational semantics remain engine-neutral.
+
+## Exit criteria
+
+- TransformationPlan can express all prior LOT-00 to LOT-10 functionality.
+- Legacy Pipeline is no longer the canonical root API.
+- TransformationRuntime replaces RunPipelineService as the target execution API.
+- Multi-input dependencies compile deterministically into LogicalPlan.
+- InputBinding separates logical Dataset from native data.
+- Pandas and Polars pass join/set-operation conformance.
+- No engine-native type enters domain objects.
+- root import remains engine-optional.
+
+---
+
+# 6. LOT-12 — Aggregation and Grouping
+
+**Target milestone:** 0.2.0a2
+
+## Scope
+
+Implement:
+
+~~~text
+AggregateTransformation
+grouping expressions
+COUNT
+COUNT DISTINCT
+SUM
+MIN
+MAX
+MEAN
+null-aware aggregate semantics
+aggregate expression validation
+result-type inference
+grouped schema propagation
+Pandas execution
+Polars execution
+~~~
+
+## Architectural objective
+
+Extend the Expression AST with a typed aggregate context without introducing engine-specific expressions.
+
+## Exit criteria
+
+- illegal row/aggregate expression mixing fails during compilation;
+- output schemas are deterministic;
+- grouping dependencies appear in lineage;
+- aggregate capabilities are advertised explicitly;
+- Pandas and Polars return equivalent normalized logical results.
+
+---
+
+# 7. LOT-13 — Window and Analytical Semantics
+
+**Target milestone:** 0.2.0b1
+
+## Scope
+
+Implement:
+
+~~~text
+window specification
+partition keys
+ordering specification
+frame model
+ROW_NUMBER
+RANK
+DENSE_RANK
+LAG
+LEAD
+cumulative aggregates
+moving aggregates
+determinism diagnostics
+Pandas support
+Polars support
+~~~
+
+## Exit criteria
+
+- window specs are immutable;
+- ordering requirements are explicit;
+- unsupported frame semantics fail through capability validation;
+- field lineage records ordering/partition dependencies;
+- common window suite passes on Pandas and Polars.
+
+---
+
+# 8. LOT-14 — Reshaping, Temporal and Nested Semantics
+
+**Target milestone:** 0.2.0
+
+## Scope
+
+Implement the remaining stable 1.0 transformation vocabulary needed before quality/metadata layers:
+
+~~~text
+pivot
+unpivot
+explode
+flatten where portable
+nested field access
+list / struct / map handling where supported
+date extraction
+timestamp normalization
+timezone conversion
+duration semantics
+explicit unsupported capability reporting
+~~~
+
+## Exit criteria
+
+- 0.2 transformation semantics are documented;
+- type/schema changes are deterministic;
+- engine capability gaps are explicit;
+- no hidden fallback occurs;
+- relational/analytical V1 authoring examples are green.
+
+---
+
+# Phase B — Quality, Lineage and Runtime Evidence
+
+# 9. LOT-15 — Data Quality and Validation
+
+**Target milestone:** 0.3.0a1
+
+## Scope
+
+Implement transformation-owned quality semantics:
+
+~~~text
+ValidationRule
+ValidationSpec
+ValidationPolicy
+ValidationResult
+NotNull
+Unique
+Range
+AllowedValues
+Regex
+SchemaValidation
+RowCount
+expression-based validation
+QualityGate
+FAIL_FAST
+FAIL_AT_END
+WARN_ONLY
+IGNORE
+threshold policy
+~~~
+
+## Boundary rule
+
+This lot validates logical transformation data.
+
+It does not absorb PyIngestKit source-decoding contract validation or ingestion publication policy.
+
+## Exit criteria
+
+- data violations differ from technical execution failures;
+- quality semantics remain engine-neutral;
+- core rules pass Pandas/Polars conformance;
+- quality evidence is structured and lineage-compatible.
+
+---
+
+# 10. LOT-16 — Logical and Field Lineage
+
+**Target milestone:** 0.3.0a2
+
+## Scope
+
+Implement:
+
+~~~text
+logical dataset lineage
+field lineage
+expression dependency extraction
+selection dependency
+grouping dependency
+join dependency
+ordering dependency
+window dependency
+derivation kind
+lineage confidence
+impact analysis primitives
+ResourceReference linkage
+~~~
+
+Stable confidence model:
+
+~~~text
+EXACT
+DECLARED
+INFERRED
+PARTIAL
+UNKNOWN
+~~~
+
+## Exit criteria
+
+- every stable built-in transformation has lineage behavior;
+- rename/cast/derive/join/aggregate/window lineage is tested;
+- logical lineage is derivable without data execution;
+- native engine conversion creates no false logical lineage;
+- Customer 360 field lineage shape can be expressed.
+
+---
+
+# 11. LOT-17 — Runtime Identity, Diagnostics and Observability
+
+**Target milestone:** 0.3.0
+
+## Scope
+
+Complete the V1 runtime evidence model:
+
+~~~text
+TransformationExecutionId
+TransformationExecution runtime record
+ExecutionStatus
+CorrelationContext propagation
+FailureEvidence mapping
+structured Diagnostic
+runtime lifecycle events
+metrics
+tracing hooks
+execution manifest
+engine descriptor in results
+plan fingerprint in results
+bounded provider retry evidence
+UNKNOWN_OUTCOME
+cancellation capability model
+telemetry redaction
+~~~
+
+## Architectural objective
+
+Make TransformationRuntime fully conform to the ecosystem execution/failure/observability contracts before additional backends are stabilized.
+
+## Exit criteria
+
+- every execute call has a TransformationExecutionId;
+- correlation remains distinct from execution identity;
+- structured failures are available without parsing logs;
+- telemetry failure does not replay computation;
+- unknown write outcomes remain explicit;
+- lazy execution never fabricates step metrics.
+
+---
+
+# Phase C — Additional Engines and Physical I/O
+
+# 12. LOT-18 — PyArrow Adapter and Interchange
+
+**Target milestone:** 0.4.0a1
+
+## Scope
+
+Implement:
+
+~~~text
+PyArrowEngineAdapter
+Arrow type mapper
+Table / RecordBatch runtime handles
+expression compilation
+stable supported transformation subset
+Arrow schema inspection
+chunk-aware execution
+Arrow interchange
+Pandas ↔ Arrow bridge
+Polars ↔ Arrow bridge
+conversion diagnostics
+lossiness policy
+~~~
+
+## Exit criteria
+
+- base package imports without PyArrow;
+- Arrow native types remain outside domain;
+- supported capabilities pass engine conformance;
+- conversion lossiness is explicit;
+- adapter stability is STABLE or explicitly PROVISIONAL.
+
+---
+
+# 13. LOT-19 — DuckDB Adapter and SQL Lowering
+
+**Target milestone:** 0.4.0a2
+
+## Scope
+
+Implement:
+
+~~~text
+DuckDBEngineAdapter
+connection ownership
+logical-type mapping
+safe identifier quoting
+parameterized value handling
+join/aggregate/window lowering
+CTE/subquery lowering
+Arrow interchange
+lazy relational execution
+native explain diagnostics
+~~~
+
+## Exit criteria
+
+- SQL remains physical representation only;
+- raw values are not interpolated unsafely;
+- user-owned connections are not closed/committed unexpectedly;
+- supported relational/analytical semantics pass conformance;
+- unsupported semantics fail explicitly.
+
+---
+
+# 14. LOT-20 — Physical I/O and Resource Boundary
+
+**Target milestone:** 0.4.0
+
+## Scope
+
+Implement the constrained PyTransformKit I/O boundary:
+
+~~~text
+ResourceReference
+Reader port
+Writer port
+read request/result
+write request/result
+CSV
+JSONL
+Parquet
+Arrow IPC
+local filesystem
+projection pushdown
+predicate pushdown
+partition pruning where supported
+typed write modes
+CredentialReference
+retry-safety declaration
+UNKNOWN_OUTCOME for writes
+~~~
+
+## Non-goals
+
+LOT-20 MUST NOT implement:
+
+~~~text
+immutable RAW lifecycle
+source acquisition provenance
+DatasetVersionStore
+PublishedDataset
+ingestion replay
+governed publication
+~~~
+
+## Exit criteria
+
+- I/O is not modeled as Transformation;
+- ResourceReference is portable;
+- PhysicalHandle remains process-local;
+- credentials are absent from serialized references;
+- write and publication semantics remain distinct;
+- pushdown does not corrupt lineage.
+
+---
+
+# Phase D — Portable IR, Optimizer and Extensibility
+
+# 15. LOT-21 — Versioned Serialization and Canonical IR
+
+**Target milestone:** 0.5.0a1
+
+## Scope
+
+Implement explicit safe codecs for:
+
+~~~text
+DataType
+Field
+Schema
+Expression
+TransformationPlan
+LogicalPlan
+ResourceReference
+TransformationExecutionReference
+lineage records
+selected diagnostics/manifests
+~~~
+
+Requirements:
+
+~~~text
+contract ID
+contract_version
+canonical JSON
+deterministic ordering
+semantic fingerprints
+golden fixtures
+strict decoding
+round-trip tests
+migration hooks
+payload limits
+no pickle/cloudpickle/dill fallback
+~~~
+
+## Exit criteria
+
+- portable plan subset round-trips deterministically;
+- non-portable UDF/callback constructs fail explicitly;
+- wire versions are independent from package version;
+- golden fixtures are committed and compatibility-tested.
+
+---
+
+# 16. LOT-22 — Logical Optimizer
+
+**Target milestone:** 0.5.0a2
+
+## Scope
+
+Implement semantics-preserving LogicalPlan optimization:
+
+~~~text
+projection pruning
+predicate pushdown
+constant folding
+boolean simplification
+dead-node elimination
+common expression analysis
+safe fusion hints
+materialization-boundary analysis
+optimizer diagnostics
+rule provenance
+~~~
+
+The public contract remains:
+
+~~~text
+LogicalPlan
+    ↓ optimize
+LogicalPlan
+~~~
+
+No public OptimizedLogicalPlan is introduced.
+
+## Exit criteria
+
+- every stable rule has equivalence/property tests;
+- optimizer can be disabled;
+- lineage remains correct after optimization;
+- rules are engine-neutral;
+- physical lowering remains adapter-owned.
+
+---
+
+# 17. LOT-23 — Extension and Plugin Architecture
+
+**Target milestone:** 0.5.0
+
+## Scope
+
+Stabilize extension contracts for:
+
+~~~text
+EngineAdapter
+Reader / Writer
+ResourceResolver
+function registry
+optimizer rules
+telemetry sinks
+PluginRegistry
+entry-point discovery
+compatibility declaration
+explicit activation
+registry freezing
+duplicate/conflict handling
+~~~
+
+## Exit criteria
+
+- discovery does not equal activation;
+- core import remains side-effect free;
+- built-ins can conform to public extension Protocols;
+- plugin compatibility is machine-checkable;
+- untrusted wire payload cannot activate code.
+
+---
+
+# Phase E — Ecosystem Conformance and Performance
+
+# 18. LOT-24 — Cross-Engine Conformance and Customer 360 Transformation Gate
+
+**Target milestone:** 0.6.0
+
+## Scope
+
+Qualify stable semantic behavior across:
+
+~~~text
+Pandas
+Polars eager
+Polars lazy where applicable
+PyArrow when declared stable
+DuckDB when declared stable
+~~~
+
+Conformance matrix includes:
+
+~~~text
+NULL / NaN
+numeric promotion
+Decimal
+timezone
+nested data
+Unicode
+ordering
+duplicates
+empty data
+joins
+aggregates
+windows
+quality
+lineage
+serialization
+capability failure
+no hidden fallback
+~~~
+
+Customer 360 requirements:
+
+- one TransformationPlan;
+- Pandas execution;
+- Polars execution;
+- equivalent normalized result;
+- expected field lineage;
+- ResourceReference output handoff suitable for PyIngestKit publication.
+
+## Exit criteria
+
+- published capability matrix exists;
+- Pandas and Polars are fully green for mandatory 1.0 semantics;
+- optional engines are labeled STABLE or PROVISIONAL honestly;
+- Customer 360 transform path is green.
+
+---
+
+# 19. LOT-25 — Performance and Memory Qualification
+
+**Target milestone:** 0.7.0
+
+## Scope
+
+Implement reproducible benchmarks for:
+
+~~~text
+planning overhead
+expression compilation
+execution overhead
+memory amplification
+eager versus lazy
+native conversion costs
+Arrow interchange
+DuckDB materialization boundaries
+I/O pushdown
+lineage/diagnostic overhead
+~~~
+
+## Exit criteria
+
+- repeatable benchmark harness exists;
+- regression thresholds are defined;
+- no optimization changes public semantics;
+- observability does not force unnecessary materialization;
+- abstraction overhead is measured rather than assumed.
+
+---
+
+# Phase F — API and Compatibility Freeze
+
+# 20. LOT-26 — Public API, Security and Migration Freeze
+
+**Target milestone:** 0.8.0
+
+## Scope
+
+Freeze the public V1 contract defined by PYTRANSFORMKIT_V1_PUBLIC_API_SPEC.md.
+
+Required work includes:
+
+~~~text
+curated root exports
+qualified stable namespaces
+public signatures
+DataType / Schema / Expression API
+TransformationPlan builder
+TransformationCompiler
+LogicalPlan
+TransformationRuntime
+InputBinding / OutputBinding
+EngineRegistry / EngineAdapter
+public exception hierarchy
+status/capability enums
+stable extras
+plugin contracts
+serialization contract versions
+security review
+threat model
+documentation
+migration guide
+Pipeline migration
+RunPipelineService migration
+~~~
+
+## Exit criteria
+
+- public API snapshot is committed;
+- accidental exports are removed;
+- Pipeline is no longer canonical;
+- no public TransformationGraph/OptimizedLogicalPlan/universal PhysicalPlan exists;
+- import-time safety tests pass;
+- security conformance is green;
+- Getting Started and engine guides execute in CI;
+- API docs match built artifacts.
+
+---
+
+# Phase G — Release Qualification
+
+# 21. LOT-27 — 1.0 Release Candidate
+
+**Target milestone:** 0.9.0 → 1.0.0rc1
+
+## Scope
+
+Run complete release qualification:
+
+~~~text
+Python support matrix
+Ruff
+format
+mypy
+unit tests
+architecture tests
+public API snapshot
+engine conformance
+wire golden fixtures
+plugin conformance
+optional dependency isolation
+built wheel install
+sdist install if published
+Customer 360 transform path
+security negative tests
+performance review
+migration examples
+release notes
+known limitations
+release evidence manifest
+~~~
+
+## Exit criteria
+
+- no blocker-class defect remains;
+- intended stable surfaces are frozen;
+- built artifacts, not source checkout, pass qualification;
+- rc1 requires no architecture redesign;
+- only blocker fixes are allowed after rc1 without resetting RC qualification.
+
+---
+
+# 22. LOT-28 — PyTransformKit 1.0.0 Stable
+
+**Target:** 1.0.0
+
+## Scope
+
+- resolve RC blockers only;
+- rerun full qualification;
+- freeze stable public API baseline;
+- freeze declared wire-contract versions;
+- finalize capability matrix;
+- finalize migration guide;
+- finalize changelog and release notes;
+- publish artifacts;
+- create v1.0.0 tag;
+- produce auditable release evidence.
+
+## Stable acceptance
+
+PyTransformKit 1.0.0 is released only when:
+
+1. domain imports no physical-engine package;
+2. TransformationPlan is the canonical authoring root;
+3. LogicalPlan is the stable engine-neutral compiled IR;
+4. TransformationRuntime is the canonical execution service;
+5. InputBinding and OutputBinding are explicit;
+6. native physical handles remain outside domain;
+7. Pandas and Polars pass mandatory conformance;
+8. optional engines are honestly classified;
+9. relational, aggregate and window semantics are qualified;
+10. logical and field lineage are first-class;
+11. runtime identity and structured failure semantics are stable;
+12. physical I/O remains separate from ingestion lifecycle;
+13. serialization is deterministic and non-executable;
+14. optimizer rules preserve semantics;
+15. plugin activation is explicit;
+16. public API snapshots are green;
+17. clean built artifacts install on supported Python versions;
+18. Customer 360 transformation path passes;
+19. no blocker remains;
+20. RC required no architecture redesign.
+
+---
+
+# 23. Revised version map
+
+| Version line | Lots | Theme |
+|---|---|---|
+| 0.1.x | LOT-00 → LOT-10 | Existing baseline |
+| 0.2.x | LOT-11 → LOT-14 | V1 authoring migration + relational/analytical semantics |
+| 0.3.x | LOT-15 → LOT-17 | Quality, lineage, runtime evidence |
+| 0.4.x | LOT-18 → LOT-20 | Arrow, DuckDB, physical I/O |
+| 0.5.x | LOT-21 → LOT-23 | Wire IR, optimizer, plugins |
+| 0.6.0 | LOT-24 | Cross-engine + Customer 360 transform gate |
+| 0.7.0 | LOT-25 | Performance |
+| 0.8.0 | LOT-26 | API/security/migration freeze |
+| 1.0.0rc1 | LOT-27 | Release candidate |
+| 1.0.0 | LOT-28 | Stable |
+
+---
+
+# 24. Current lot count
+
+The historical numbering remains:
+
+~~~text
+LOT-00 → LOT-28
+29 total lots
+
+Completed historical baseline
+    LOT-00 → LOT-10
+    11 lots
+
+Remaining revised roadmap
+    LOT-11 → LOT-28
+    18 lots
+~~~
+
+The historical completion percentage remains 11 / 29 by lot count, but future work is now judged against the revised V2 acceptance criteria rather than the old roadmap text.
+
+---
+
+# 25. Definition of Done for every remaining lot
+
+A lot is DONE only when all applicable conditions hold:
+
+- domain/API intent matches target architecture;
+- implementation is typed;
+- public and internal boundaries are explicit;
+- architecture-import tests pass;
+- unit tests pass;
+- property tests pass where semantic invariants justify them;
+- adapter conformance passes where applicable;
+- cross-engine comparison passes where applicable;
+- structured failures are used;
+- security rules are covered;
+- optional dependency isolation is preserved;
+- Ruff/format/mypy pass;
+- package builds;
+- installed-wheel smoke passes;
+- docs/examples are updated;
+- acceptance evidence is recorded;
+- no unresolved semantic ambiguity is hidden.
+
+---
+
+# 26. Roadmap governance
+
+This revised roadmap is normative for LOT-11 through LOT-28.
+
+The older ROADMAP_LOT_11_TO_1_0.md remains historical evidence of the first planning freeze but no longer controls future implementation where it conflicts with V2 architecture.
+
+Changes to:
+
+~~~text
+lot ordering
+public model
+1.0 acceptance
+sibling boundaries
+retry ownership
+serialization safety
+engine-neutrality
+~~~
+
+require an explicit roadmap/specification amendment.
+
+---
+
+# 27. Final roadmap statement
+
+The path to PyTransformKit 1.0 is now:
+
+~~~text
+migrate authoring/runtime vocabulary
+        ↓
+complete transformation semantics
+        ↓
+make lineage and runtime evidence first-class
+        ↓
+qualify additional engines and bounded I/O
+        ↓
+freeze portable IR and optimizer
+        ↓
+stabilize extensions
+        ↓
+prove cross-engine semantics
+        ↓
+freeze public API
+        ↓
+qualify built artifacts
+        ↓
+1.0.0
+~~~
+
+> **PyTransformKit reaches 1.0 by stabilizing transformation meaning first and execution backends second, while preserving a strict boundary against ingestion and workflow ownership.**

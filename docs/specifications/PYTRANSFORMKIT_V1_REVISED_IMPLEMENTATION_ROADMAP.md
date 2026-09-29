@@ -233,6 +233,8 @@ LOT-11 is closed by the 0.2.0a1 implementation baseline:
 
 **Target milestone:** 0.2.0a2
 
+**Status:** DONE — implemented and qualified on 2026-09-29
+
 ## Scope
 
 Implement:
@@ -265,6 +267,26 @@ Extend the Expression AST with a typed aggregate context without introducing eng
 - grouping dependencies appear in lineage;
 - aggregate capabilities are advertised explicitly;
 - Pandas and Polars return equivalent normalized logical results.
+
+## Implementation evidence
+
+LOT-12 is closed by the 0.2.0a2 implementation baseline:
+
+- AggregateExpression and AggregateFunction define a dedicated aggregate context;
+- the public function DSL exposes count, count_distinct, sum, min, max, mean and avg;
+- AggregateTransformation carries ordered grouping expressions and named metrics;
+- aggregate type inference distinguishes row-level and aggregate contexts;
+- nested aggregate expressions and row/aggregate mixing fail during logical validation;
+- COUNT returns non-null Int64 semantics;
+- SUM, MIN, MAX and MEAN preserve explicit nullable aggregate semantics;
+- TransformationPlanBuilder.aggregate authors grouped and global aggregates;
+- grouped output Schemas are deterministic, including deterministic names for derived grouping expressions;
+- aggregate field dependencies are extractable from the Expression AST in preparation for LOT-16 lineage;
+- Pandas and Polars both advertise AGGREGATE capability;
+- grouped/global aggregation is implemented for both adapters;
+- NULL groups, all-null metrics, count-distinct, empty global inputs and grouping expressions are covered by cross-engine tests;
+- Python 3.11, 3.12, 3.13 and 3.14 test matrices pass;
+- Ruff lint, Ruff format, mypy, package build, wheel install, Pandas contract, Polars contract and cross-engine contract jobs pass.
 
 ---
 
@@ -957,15 +979,15 @@ LOT-00 → LOT-28
 29 total lots
 
 Completed implementation
-    LOT-00 → LOT-11
-    12 lots
+    LOT-00 → LOT-12
+    13 lots
 
 Remaining revised roadmap
-    LOT-12 → LOT-28
-    17 lots
+    LOT-13 → LOT-28
+    16 lots
 ~~~
 
-The current completion count is 12 / 29 lots. Future work continues to be judged against the revised V2 acceptance criteria rather than the old roadmap text.
+The current completion count is 13 / 29 lots. Future work continues to be judged against the revised V2 acceptance criteria rather than the old roadmap text.
 
 ---
 

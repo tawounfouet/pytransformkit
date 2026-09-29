@@ -1,5 +1,9 @@
 """Engine-independent logical Transformation model."""
 
+from pytransformkit.domain.transformations.aggregation import (
+    AggregateMetric,
+    AggregateTransformation,
+)
 from pytransformkit.domain.transformations.base import TransformationSpec
 from pytransformkit.domain.transformations.casting import (
     CastPolicy,
@@ -51,6 +55,8 @@ from pytransformkit.domain.transformations.sorting import (
 )
 
 __all__ = [
+    "AggregateMetric",
+    "AggregateTransformation",
     "CardinalityEffect",
     "CastPolicy",
     "CastTransformation",

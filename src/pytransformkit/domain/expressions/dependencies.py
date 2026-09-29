@@ -1,6 +1,7 @@
 """Logical field dependency extraction from Expressions."""
 
 from pytransformkit.domain.data.field_path import FieldPath
+from pytransformkit.domain.expressions.aggregate import AggregateExpression
 from pytransformkit.domain.expressions.base import Expression
 from pytransformkit.domain.expressions.binary import BinaryExpression
 from pytransformkit.domain.expressions.functions import FunctionCall
@@ -21,6 +22,11 @@ class ExpressionDependencyExtractor:
         self,
         expression: Expression,
     ) -> frozenset[FieldPath]:
+        if isinstance(expression, AggregateExpression):
+            if expression.argument is None:
+                return frozenset()
+            return self.extract(expression.argument)
+
         if isinstance(expression, ColumnReference):
             return frozenset({expression.path})
 

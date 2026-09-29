@@ -5,7 +5,14 @@ from dataclasses import replace
 from pytransformkit.domain.data.data_types import BooleanType
 from pytransformkit.domain.data.field import Field
 from pytransformkit.domain.data.schema import Schema
-from pytransformkit.domain.expressions.typing import ExpressionTypeResolver
+from pytransformkit.domain.expressions.typing import (
+    AggregateExpressionTypeResolver,
+    ExpressionTypeResolver,
+)
+from pytransformkit.domain.transformations.aggregation import (
+    AggregateTransformation,
+    group_output_name,
+)
 from pytransformkit.domain.transformations.base import TransformationSpec
 from pytransformkit.domain.transformations.casting import (
     CastPolicy,
@@ -49,9 +56,14 @@ class OutputSchemaResolver:
     def __init__(
         self,
         expression_type_resolver: ExpressionTypeResolver | None = None,
+        aggregate_type_resolver: AggregateExpressionTypeResolver | None = None,
     ) -> None:
         self._expression_type_resolver = (
             expression_type_resolver or ExpressionTypeResolver()
+        )
+        self._aggregate_type_resolver = (
+            aggregate_type_resolver
+            or AggregateExpressionTypeResolver(self._expression_type_resolver)
         )
 
     def resolve(
@@ -124,6 +136,12 @@ class OutputSchemaResolver:
 
             return input_schema.append(derived_field)
 
+        if isinstance(transformation, AggregateTransformation):
+            return self._resolve_aggregate(
+                transformation,
+                input_schema,
+            )
+
         if isinstance(transformation, SortTransformation):
             for key in transformation.keys:
                 input_schema.field(str(key.field))
@@ -181,6 +199,49 @@ class OutputSchemaResolver:
             "No multi-input output Schema resolver exists for "
             f"{type(transformation).__name__!r}."
         )
+
+    def _resolve_aggregate(
+        self,
+        transformation: AggregateTransformation,
+        input_schema: Schema,
+    ) -> Schema:
+        fields: list[Field] = []
+        used_names: set[str] = set()
+
+        for index, expression in enumerate(transformation.group_by):
+            expression_type = self._expression_type_resolver.resolve(
+                expression,
+                input_schema,
+            )
+            name = group_output_name(expression, index)
+            if name in used_names:
+                raise FieldCollisionError(name)
+            fields.append(
+                Field(
+                    name=name,
+                    data_type=expression_type.data_type,
+                    nullable=expression_type.nullable,
+                )
+            )
+            used_names.add(name)
+
+        for metric in transformation.metrics:
+            if metric.name in used_names:
+                raise FieldCollisionError(metric.name)
+            expression_type = self._aggregate_type_resolver.resolve(
+                metric.expression,
+                input_schema,
+            )
+            fields.append(
+                Field(
+                    name=metric.name,
+                    data_type=expression_type.data_type,
+                    nullable=expression_type.nullable,
+                )
+            )
+            used_names.add(metric.name)
+
+        return Schema(tuple(fields))
 
     @staticmethod
     def _resolve_join(

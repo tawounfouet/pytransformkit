@@ -30,8 +30,16 @@ from pytransformkit.domain.data.data_types import (
 )
 from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.engines import EngineCapability, EngineDescriptor
+from pytransformkit.domain.expressions.aggregate import (
+    AggregateExpression,
+    AggregateFunction,
+)
 from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
 from pytransformkit.domain.pipelines.plan import LogicalPlan
+from pytransformkit.domain.transformations.aggregation import (
+    AggregateTransformation,
+    group_output_name,
+)
 from pytransformkit.domain.transformations.base import TransformationSpec
 from pytransformkit.domain.transformations.casting import (
     CastPolicy,
@@ -81,6 +89,7 @@ _PANDAS_CAPABILITIES = frozenset(
         EngineCapability.DERIVE,
         EngineCapability.SORT,
         EngineCapability.DEDUPLICATE,
+        EngineCapability.AGGREGATE,
         EngineCapability.JOIN_INNER,
         EngineCapability.JOIN_LEFT,
         EngineCapability.JOIN_RIGHT,
@@ -179,6 +188,7 @@ class PandasAdapter:
                     values[node.node_id] = self._execute_transformation(
                         inputs[0],
                         node.transformation,
+                        node.output_schema,
                     )
                 else:
                     values[node.node_id] = self._execute_relational(
@@ -228,6 +238,7 @@ class PandasAdapter:
         self,
         dataframe: Any,
         transformation: TransformationSpec,
+        output_schema: Schema,
     ) -> Any:
         if isinstance(transformation, SelectTransformation):
             names = [str(field) for field in transformation.fields]
@@ -269,6 +280,13 @@ class PandasAdapter:
             )
             return dataframe.assign(**{transformation.field_name: value})
 
+        if isinstance(transformation, AggregateTransformation):
+            return self._execute_aggregate(
+                dataframe,
+                transformation,
+                output_schema,
+            )
+
         if isinstance(transformation, SortTransformation):
             return _sort(dataframe, transformation)
 
@@ -283,6 +301,118 @@ class PandasAdapter:
             "Pandas execution is not implemented for "
             f"{type(transformation).__name__!r}."
         )
+
+    def _execute_aggregate(
+        self,
+        dataframe: Any,
+        transformation: AggregateTransformation,
+        output_schema: Schema,
+    ) -> Any:
+        work = dataframe.copy()
+        group_columns: list[str] = []
+        existing = {str(column) for column in work.columns}
+
+        for index, expression in enumerate(transformation.group_by):
+            internal_name = _pandas_internal_name(
+                existing,
+                "group",
+                index,
+            )
+            existing.add(internal_name)
+            work[internal_name] = self._expression_compiler.compile(
+                expression,
+                dataframe,
+            )
+            group_columns.append(internal_name)
+
+        metric_columns: dict[str, str | None] = {}
+        for index, metric in enumerate(transformation.metrics):
+            argument = metric.expression.argument
+            if argument is None:
+                metric_columns[metric.name] = None
+                continue
+            internal_name = _pandas_internal_name(
+                existing,
+                "metric",
+                index,
+            )
+            existing.add(internal_name)
+            work[internal_name] = self._expression_compiler.compile(
+                argument,
+                dataframe,
+            )
+            metric_columns[metric.name] = internal_name
+
+        if group_columns:
+            named_aggregations: dict[str, Any] = {}
+            for metric in transformation.metrics:
+                column = metric_columns[metric.name]
+                if column is None:
+                    internal_name = _pandas_internal_name(
+                        existing,
+                        "row_count",
+                        len(existing),
+                    )
+                    existing.add(internal_name)
+                    work[internal_name] = 1
+                    column = internal_name
+                named_aggregations[metric.name] = pd.NamedAgg(
+                    column=column,
+                    aggfunc=_pandas_group_aggfunc(metric.expression),
+                )
+
+            result = work.groupby(
+                group_columns,
+                dropna=False,
+                sort=False,
+                as_index=False,
+            ).agg(**named_aggregations)
+            result = result.rename(
+                columns={
+                    internal_name: group_output_name(expression, index)
+                    for index, (internal_name, expression) in enumerate(
+                        zip(
+                            group_columns,
+                            transformation.group_by,
+                            strict=True,
+                        )
+                    )
+                }
+            )
+        else:
+            row: dict[str, object] = {}
+            for metric in transformation.metrics:
+                column = metric_columns[metric.name]
+                series = None if column is None else work[column]
+                row[metric.name] = _pandas_scalar_aggregate(
+                    dataframe,
+                    series,
+                    metric.expression,
+                )
+            result = pd.DataFrame([row])
+
+        result = result.loc[:, list(output_schema.names())]
+        return self._coerce_output_schema(
+            result,
+            output_schema,
+        )
+
+    def _coerce_output_schema(
+        self,
+        dataframe: Any,
+        output_schema: Schema,
+    ) -> Any:
+        result = dataframe.copy()
+        for field in output_schema.fields:
+            try:
+                native_type = self._type_mapper.to_native(
+                    field.data_type,
+                    nullable=field.nullable,
+                )
+            except AdapterError:
+                continue
+            result[field.name] = result[field.name].astype(native_type)
+        return result
 
     def _execute_relational(
         self,
@@ -377,6 +507,61 @@ class PandasAdapter:
         raise AdapterError(
             f"Pandas casting is not implemented for {type(data_type).__name__!r}."
         )
+
+
+def _pandas_internal_name(
+    existing: set[str],
+    kind: str,
+    index: int,
+) -> str:
+    candidate = f"__pytransformkit_{kind}_{index}__"
+    while candidate in existing:
+        candidate = f"_{candidate}"
+    return candidate
+
+
+def _pandas_group_aggfunc(
+    expression: AggregateExpression,
+) -> Any:
+    if expression.function is AggregateFunction.COUNT:
+        return (lambda values: len(values)) if expression.argument is None else "count"
+    if expression.function is AggregateFunction.COUNT_DISTINCT:
+        return lambda values: values.nunique(dropna=True)
+    if expression.function is AggregateFunction.SUM:
+        return lambda values: values.sum(min_count=1)
+    if expression.function is AggregateFunction.MIN:
+        return "min"
+    if expression.function is AggregateFunction.MAX:
+        return "max"
+    if expression.function is AggregateFunction.MEAN:
+        return "mean"
+    raise AdapterError(f"Unsupported aggregate function {expression.function.value!r}.")
+
+
+def _pandas_scalar_aggregate(
+    dataframe: Any,
+    series: Any | None,
+    expression: AggregateExpression,
+) -> object:
+    if expression.function is AggregateFunction.COUNT:
+        if series is None:
+            return len(dataframe)
+        return int(series.count())
+    if series is None:
+        raise AdapterError(
+            f"{expression.function.value} requires an aggregate argument."
+        )
+    if expression.function is AggregateFunction.COUNT_DISTINCT:
+        return int(series.nunique(dropna=True))
+    if expression.function is AggregateFunction.SUM:
+        return series.sum(min_count=1)
+    if expression.function is AggregateFunction.MIN:
+        return series.min()
+    if expression.function is AggregateFunction.MAX:
+        return series.max()
+    if expression.function is AggregateFunction.MEAN:
+        return series.mean()
+    raise AdapterError(f"Unsupported aggregate function {expression.function.value!r}.")
 
 
 def _join(
@@ -544,4 +729,4 @@ def _package_version() -> str:
     try:
         return version("pytransformkit")
     except PackageNotFoundError:
-        return "0.2.0a1"
+        return "0.2.0a2"

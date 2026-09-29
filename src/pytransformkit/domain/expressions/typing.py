@@ -19,6 +19,10 @@ from pytransformkit.domain.data.data_types import (
     UnknownType,
 )
 from pytransformkit.domain.data.schema import Schema
+from pytransformkit.domain.expressions.aggregate import (
+    AggregateExpression,
+    AggregateFunction,
+)
 from pytransformkit.domain.expressions.base import Expression
 from pytransformkit.domain.expressions.binary import BinaryExpression
 from pytransformkit.domain.expressions.functions import FunctionCall
@@ -45,7 +49,7 @@ class ExpressionType:
 
 
 class ExpressionTypeResolver:
-    """Resolve Expression types from an input logical Schema."""
+    """Resolve row-level Expression types from an input logical Schema."""
 
     _COMPARISON_OPERATORS = frozenset(
         {
@@ -77,6 +81,12 @@ class ExpressionTypeResolver:
         expression: Expression,
         schema: Schema,
     ) -> ExpressionType:
+        if isinstance(expression, AggregateExpression):
+            raise ExpressionTypeError(
+                "Aggregate Expressions are only valid inside "
+                "AggregateTransformation metric context."
+            )
+
         if isinstance(expression, ColumnReference):
             field = schema.field(str(expression.path))
             return ExpressionType(
@@ -228,6 +238,74 @@ class ExpressionTypeResolver:
         raise FunctionNotFoundError(name)
 
 
+class AggregateExpressionTypeResolver:
+    """Resolve one aggregate Expression in aggregate metric context."""
+
+    def __init__(
+        self,
+        row_resolver: ExpressionTypeResolver | None = None,
+    ) -> None:
+        self._row_resolver = row_resolver or ExpressionTypeResolver()
+
+    def resolve(
+        self,
+        expression: AggregateExpression,
+        schema: Schema,
+    ) -> ExpressionType:
+        if not isinstance(expression, AggregateExpression):
+            raise TypeError(
+                "AggregateExpressionTypeResolver requires an AggregateExpression."
+            )
+
+        if expression.function is AggregateFunction.COUNT:
+            if expression.argument is not None:
+                self._row_resolver.resolve(expression.argument, schema)
+            return ExpressionType(IntegerType(bits=64), False)
+
+        if expression.argument is None:
+            raise ExpressionTypeError(
+                f"{expression.function.value} requires an aggregate argument."
+            )
+
+        argument = self._row_resolver.resolve(
+            expression.argument,
+            schema,
+        )
+
+        if expression.function is AggregateFunction.COUNT_DISTINCT:
+            return ExpressionType(IntegerType(bits=64), False)
+
+        if expression.function is AggregateFunction.SUM:
+            _require_numeric(argument, "sum")
+            if isinstance(argument.data_type, IntegerType):
+                return ExpressionType(
+                    IntegerType(
+                        bits=64,
+                        signed=argument.data_type.signed,
+                    ),
+                    True,
+                )
+            return ExpressionType(argument.data_type, True)
+
+        if expression.function in {
+            AggregateFunction.MIN,
+            AggregateFunction.MAX,
+        }:
+            if isinstance(argument.data_type, UnknownType):
+                raise ExpressionTypeError(
+                    f"{expression.function.value} requires a known logical DataType."
+                )
+            return ExpressionType(argument.data_type, True)
+
+        if expression.function is AggregateFunction.MEAN:
+            _require_numeric(argument, "mean")
+            return ExpressionType(FloatType(bits=64), True)
+
+        raise ExpressionTypeError(
+            f"Unsupported aggregate function {expression.function.value!r}."
+        )
+
+
 def _require_boolean(
     expression_type: ExpressionType,
     side: str,
@@ -236,6 +314,17 @@ def _require_boolean(
         raise ExpressionTypeError(
             f"Boolean operation requires a Boolean {side} Expression."
         )
+
+
+def _require_numeric(
+    expression_type: ExpressionType,
+    function_name: str,
+) -> None:
+    if not isinstance(
+        expression_type.data_type,
+        (IntegerType, FloatType, DecimalType),
+    ):
+        raise ExpressionTypeError(f"{function_name} requires a numeric Expression.")
 
 
 def _resolve_numeric_result(

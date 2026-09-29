@@ -22,8 +22,16 @@ from pytransformkit.application.execution.results import (
 from pytransformkit.application.ports.engines import PhysicalHandle
 from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.engines import EngineCapability, EngineDescriptor
+from pytransformkit.domain.expressions.aggregate import (
+    AggregateExpression,
+    AggregateFunction,
+)
 from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
 from pytransformkit.domain.pipelines.plan import LogicalPlan
+from pytransformkit.domain.transformations.aggregation import (
+    AggregateTransformation,
+    group_output_name,
+)
 from pytransformkit.domain.transformations.base import TransformationSpec
 from pytransformkit.domain.transformations.casting import (
     CastPolicy,
@@ -73,6 +81,7 @@ _POLARS_CAPABILITIES = frozenset(
         EngineCapability.DERIVE,
         EngineCapability.SORT,
         EngineCapability.DEDUPLICATE,
+        EngineCapability.AGGREGATE,
         EngineCapability.JOIN_INNER,
         EngineCapability.JOIN_LEFT,
         EngineCapability.JOIN_RIGHT,
@@ -168,6 +177,7 @@ class PolarsAdapter:
                     values[node.node_id] = self._execute_transformation(
                         inputs[0],
                         node.transformation,
+                        node.output_schema,
                     )
                 else:
                     values[node.node_id] = self._execute_relational(
@@ -235,6 +245,7 @@ class PolarsAdapter:
         self,
         frame: Any,
         transformation: TransformationSpec,
+        output_schema: Schema,
     ) -> Any:
         if isinstance(transformation, SelectTransformation):
             return frame.select([str(field) for field in transformation.fields])
@@ -275,6 +286,13 @@ class PolarsAdapter:
             )
             return frame.with_columns(expression.alias(transformation.field_name))
 
+        if isinstance(transformation, AggregateTransformation):
+            return self._execute_aggregate(
+                frame,
+                transformation,
+                output_schema,
+            )
+
         if isinstance(transformation, SortTransformation):
             return frame.sort(
                 by=[str(key.field) for key in transformation.keys],
@@ -296,6 +314,91 @@ class PolarsAdapter:
             "Polars execution is not implemented for "
             f"{type(transformation).__name__!r}."
         )
+
+    def _execute_aggregate(
+        self,
+        frame: Any,
+        transformation: AggregateTransformation,
+        output_schema: Schema,
+    ) -> Any:
+        existing = _polars_columns(frame)
+        group_columns: list[str] = []
+        prepared: list[Any] = []
+        metric_columns: dict[str, str | None] = {}
+
+        for index, expression in enumerate(transformation.group_by):
+            internal_name = _polars_internal_name(
+                existing,
+                "group",
+                index,
+            )
+            existing.add(internal_name)
+            prepared.append(
+                self._expression_compiler.compile(
+                    expression,
+                    frame,
+                ).alias(internal_name)
+            )
+            group_columns.append(internal_name)
+
+        for index, metric in enumerate(transformation.metrics):
+            argument = metric.expression.argument
+            if argument is None:
+                metric_columns[metric.name] = None
+                continue
+            internal_name = _polars_internal_name(
+                existing,
+                "metric",
+                index,
+            )
+            existing.add(internal_name)
+            prepared.append(
+                self._expression_compiler.compile(
+                    argument,
+                    frame,
+                ).alias(internal_name)
+            )
+            metric_columns[metric.name] = internal_name
+
+        work = frame.with_columns(prepared) if prepared else frame
+        aggregate_expressions = [
+            _polars_aggregate_expression(
+                metric.expression,
+                metric_columns[metric.name],
+            ).alias(metric.name)
+            for metric in transformation.metrics
+        ]
+
+        if group_columns:
+            result = work.group_by(
+                group_columns,
+                maintain_order=True,
+            ).agg(aggregate_expressions)
+            result = result.rename(
+                {
+                    internal_name: group_output_name(expression, index)
+                    for index, (internal_name, expression) in enumerate(
+                        zip(
+                            group_columns,
+                            transformation.group_by,
+                            strict=True,
+                        )
+                    )
+                }
+            )
+        else:
+            result = work.select(aggregate_expressions)
+
+        casts = [
+            pl.col(field.name)
+            .cast(
+                self._type_mapper.to_native(field.data_type),
+                strict=True,
+            )
+            .alias(field.name)
+            for field in output_schema.fields
+        ]
+        return result.with_columns(casts).select(list(output_schema.names()))
 
     def _execute_relational(
         self,
@@ -340,6 +443,53 @@ class PolarsAdapter:
 
         expected = list(output_schema.names())
         return result.select(expected)
+
+
+def _polars_columns(frame: Any) -> set[str]:
+    if isinstance(frame, pl.LazyFrame):
+        return set(frame.collect_schema().names())
+    return set(frame.columns)
+
+
+def _polars_internal_name(
+    existing: set[str],
+    kind: str,
+    index: int,
+) -> str:
+    candidate = f"__pytransformkit_{kind}_{index}__"
+    while candidate in existing:
+        candidate = f"_{candidate}"
+    return candidate
+
+
+def _polars_aggregate_expression(
+    expression: AggregateExpression,
+    column: str | None,
+) -> Any:
+    if expression.function is AggregateFunction.COUNT:
+        if column is None:
+            return pl.len().cast(pl.Int64)
+        return pl.col(column).count().cast(pl.Int64)
+
+    if column is None:
+        raise AdapterError(
+            f"{expression.function.value} requires an aggregate argument."
+        )
+
+    value = pl.col(column)
+
+    if expression.function is AggregateFunction.COUNT_DISTINCT:
+        return value.drop_nulls().n_unique().cast(pl.Int64)
+    if expression.function is AggregateFunction.SUM:
+        return pl.when(value.count() == 0).then(pl.lit(None)).otherwise(value.sum())
+    if expression.function is AggregateFunction.MIN:
+        return value.min()
+    if expression.function is AggregateFunction.MAX:
+        return value.max()
+    if expression.function is AggregateFunction.MEAN:
+        return value.mean().cast(pl.Float64)
+
+    raise AdapterError(f"Unsupported aggregate function {expression.function.value!r}.")
 
 
 def _join(
@@ -393,4 +543,4 @@ def _package_version() -> str:
     try:
         return version("pytransformkit")
     except PackageNotFoundError:
-        return "0.2.0a1"
+        return "0.2.0a2"

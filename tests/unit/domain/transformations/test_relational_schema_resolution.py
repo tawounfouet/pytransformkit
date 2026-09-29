@@ -100,11 +100,7 @@ def test_semi_and_anti_join_keep_left_schema() -> None:
 
 
 def test_join_requires_compatible_key_types() -> None:
-    incompatible = Schema(
-        fields=(
-            Field("customer_id", StringType(), nullable=False),
-        )
-    )
+    incompatible = Schema(fields=(Field("customer_id", StringType(), nullable=False),))
 
     with pytest.raises(InvalidTransformationError, match="types"):
         OutputSchemaResolver().resolve_many(

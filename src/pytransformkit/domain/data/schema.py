@@ -5,7 +5,9 @@ from __future__ import annotations
 from collections.abc import Iterator, Mapping
 from dataclasses import dataclass, replace
 
+from pytransformkit.domain.data.data_types import StructType
 from pytransformkit.domain.data.field import Field
+from pytransformkit.domain.data.field_path import FieldPath
 from pytransformkit.errors.schema import (
     DuplicateFieldError,
     FieldCollisionError,
@@ -51,6 +53,32 @@ class Schema:
             if field.name == name:
                 return field
         raise FieldNotFoundError(name)
+
+    def resolve_path(self, path: FieldPath | str) -> Field:
+        """Resolve a top-level or nested Struct field path."""
+        field_path = path if isinstance(path, FieldPath) else FieldPath.of(path)
+        root = self.field(field_path.parts[0])
+        if len(field_path.parts) == 1:
+            return root
+
+        current_type = root.data_type
+        nullable = root.nullable
+
+        for part in field_path.parts[1:]:
+            if not isinstance(current_type, StructType):
+                raise FieldNotFoundError(str(field_path))
+            try:
+                nested = current_type.field(part)
+            except KeyError as error:
+                raise FieldNotFoundError(str(field_path)) from error
+            current_type = nested.data_type
+            nullable = nullable or nested.nullable
+
+        return Field(
+            name=field_path.name,
+            data_type=current_type,
+            nullable=nullable,
+        )
 
     def select(self, names: tuple[str, ...]) -> Schema:
         """Create a Schema containing fields in the requested order."""

@@ -1,4 +1,4 @@
-"""Engine and adapter related PyTransformKit errors."""
+"""Engine, binding and adapter related PyTransformKit errors."""
 
 from typing import ClassVar
 
@@ -44,6 +44,18 @@ class AdapterError(EngineError):
     """Base class for physical engine adapter failures."""
 
     error_code: ClassVar[ErrorCode] = ErrorCode("PTK-ENGINE-100")
+
+
+class BindingError(PyTransformKitError):
+    """Raised when logical/physical runtime bindings are invalid."""
+
+    error_code: ClassVar[ErrorCode] = ErrorCode("PTK-BIND-001")
+
+
+class ResourceResolutionError(BindingError):
+    """Raised when a portable resource cannot be resolved for execution."""
+
+    error_code: ClassVar[ErrorCode] = ErrorCode("PTK-BIND-002")
 
 
 class ExecutionError(PyTransformKitError):

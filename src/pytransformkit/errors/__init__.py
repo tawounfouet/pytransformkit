@@ -4,9 +4,11 @@ from pytransformkit.errors.base import PyTransformKitError
 from pytransformkit.errors.codes import ErrorCode
 from pytransformkit.errors.engine import (
     AdapterError,
+    BindingError,
     EngineError,
     EngineNotFoundError,
     ExecutionError,
+    ResourceResolutionError,
     UnsupportedEngineCapabilityError,
 )
 from pytransformkit.errors.expression import (
@@ -35,6 +37,7 @@ from pytransformkit.errors.transformation import (
 
 __all__ = [
     "AdapterError",
+    "BindingError",
     "DuplicateFieldError",
     "EngineError",
     "EngineNotFoundError",
@@ -52,6 +55,7 @@ __all__ = [
     "PipelineError",
     "PipelineNodeNotFoundError",
     "PyTransformKitError",
+    "ResourceResolutionError",
     "SchemaError",
     "TransformationError",
     "UnsupportedEngineCapabilityError",

@@ -19,6 +19,13 @@ from pytransformkit.domain.transformations.projection import (
     RenameTransformation,
     SelectTransformation,
 )
+from pytransformkit.domain.transformations.relational import (
+    ExceptTransformation,
+    IntersectTransformation,
+    JoinTransformation,
+    JoinType,
+    UnionTransformation,
+)
 from pytransformkit.domain.transformations.sorting import SortTransformation
 from pytransformkit.errors.engine import UnsupportedEngineCapabilityError
 from pytransformkit.errors.transformation import UnsupportedTransformationError
@@ -37,7 +44,20 @@ _CAPABILITY_BY_TRANSFORMATION: tuple[
     (DeriveTransformation, EngineCapability.DERIVE),
     (SortTransformation, EngineCapability.SORT),
     (DeduplicateTransformation, EngineCapability.DEDUPLICATE),
+    (UnionTransformation, EngineCapability.UNION),
+    (IntersectTransformation, EngineCapability.INTERSECT),
+    (ExceptTransformation, EngineCapability.EXCEPT),
 )
+
+_JOIN_CAPABILITY: dict[JoinType, EngineCapability] = {
+    JoinType.INNER: EngineCapability.JOIN_INNER,
+    JoinType.LEFT: EngineCapability.JOIN_LEFT,
+    JoinType.RIGHT: EngineCapability.JOIN_RIGHT,
+    JoinType.FULL: EngineCapability.JOIN_FULL,
+    JoinType.SEMI: EngineCapability.JOIN_SEMI,
+    JoinType.ANTI: EngineCapability.JOIN_ANTI,
+    JoinType.CROSS: EngineCapability.JOIN_CROSS,
+}
 
 
 class EngineCapabilityAnalyzer:
@@ -90,6 +110,9 @@ class EngineCompatibilityService:
 def _capability_for(
     transformation: TransformationSpec,
 ) -> EngineCapability:
+    if isinstance(transformation, JoinTransformation):
+        return _JOIN_CAPABILITY[transformation.how]
+
     for transformation_type, capability in _CAPABILITY_BY_TRANSFORMATION:
         if isinstance(transformation, transformation_type):
             return capability

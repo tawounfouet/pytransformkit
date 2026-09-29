@@ -27,10 +27,18 @@ from pytransformkit.domain.transformations.projection import (
     RenameTransformation,
     SelectTransformation,
 )
+from pytransformkit.domain.transformations.relational import (
+    ExceptTransformation,
+    IntersectTransformation,
+    JoinTransformation,
+    JoinType,
+    UnionTransformation,
+)
 from pytransformkit.domain.transformations.sorting import SortTransformation
 from pytransformkit.errors.expression import ExpressionTypeError
 from pytransformkit.errors.schema import FieldCollisionError
 from pytransformkit.errors.transformation import (
+    InvalidTransformationError,
     UnsupportedTransformationError,
 )
 
@@ -51,6 +59,7 @@ class OutputSchemaResolver:
         transformation: TransformationSpec,
         input_schema: Schema,
     ) -> Schema:
+        """Resolve one-input transformation schema."""
         if isinstance(transformation, SelectTransformation):
             return input_schema.select(
                 tuple(str(field) for field in transformation.fields)
@@ -128,3 +137,132 @@ class OutputSchemaResolver:
         raise UnsupportedTransformationError(
             f"No output Schema resolver exists for {type(transformation).__name__!r}."
         )
+
+    def resolve_many(
+        self,
+        transformation: TransformationSpec,
+        input_schemas: tuple[Schema, ...],
+    ) -> Schema:
+        """Resolve a multi-input transformation schema."""
+        if not isinstance(input_schemas, tuple):
+            raise TypeError("input_schemas must be provided as a tuple.")
+
+        if isinstance(transformation, JoinTransformation):
+            if len(input_schemas) != 2:
+                raise InvalidTransformationError(
+                    "JoinTransformation requires exactly two input Schemas."
+                )
+            return self._resolve_join(
+                transformation,
+                input_schemas[0],
+                input_schemas[1],
+            )
+
+        if isinstance(
+            transformation,
+            (
+                UnionTransformation,
+                IntersectTransformation,
+                ExceptTransformation,
+            ),
+        ):
+            if len(input_schemas) != 2:
+                raise InvalidTransformationError(
+                    f"{type(transformation).__name__} requires exactly "
+                    "two input Schemas."
+                )
+            _validate_set_compatible(input_schemas[0], input_schemas[1])
+            return input_schemas[0]
+
+        if len(input_schemas) == 1:
+            return self.resolve(transformation, input_schemas[0])
+
+        raise UnsupportedTransformationError(
+            "No multi-input output Schema resolver exists for "
+            f"{type(transformation).__name__!r}."
+        )
+
+    @staticmethod
+    def _resolve_join(
+        transformation: JoinTransformation,
+        left: Schema,
+        right: Schema,
+    ) -> Schema:
+        if transformation.how is not JoinType.CROSS:
+            for key in transformation.keys:
+                left_field = left.field(str(key.left))
+                right_field = right.field(str(key.right))
+                if left_field.data_type != right_field.data_type:
+                    raise InvalidTransformationError(
+                        "Join key types must match exactly: "
+                        f"{key.left!s}={left_field.data_type!r}, "
+                        f"{key.right!s}={right_field.data_type!r}."
+                    )
+
+        if transformation.how in {JoinType.SEMI, JoinType.ANTI}:
+            return left
+
+        left_nullable = transformation.how in {
+            JoinType.RIGHT,
+            JoinType.FULL,
+        }
+        right_nullable = transformation.how in {
+            JoinType.LEFT,
+            JoinType.FULL,
+        }
+
+        fields: list[Field] = [
+            replace(field, nullable=True) if left_nullable else field
+            for field in left.fields
+        ]
+        used_names = {field.name for field in fields}
+
+        right_join_keys = {str(key.right) for key in transformation.keys}
+
+        for field in right.fields:
+            if field.name in right_join_keys:
+                continue
+
+            output_name = field.name
+            if output_name in used_names:
+                output_name = f"{output_name}{transformation.right_suffix}"
+            if output_name in used_names:
+                raise FieldCollisionError(output_name)
+
+            output_field = field
+            if output_name != field.name or right_nullable:
+                output_field = replace(
+                    field,
+                    name=output_name,
+                    nullable=(True if right_nullable else field.nullable),
+                )
+            fields.append(output_field)
+            used_names.add(output_name)
+
+        return Schema(tuple(fields))
+
+
+def _validate_set_compatible(left: Schema, right: Schema) -> None:
+    if len(left.fields) != len(right.fields):
+        raise InvalidTransformationError(
+            "Set operations require Schemas with the same field count."
+        )
+
+    for index, (left_field, right_field) in enumerate(
+        zip(left.fields, right.fields, strict=True)
+    ):
+        if left_field.name != right_field.name:
+            raise InvalidTransformationError(
+                "Set operations require identical field names and ordering; "
+                f"position {index} differs."
+            )
+        if left_field.data_type != right_field.data_type:
+            raise InvalidTransformationError(
+                "Set operations require identical logical DataTypes; "
+                f"field {left_field.name!r} differs."
+            )
+        if left_field.nullable != right_field.nullable:
+            raise InvalidTransformationError(
+                "Set operations require identical nullability; "
+                f"field {left_field.name!r} differs."
+            )

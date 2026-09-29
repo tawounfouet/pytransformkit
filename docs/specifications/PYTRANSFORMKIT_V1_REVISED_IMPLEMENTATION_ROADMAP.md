@@ -165,6 +165,8 @@ The migration gate also requires:
 
 **Target milestone:** 0.2.0a1
 
+**Status:** DONE — implemented and qualified on 2026-09-29
+
 ## Scope
 
 Implement the mandatory V1 migration gate and portable multi-input relational semantics.
@@ -208,6 +210,22 @@ Move from the initial pre-1.0 Pipeline implementation to the stable V1 declarati
 - Pandas and Polars pass join/set-operation conformance.
 - No engine-native type enters domain objects.
 - root import remains engine-optional.
+
+## Implementation evidence
+
+LOT-11 is closed by the 0.2.0a1 implementation baseline:
+
+- TransformationPlan and TransformationPlanBuilder are canonical authoring contracts;
+- TransformationCompiler produces deterministic multi-input LogicalPlan values;
+- TransformationRuntime, TransformationExecutionId and TransformationResult are implemented;
+- InputBinding, OutputBinding, ResourceReference and PhysicalHandle boundaries are explicit;
+- Join, Union, Intersect and Except are implemented for Pandas and Polars;
+- join types include inner, left, right, full, semi, anti and cross;
+- NULL join policy and deterministic collision handling are covered by tests;
+- root exports promote the V1 model while legacy Pipeline / RunPipelineService remain compatibility-only;
+- README, Getting Started, script and experimentation notebook use the V1 path;
+- Python 3.11, 3.12, 3.13 and 3.14 tests pass;
+- Ruff lint, Ruff format, mypy, build, Pandas contract, Polars contract and cross-engine contract jobs pass.
 
 ---
 
@@ -938,16 +956,16 @@ The historical numbering remains:
 LOT-00 → LOT-28
 29 total lots
 
-Completed historical baseline
-    LOT-00 → LOT-10
-    11 lots
+Completed implementation
+    LOT-00 → LOT-11
+    12 lots
 
 Remaining revised roadmap
-    LOT-11 → LOT-28
-    18 lots
+    LOT-12 → LOT-28
+    17 lots
 ~~~
 
-The historical completion percentage remains 11 / 29 by lot count, but future work is now judged against the revised V2 acceptance criteria rather than the old roadmap text.
+The current completion count is 12 / 29 lots. Future work continues to be judged against the revised V2 acceptance criteria rather than the old roadmap text.
 
 ---
 

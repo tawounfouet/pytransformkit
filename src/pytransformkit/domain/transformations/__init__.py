@@ -31,6 +31,15 @@ from pytransformkit.domain.transformations.properties import (
     SchemaEffect,
     TransformationProperties,
 )
+from pytransformkit.domain.transformations.relational import (
+    ExceptTransformation,
+    IntersectTransformation,
+    JoinKey,
+    JoinTransformation,
+    JoinType,
+    NullJoinPolicy,
+    UnionTransformation,
+)
 from pytransformkit.domain.transformations.schema_resolution import (
     OutputSchemaResolver,
 )
@@ -51,8 +60,14 @@ __all__ = [
     "Determinism",
     "DistinctTransformation",
     "DropTransformation",
+    "ExceptTransformation",
     "FilterTransformation",
+    "IntersectTransformation",
+    "JoinKey",
+    "JoinTransformation",
+    "JoinType",
     "LimitTransformation",
+    "NullJoinPolicy",
     "NullOrder",
     "OutputSchemaResolver",
     "Portability",
@@ -66,4 +81,5 @@ __all__ = [
     "SortTransformation",
     "TransformationProperties",
     "TransformationSpec",
+    "UnionTransformation",
 ]

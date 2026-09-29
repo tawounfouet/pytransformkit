@@ -134,6 +134,4 @@ def test_aggregate_dependencies_are_row_dependencies() -> None:
 
 def test_aggregate_fingerprint_is_canonical() -> None:
     assert canonical_expression(count()) == "aggregate:count:(*)"
-    assert canonical_expression(sum(col("amount"))).startswith(
-        "aggregate:sum:(column:"
-    )
+    assert canonical_expression(sum(col("amount"))).startswith("aggregate:sum:(column:")

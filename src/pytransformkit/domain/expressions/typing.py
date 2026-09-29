@@ -349,10 +349,10 @@ class WindowExpressionTypeResolver:
 
         validate_window_expression(expression)
 
-        for key in expression.spec.partition_keys:
-            schema.field(str(key))
-        for key in expression.spec.order_keys:
-            schema.field(str(key.field))
+        for partition_key in expression.spec.partition_keys:
+            schema.field(str(partition_key))
+        for order_key in expression.spec.order_keys:
+            schema.field(str(order_key.field))
 
         if (
             expression.function not in self._AGGREGATE_FUNCTIONS

@@ -195,7 +195,7 @@ def _set_plan(operation: str, *, all: bool = False) -> TransformationPlan:
     return builder.output("out", output).build()
 
 
-@pytest.mark.parametrize("how", ["inner", "left"])
+@pytest.mark.parametrize("how", ["inner", "left", "right", "full"])
 def test_join_semantics_match_across_pandas_and_polars(how: str) -> None:
     left = [
         {"customer_id": 1, "status": "ACTIVE"},
@@ -220,6 +220,59 @@ def test_join_semantics_match_across_pandas_and_polars(how: str) -> None:
         "amount",
     }
 
+
+
+@pytest.mark.parametrize("how", ["semi", "anti"])
+def test_semi_and_anti_join_semantics_match_across_engines(
+    how: str,
+) -> None:
+    left = [
+        {"customer_id": 1, "status": "ACTIVE"},
+        {"customer_id": 2, "status": "ACTIVE"},
+        {"customer_id": 3, "status": "INACTIVE"},
+    ]
+    right = [
+        {"customer_id": 1, "status": "PAID", "amount": 10},
+        {"customer_id": 3, "status": "OPEN", "amount": 30},
+    ]
+    plan = _join_plan(how=how)
+
+    pandas_records = _execute_pandas(plan, left, right)
+    polars_records = _execute_polars(plan, left, right)
+
+    assert pandas_records == polars_records
+    assert all(
+        set(record) == {"customer_id", "status"}
+        for record in pandas_records
+    )
+
+
+def test_cross_join_semantics_match_across_engines() -> None:
+    left = [
+        {"customer_id": 1, "status": "ACTIVE"},
+        {"customer_id": 2, "status": "INACTIVE"},
+    ]
+    right = [
+        {"customer_id": 10, "status": "PAID", "amount": 5},
+        {"customer_id": 20, "status": "OPEN", "amount": 8},
+    ]
+
+    builder = TransformationPlan.builder("cross")
+    left_ds = builder.input("left", schema=_left_schema())
+    right_ds = builder.input("right", schema=_right_schema())
+    joined = builder.join(
+        "joined",
+        left=left_ds,
+        right=right_ds,
+        how="cross",
+    )
+    plan = builder.output("out", joined).build()
+
+    pandas_records = _execute_pandas(plan, left, right)
+    polars_records = _execute_polars(plan, left, right)
+
+    assert pandas_records == polars_records
+    assert len(pandas_records) == 4
 
 def test_null_join_policy_match_is_cross_engine_equivalent() -> None:
     left = [

@@ -544,9 +544,7 @@ class PolarsAdapter:
                 output_field.name,
             )
             expressions.append(
-                pl.col(field_name)
-                .struct.field(nested_name)
-                .alias(output_field.name)
+                pl.col(field_name).struct.field(nested_name).alias(output_field.name)
             )
 
         result = frame.with_columns(expressions).drop(field_name)
@@ -623,9 +621,11 @@ def _polars_pivot_aggregate(
     value_field: str,
     category: str,
 ) -> Any:
-    value = pl.when(pl.col(category_field) == category).then(
-        pl.col(value_field)
-    ).otherwise(None)
+    value = (
+        pl.when(pl.col(category_field) == category)
+        .then(pl.col(value_field))
+        .otherwise(None)
+    )
 
     if aggregation is PivotAggregation.COUNT:
         return value.count().cast(pl.Int64)
@@ -639,9 +639,7 @@ def _polars_pivot_aggregate(
     if aggregation is PivotAggregation.MEAN:
         return value.mean().cast(pl.Float64)
 
-    raise AdapterError(
-        f"Unsupported Polars pivot aggregation {aggregation.value!r}."
-    )
+    raise AdapterError(f"Unsupported Polars pivot aggregation {aggregation.value!r}.")
 
 
 def _flatten_nested_name(

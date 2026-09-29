@@ -562,9 +562,7 @@ def _literal_time_unit_argument(
 ) -> str:
     unit = _literal_string_argument(expression, index, label)
     if unit not in {"s", "ms", "us", "ns"}:
-        raise ExpressionTypeError(
-            f"{label} must be one of 's', 'ms', 'us', or 'ns'."
-        )
+        raise ExpressionTypeError(f"{label} must be one of 's', 'ms', 'us', or 'ns'.")
     return unit
 
 

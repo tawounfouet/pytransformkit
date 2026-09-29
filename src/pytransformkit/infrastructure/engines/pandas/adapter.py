@@ -68,6 +68,13 @@ from pytransformkit.domain.transformations.relational import (
     NullJoinPolicy,
     UnionTransformation,
 )
+from pytransformkit.domain.transformations.reshaping import (
+    ExplodeTransformation,
+    FlattenTransformation,
+    PivotAggregation,
+    PivotTransformation,
+    UnpivotTransformation,
+)
 from pytransformkit.domain.transformations.sorting import SortTransformation
 from pytransformkit.errors.engine import AdapterError
 from pytransformkit.infrastructure.engines.pandas.expressions import (
@@ -95,6 +102,13 @@ _PANDAS_CAPABILITIES = frozenset(
         EngineCapability.WINDOW,
         EngineCapability.WINDOW_ROWS_CUMULATIVE,
         EngineCapability.WINDOW_ROWS_MOVING,
+        EngineCapability.PIVOT,
+        EngineCapability.UNPIVOT,
+        EngineCapability.EXPLODE,
+        EngineCapability.FLATTEN,
+        EngineCapability.NESTED,
+        EngineCapability.TEMPORAL,
+        EngineCapability.DURATION,
         EngineCapability.JOIN_INNER,
         EngineCapability.JOIN_LEFT,
         EngineCapability.JOIN_RIGHT,

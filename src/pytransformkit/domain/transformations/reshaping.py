@@ -61,7 +61,10 @@ class PivotTransformation(TransformationSpec):
             raise InvalidTransformationError(
                 "Pivot requires at least one explicit category."
             )
-        if any(not isinstance(value, str) or not value.strip() for value in self.categories):
+        if any(
+            not isinstance(value, str) or not value.strip()
+            for value in self.categories
+        ):
             raise InvalidTransformationError(
                 "Pivot categories must be non-empty strings."
             )

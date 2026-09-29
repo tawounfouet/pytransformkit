@@ -217,14 +217,13 @@ class OutputSchemaResolver:
         ]
         used_names = {field.name for field in fields}
 
-        same_name_right_keys = {
+        right_join_keys = {
             str(key.right)
             for key in transformation.keys
-            if str(key.left) == str(key.right)
         }
 
         for field in right.fields:
-            if field.name in same_name_right_keys:
+            if field.name in right_join_keys:
                 continue
 
             output_name = field.name

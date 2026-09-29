@@ -55,8 +55,7 @@ class TransformationCompiler:
                 plan.dependencies,
             )
             predecessor_schemas = tuple(
-                output_schema_by_node[item]
-                for item in predecessor_ids
+                output_schema_by_node[item] for item in predecessor_ids
             )
             planned = self._compile_node(
                 node,
@@ -94,9 +93,7 @@ class TransformationCompiler:
     ) -> LogicalPlanNode:
         if isinstance(node, InputNode):
             if predecessor_ids:
-                raise InvalidPipelineError(
-                    "Input nodes cannot have predecessors."
-                )
+                raise InvalidPipelineError("Input nodes cannot have predecessors.")
             return LogicalPlanNode(
                 node_id=node.id,
                 kind=node.kind,
@@ -114,9 +111,7 @@ class TransformationCompiler:
                 node_id=node.id,
                 kind=node.kind,
                 input_schema=(
-                    predecessor_schemas[0]
-                    if len(predecessor_schemas) == 1
-                    else None
+                    predecessor_schemas[0] if len(predecessor_schemas) == 1 else None
                 ),
                 output_schema=output_schema,
                 step_id=node.step_id,

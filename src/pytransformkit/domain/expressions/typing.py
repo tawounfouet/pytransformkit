@@ -12,10 +12,12 @@ from pytransformkit.domain.data.data_types import (
     DataType,
     DateType,
     DecimalType,
+    DurationType,
     FloatType,
     IntegerType,
     StringType,
     TimestampType,
+    TimeType,
     UnknownType,
 )
 from pytransformkit.domain.data.schema import Schema
@@ -98,7 +100,7 @@ class ExpressionTypeResolver:
             )
 
         if isinstance(expression, ColumnReference):
-            field = schema.field(str(expression.path))
+            field = schema.resolve_path(expression.path)
             return ExpressionType(
                 data_type=field.data_type,
                 nullable=field.nullable,
@@ -243,6 +245,119 @@ class ExpressionTypeResolver:
             return ExpressionType(
                 StringType(),
                 any(argument.nullable for argument in arguments),
+            )
+
+        if name in {
+            "core.temporal.year",
+            "core.temporal.month",
+            "core.temporal.day",
+        }:
+            if len(arguments) != 1:
+                raise ExpressionTypeError(f"{name} requires exactly one argument.")
+            argument = arguments[0]
+            if not isinstance(argument.data_type, (DateType, TimestampType)):
+                raise ExpressionTypeError(
+                    f"{name} requires a Date or Timestamp Expression."
+                )
+            return ExpressionType(IntegerType(bits=32), argument.nullable)
+
+        if name in {
+            "core.temporal.hour",
+            "core.temporal.minute",
+            "core.temporal.second",
+        }:
+            if len(arguments) != 1:
+                raise ExpressionTypeError(f"{name} requires exactly one argument.")
+            argument = arguments[0]
+            if not isinstance(argument.data_type, (TimeType, TimestampType)):
+                raise ExpressionTypeError(
+                    f"{name} requires a Time or Timestamp Expression."
+                )
+            return ExpressionType(IntegerType(bits=32), argument.nullable)
+
+        if name == "core.temporal.to_date":
+            if len(arguments) != 1:
+                raise ExpressionTypeError("core.temporal.to_date requires one argument.")
+            argument = arguments[0]
+            if not isinstance(argument.data_type, (DateType, TimestampType)):
+                raise ExpressionTypeError(
+                    "core.temporal.to_date requires Date or Timestamp."
+                )
+            return ExpressionType(DateType(), argument.nullable)
+
+        if name == "core.temporal.normalize_timestamp":
+            if len(arguments) != 3:
+                raise ExpressionTypeError(
+                    "core.temporal.normalize_timestamp requires value, timezone and unit."
+                )
+            source = arguments[0]
+            if not isinstance(source.data_type, TimestampType):
+                raise ExpressionTypeError(
+                    "core.temporal.normalize_timestamp requires Timestamp."
+                )
+            timezone = _literal_string_argument(
+                expression,
+                1,
+                "normalize_timestamp timezone",
+            )
+            unit = _literal_time_unit_argument(
+                expression,
+                2,
+                "normalize_timestamp unit",
+            )
+            return ExpressionType(
+                TimestampType(unit=unit, timezone=timezone),
+                source.nullable,
+            )
+
+        if name == "core.temporal.convert_timezone":
+            if len(arguments) != 2:
+                raise ExpressionTypeError(
+                    "core.temporal.convert_timezone requires value and timezone."
+                )
+            source = arguments[0]
+            if not isinstance(source.data_type, TimestampType):
+                raise ExpressionTypeError(
+                    "core.temporal.convert_timezone requires Timestamp."
+                )
+            if source.data_type.timezone is None:
+                raise ExpressionTypeError(
+                    "core.temporal.convert_timezone requires a timezone-aware Timestamp."
+                )
+            timezone = _literal_string_argument(
+                expression,
+                1,
+                "convert_timezone timezone",
+            )
+            return ExpressionType(
+                TimestampType(
+                    unit=source.data_type.unit,
+                    timezone=timezone,
+                ),
+                source.nullable,
+            )
+
+        if name == "core.temporal.duration_between":
+            if len(arguments) != 3:
+                raise ExpressionTypeError(
+                    "core.temporal.duration_between requires start, end and unit."
+                )
+            start, end = arguments[:2]
+            if not isinstance(start.data_type, TimestampType) or not isinstance(
+                end.data_type,
+                TimestampType,
+            ):
+                raise ExpressionTypeError(
+                    "core.temporal.duration_between requires Timestamp arguments."
+                )
+            unit = _literal_time_unit_argument(
+                expression,
+                2,
+                "duration_between unit",
+            )
+            return ExpressionType(
+                DurationType(unit=unit),
+                start.nullable or end.nullable,
             )
 
         raise FunctionNotFoundError(name)
@@ -421,6 +536,32 @@ class WindowExpressionTypeResolver:
         raise ExpressionTypeError(
             f"Unsupported window function {expression.function.value!r}."
         )
+
+
+def _literal_string_argument(
+    expression: FunctionCall,
+    index: int,
+    label: str,
+) -> str:
+    argument = expression.arguments[index]
+    if not isinstance(argument, Literal) or not isinstance(argument.value, str):
+        raise ExpressionTypeError(f"{label} must be a string literal.")
+    if not argument.value.strip():
+        raise ExpressionTypeError(f"{label} must not be blank.")
+    return argument.value
+
+
+def _literal_time_unit_argument(
+    expression: FunctionCall,
+    index: int,
+    label: str,
+) -> str:
+    unit = _literal_string_argument(expression, index, label)
+    if unit not in {"s", "ms", "us", "ns"}:
+        raise ExpressionTypeError(
+            f"{label} must be one of 's', 'ms', 'us', or 'ns'."
+        )
+    return unit
 
 
 def _require_compatible_types(

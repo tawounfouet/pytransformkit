@@ -292,16 +292,13 @@ class OutputSchemaResolver:
         input_schema: Schema,
     ) -> Schema:
         index_fields = tuple(
-            input_schema.field(str(path))
-            for path in transformation.index
+            input_schema.field(str(path)) for path in transformation.index
         )
         category_field = input_schema.field(str(transformation.columns))
         value_field = input_schema.field(str(transformation.values))
 
         if not isinstance(category_field.data_type, StringType):
-            raise InvalidTransformationError(
-                "Pivot columns field must use StringType."
-            )
+            raise InvalidTransformationError("Pivot columns field must use StringType.")
 
         used_names = {field.name for field in index_fields}
         output_fields = list(index_fields)
@@ -326,12 +323,10 @@ class OutputSchemaResolver:
         input_schema: Schema,
     ) -> Schema:
         id_fields = tuple(
-            input_schema.field(str(path))
-            for path in transformation.id_vars
+            input_schema.field(str(path)) for path in transformation.id_vars
         )
         value_fields = tuple(
-            input_schema.field(str(path))
-            for path in transformation.value_vars
+            input_schema.field(str(path)) for path in transformation.value_vars
         )
 
         first = value_fields[0]
@@ -371,9 +366,7 @@ class OutputSchemaResolver:
         field_name = str(transformation.field)
         current = input_schema.field(field_name)
         if not isinstance(current.data_type, ListType):
-            raise InvalidTransformationError(
-                "Explode requires a ListType field."
-            )
+            raise InvalidTransformationError("Explode requires a ListType field.")
         return input_schema.replace(
             replace(
                 current,
@@ -390,14 +383,10 @@ class OutputSchemaResolver:
         field_name = str(transformation.field)
         current = input_schema.field(field_name)
         if not isinstance(current.data_type, StructType):
-            raise InvalidTransformationError(
-                "Flatten requires a StructType field."
-            )
+            raise InvalidTransformationError("Flatten requires a StructType field.")
 
         existing = {
-            field.name
-            for field in input_schema.fields
-            if field.name != field_name
+            field.name for field in input_schema.fields if field.name != field_name
         }
         flattened: list[Field] = []
 

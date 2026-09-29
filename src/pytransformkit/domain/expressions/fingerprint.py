@@ -41,8 +41,7 @@ def canonical_expression(expression: Expression) -> str:
 
     if isinstance(expression, WindowExpression):
         partition = ",".join(
-            _quoted(str(field))
-            for field in expression.spec.partition_keys
+            _quoted(str(field)) for field in expression.spec.partition_keys
         )
         ordering = ",".join(
             ":".join(

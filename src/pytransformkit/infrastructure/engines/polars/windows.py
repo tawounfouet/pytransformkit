@@ -482,8 +482,6 @@ def _moving_aggregate(
 
     if function is WindowFunction.COUNT:
         present = value.is_not_null().cast(pl.Int64)
-        if argument_column is None:
-            present = pl.lit(1, dtype=pl.Int64)
         rolling = present.rolling_sum(
             window_size=window_size,
             min_samples=1,

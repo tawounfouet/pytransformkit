@@ -44,7 +44,9 @@ from pytransformkit.domain.expressions.window import (
     WindowFrameMode,
     WindowFunction,
     WindowFunctionCall,
+    WindowNullOrder,
     WindowOrderKey,
+    WindowSortDirection,
     WindowSpec,
 )
 
@@ -76,7 +78,9 @@ __all__ = [
     "WindowFrameMode",
     "WindowFunction",
     "WindowFunctionCall",
+    "WindowNullOrder",
     "WindowOrderKey",
+    "WindowSortDirection",
     "WindowSpec",
     "canonical_expression",
     "ensure_expression",

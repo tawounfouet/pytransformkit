@@ -168,8 +168,9 @@ class PolarsExpressionCompiler:
                 expression.arguments[2],
                 "duration_between unit",
             )
+            physical_unit = "us" if unit == "s" else unit
             return (arguments[1] - arguments[0]).cast(
-                pl.Duration(time_unit=unit)
+                pl.Duration(time_unit=physical_unit)
             )
 
         raise AdapterError(f"Polars does not compile logical function {name!r}.")

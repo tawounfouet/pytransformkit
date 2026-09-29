@@ -2,7 +2,7 @@
 
 PyTransformKit lets you define engine-neutral transformation semantics once, compile them into a LogicalPlan, and execute them explicitly through supported physical engines.
 
-The current development line targets **0.2.0a2** and includes LOT-12: typed aggregation and grouping on top of the V1 public model and relational core.
+The current development line targets **0.2.0b1** and includes LOT-13: analytical window semantics on top of the V1 public model, relational core and aggregation layer.
 
 The canonical path is:
 
@@ -436,7 +436,60 @@ Pandas and Polars are qualified against the same normalized semantics.
 
 ---
 
-## 11. InputBinding, ResourceReference and OutputBinding
+## 11. Analytical windows
+
+LOT-13 adds a dedicated `pytransformkit.window` namespace for portable analytical expressions.
+
+~~~python
+from pytransformkit import window
+from pytransformkit.functions import col
+
+ordered = (
+    window.partition_by("customer_id")
+    .order_by("ordered_at")
+)
+
+ranked = builder.derive(
+    "ranked_orders",
+    source=orders,
+    field_name="order_number",
+    expression=window.row_number().over(ordered),
+)
+
+cumulative = ordered.rows_between(
+    window.unbounded_preceding(),
+    window.current_row(),
+)
+
+with_revenue = builder.derive(
+    "cumulative_revenue",
+    source=ranked,
+    field_name="cumulative_revenue",
+    expression=window.sum(col("amount")).over(cumulative),
+)
+~~~
+
+The current portable analytical vocabulary includes:
+
+- `row_number()`;
+- `rank()`;
+- `dense_rank()`;
+- `lag()`;
+- `lead()`;
+- window `count()`, `sum()`, `min()`, `max()`, and `mean()` / `avg()`;
+- partition-wide aggregates;
+- cumulative ROWS frames from unbounded preceding to current row;
+- moving ROWS frames from N preceding to current row.
+
+Ordering is explicit for order-sensitive functions. Window specifications are immutable, and partition/order dependencies are available to the logical dependency model.
+
+Arbitrary ROWS frames and RANGE frames already have explicit logical representations and engine capabilities. Pandas and Polars currently do not advertise these capabilities, so such plans fail during compatibility validation instead of falling back silently.
+
+Polars supports the qualified window subset in eager and lazy execution.
+
+---
+
+## 12. InputBinding, ResourceReference and OutputBinding
 
 InputBinding separates the logical Dataset model from physical data supplied at runtime.
 
@@ -456,7 +509,7 @@ This distinction prevents PyTransformKit from accidentally taking ownership of i
 
 ---
 
-## 12. Transformations currently available
+## 13. Transformations currently available
 
 Current portable Transformation semantics include:
 
@@ -474,7 +527,8 @@ Current portable Transformation semantics include:
 - union;
 - intersect;
 - except;
-- aggregate/group by.
+- aggregate/group by;
+- analytical windows.
 
 The Expression DSL currently includes:
 
@@ -494,11 +548,12 @@ The Expression DSL currently includes:
 - sum();
 - min();
 - max();
-- mean() / avg().
+- mean() / avg();
+- window row/rank/offset and aggregate expressions.
 
 ---
 
-## 13. Run the local experimentation script
+## 14. Run the local experimentation script
 
 The repository includes:
 
@@ -525,7 +580,7 @@ It demonstrates:
 
 ---
 
-## 14. Run the notebook
+## 15. Run the notebook
 
 An interactive equivalent is available at:
 
@@ -538,7 +593,7 @@ Start your preferred Jupyter frontend and open the notebook from the repository 
 
 ---
 
-## 15. Run the test suites
+## 16. Run the test suites
 
 ### Complete default suite
 
@@ -577,11 +632,10 @@ The CI matrix currently verifies Python 3.11, 3.12, 3.13 and 3.14 plus dedicated
 
 ---
 
-## 16. What comes next
+## 17. What comes next
 
 The revised V1 roadmap continues with:
 
-- **LOT-13** — Analytical Windows;
 - **LOT-14** — Reshape / Temporal / Nested;
 - **LOT-15** — Data Quality;
 - **LOT-16** — Logical and Field Lineage;
@@ -606,7 +660,7 @@ docs/specifications/PYTRANSFORMKIT_V1_REVISED_IMPLEMENTATION_ROADMAP.md
 
 ---
 
-## 17. Recommended experimentation workflow
+## 18. Recommended experimentation workflow
 
 While PyTransformKit is pre-1.0:
 

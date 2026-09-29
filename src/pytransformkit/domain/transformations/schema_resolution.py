@@ -8,7 +8,9 @@ from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.expressions.typing import (
     AggregateExpressionTypeResolver,
     ExpressionTypeResolver,
+    WindowExpressionTypeResolver,
 )
+from pytransformkit.domain.expressions.window import WindowExpression
 from pytransformkit.domain.transformations.aggregation import (
     AggregateTransformation,
     group_output_name,
@@ -57,6 +59,7 @@ class OutputSchemaResolver:
         self,
         expression_type_resolver: ExpressionTypeResolver | None = None,
         aggregate_type_resolver: AggregateExpressionTypeResolver | None = None,
+        window_type_resolver: WindowExpressionTypeResolver | None = None,
     ) -> None:
         self._expression_type_resolver = (
             expression_type_resolver or ExpressionTypeResolver()
@@ -64,6 +67,13 @@ class OutputSchemaResolver:
         self._aggregate_type_resolver = (
             aggregate_type_resolver
             or AggregateExpressionTypeResolver(self._expression_type_resolver)
+        )
+        self._window_type_resolver = (
+            window_type_resolver
+            or WindowExpressionTypeResolver(
+                self._expression_type_resolver,
+                self._aggregate_type_resolver,
+            )
         )
 
     def resolve(
@@ -119,10 +129,16 @@ class OutputSchemaResolver:
             )
 
         if isinstance(transformation, DeriveTransformation):
-            expression_type = self._expression_type_resolver.resolve(
-                transformation.expression,
-                input_schema,
-            )
+            if isinstance(transformation.expression, WindowExpression):
+                expression_type = self._window_type_resolver.resolve(
+                    transformation.expression,
+                    input_schema,
+                )
+            else:
+                expression_type = self._expression_type_resolver.resolve(
+                    transformation.expression,
+                    input_schema,
+                )
             derived_field = Field(
                 name=transformation.field_name,
                 data_type=expression_type.data_type,

@@ -23,10 +23,12 @@ from pytransformkit.domain.resources import ResourceReference
 from pytransformkit.domain.shared.identifiers import TransformationExecutionId
 from pytransformkit.functions import col, lit
 
+from . import window
+
 try:
     __version__ = version("pytransformkit")
 except PackageNotFoundError:
-    __version__ = "0.2.0a2"
+    __version__ = "0.2.0b1"
 
 __all__ = [
     "DataType",
@@ -45,6 +47,7 @@ __all__ = [
     "__version__",
     "col",
     "lit",
+    "window",
 ]
 
 

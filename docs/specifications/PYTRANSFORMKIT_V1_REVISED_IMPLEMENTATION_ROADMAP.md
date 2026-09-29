@@ -294,6 +294,8 @@ LOT-12 is closed by the 0.2.0a2 implementation baseline:
 
 **Target milestone:** 0.2.0b1
 
+**Status:** DONE — implemented and qualified on 2026-09-29
+
 ## Scope
 
 Implement:
@@ -322,6 +324,28 @@ Polars support
 - unsupported frame semantics fail through capability validation;
 - field lineage records ordering/partition dependencies;
 - common window suite passes on Pandas and Polars.
+
+## Implementation evidence
+
+LOT-13 is closed by the 0.2.0b1 implementation baseline:
+
+- WindowSpec provides an immutable partition, ordering and frame model;
+- the public pytransformkit.window namespace exposes row_number, rank, dense_rank, lag, lead and window aggregates;
+- WindowBoundary and WindowFrame model ROWS and RANGE boundaries explicitly;
+- row-number, ranking and offset functions require explicit ordering during logical validation;
+- WindowDeterminism distinguishes order-independent, value-ordered and order-dependent semantics;
+- full-partition, cumulative ROWS and moving ROWS aggregate semantics are implemented;
+- count, sum, min, max and mean window aggregates preserve explicit NULL behavior;
+- WindowExpressionTypeResolver propagates deterministic output DataTypes and nullability;
+- expression dependency extraction records value, partition, ordering and default dependencies;
+- window specifications participate in canonical expression fingerprints;
+- engine compatibility distinguishes WINDOW, cumulative ROWS, moving ROWS, arbitrary ROWS and RANGE capabilities;
+- unsupported arbitrary ROWS and RANGE semantics fail before physical execution on Pandas and Polars;
+- Pandas implements the qualified analytical-window subset while preserving original row order;
+- Polars implements the same qualified subset in eager and lazy modes;
+- row_number, rank, dense_rank, lag, lead, partition aggregates, cumulative aggregates, moving aggregates and descending ordering pass Pandas/Polars conformance;
+- Python 3.11, 3.12, 3.13 and 3.14 test matrices pass;
+- Ruff lint, Ruff format, mypy, package build, wheel install, Pandas contract, Polars contract and cross-engine contract jobs pass.
 
 ---
 
@@ -979,15 +1003,15 @@ LOT-00 → LOT-28
 29 total lots
 
 Completed implementation
-    LOT-00 → LOT-12
-    13 lots
+    LOT-00 → LOT-13
+    14 lots
 
 Remaining revised roadmap
-    LOT-13 → LOT-28
-    16 lots
+    LOT-14 → LOT-28
+    15 lots
 ~~~
 
-The current completion count is 13 / 29 lots. Future work continues to be judged against the revised V2 acceptance criteria rather than the old roadmap text.
+The current completion count is 14 / 29 lots. Future work continues to be judged against the revised V2 acceptance criteria rather than the old roadmap text.
 
 ---
 

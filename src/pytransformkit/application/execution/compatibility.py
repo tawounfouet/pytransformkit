@@ -2,6 +2,10 @@
 
 from pytransformkit.domain.engines.capabilities import EngineCapability
 from pytransformkit.domain.engines.descriptor import EngineDescriptor
+from pytransformkit.domain.expressions.window import (
+    WindowExpression,
+    WindowFrameKind,
+)
 from pytransformkit.domain.pipelines.plan import LogicalPlan
 from pytransformkit.domain.transformations.aggregation import AggregateTransformation
 from pytransformkit.domain.transformations.base import TransformationSpec
@@ -74,7 +78,17 @@ class EngineCapabilityAnalyzer:
         for node in plan.nodes:
             if node.transformation is None:
                 continue
-            required.add(_capability_for(node.transformation))
+            transformation = node.transformation
+            required.add(_capability_for(transformation))
+            if isinstance(transformation, DeriveTransformation) and isinstance(
+                transformation.expression, WindowExpression
+            ):
+                required.add(EngineCapability.WINDOW)
+                frame_capability = _window_frame_capability(
+                    transformation.expression.frame_kind
+                )
+                if frame_capability is not None:
+                    required.add(frame_capability)
 
         return frozenset(required)
 
@@ -122,3 +136,19 @@ def _capability_for(
     raise UnsupportedTransformationError(
         f"No engine capability mapping exists for {type(transformation).__name__!r}."
     )
+
+
+def _window_frame_capability(
+    frame_kind: WindowFrameKind,
+) -> EngineCapability | None:
+    if frame_kind is WindowFrameKind.FULL_PARTITION:
+        return None
+    if frame_kind is WindowFrameKind.ROWS_CUMULATIVE:
+        return EngineCapability.WINDOW_ROWS_CUMULATIVE
+    if frame_kind is WindowFrameKind.ROWS_MOVING:
+        return EngineCapability.WINDOW_ROWS_MOVING
+    if frame_kind is WindowFrameKind.ROWS_ARBITRARY:
+        return EngineCapability.WINDOW_ROWS_ARBITRARY
+    if frame_kind is WindowFrameKind.RANGE:
+        return EngineCapability.WINDOW_RANGE
+    raise UnsupportedTransformationError(f"Unknown window frame kind {frame_kind!r}.")

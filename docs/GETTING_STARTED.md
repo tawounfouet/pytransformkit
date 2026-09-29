@@ -2,7 +2,7 @@
 
 PyTransformKit lets you define engine-neutral transformation semantics once, compile them into a LogicalPlan, and execute them explicitly through supported physical engines.
 
-The current development line targets **0.2.0b1** and includes LOT-13: analytical window semantics on top of the V1 public model, relational core and aggregation layer.
+The current development line targets **0.2.0** and includes LOT-14: reshaping, nested-data and temporal semantics on top of the V1 public model, relational, aggregation and analytical-window layers.
 
 The canonical path is:
 
@@ -489,7 +489,101 @@ Polars supports the qualified window subset in eager and lazy execution.
 
 ---
 
-## 12. InputBinding, ResourceReference and OutputBinding
+## 12. Reshaping, nested data and temporal semantics
+
+LOT-14 completes the 0.2.x transformation-semantics line.
+
+### Reshaping
+
+TransformationPlanBuilder exposes deterministic reshape operations:
+
+~~~python
+from pytransformkit.domain.transformations.reshaping import PivotAggregation
+
+pivoted = builder.pivot(
+    "revenue_by_status",
+    source=orders,
+    index=("customer_id",),
+    columns="status",
+    values="amount",
+    categories=("PAID", "OPEN"),
+    aggregation=PivotAggregation.SUM,
+)
+
+unpivoted = builder.unpivot(
+    "quarter_rows",
+    source=wide_orders,
+    id_vars=("customer_id",),
+    value_vars=("q1", "q2"),
+    variable_name="quarter",
+    value_name="revenue",
+)
+
+exploded = builder.explode(
+    "one_tag_per_row",
+    source=customers,
+    field="tags",
+)
+
+flattened = builder.flatten(
+    "customer_profile",
+    source=customers,
+    field="profile",
+)
+~~~
+
+Pivot categories are declared explicitly so output Schemas remain deterministic without inspecting runtime data.
+
+### Nested Struct paths
+
+Logical Schemas can contain List, Struct, Map and Duration types. Portable nested access is currently defined for Struct paths:
+
+~~~python
+city = builder.derive(
+    "customer_city",
+    source=customers,
+    field_name="city",
+    expression=col("profile.address.city"),
+)
+~~~
+
+Nested nullability propagates through the complete path.
+
+### Temporal expressions
+
+Portable temporal functions are available through pytransformkit.functions:
+
+~~~python
+from pytransformkit import functions as fn
+
+year_value = fn.year(col("event_at"))
+event_date = fn.to_date(col("event_at"))
+
+normalized = fn.normalize_timestamp(
+    col("event_at"),
+    timezone="UTC",
+    unit="us",
+)
+
+paris_time = fn.convert_timezone(
+    col("event_at"),
+    "Europe/Paris",
+)
+
+elapsed = fn.duration_between(
+    col("started_at"),
+    col("finished_at"),
+    unit="s",
+)
+~~~
+
+Timestamp normalization and timezone conversion are separate operations. Duration units are logical PyTransformKit semantics; adapters may lower them to a different native precision while preserving the declared logical result.
+
+Pandas and Polars pass the same LOT-14 cross-engine suite, and the supported reshape subset also runs through Polars LazyFrame execution.
+
+---
+
+## 13. InputBinding, ResourceReference and OutputBinding
 
 InputBinding separates the logical Dataset model from physical data supplied at runtime.
 
@@ -509,7 +603,7 @@ This distinction prevents PyTransformKit from accidentally taking ownership of i
 
 ---
 
-## 13. Transformations currently available
+## 14. Transformations currently available
 
 Current portable Transformation semantics include:
 
@@ -528,7 +622,11 @@ Current portable Transformation semantics include:
 - intersect;
 - except;
 - aggregate/group by;
-- analytical windows.
+- analytical windows;
+- pivot;
+- unpivot;
+- explode;
+- flatten.
 
 The Expression DSL currently includes:
 
@@ -549,11 +647,17 @@ The Expression DSL currently includes:
 - min();
 - max();
 - mean() / avg();
-- window row/rank/offset and aggregate expressions.
+- window row/rank/offset and aggregate expressions;
+- nested Struct field references;
+- year/month/day/hour/minute/second extraction;
+- date conversion;
+- timestamp normalization;
+- timezone conversion;
+- duration calculation.
 
 ---
 
-## 14. Run the local experimentation script
+## 15. Run the local experimentation script
 
 The repository includes:
 
@@ -580,7 +684,7 @@ It demonstrates:
 
 ---
 
-## 15. Run the notebook
+## 16. Run the notebook
 
 An interactive equivalent is available at:
 
@@ -593,7 +697,7 @@ Start your preferred Jupyter frontend and open the notebook from the repository 
 
 ---
 
-## 16. Run the test suites
+## 17. Run the test suites
 
 ### Complete default suite
 
@@ -632,11 +736,10 @@ The CI matrix currently verifies Python 3.11, 3.12, 3.13 and 3.14 plus dedicated
 
 ---
 
-## 17. What comes next
+## 18. What comes next
 
 The revised V1 roadmap continues with:
 
-- **LOT-14** — Reshape / Temporal / Nested;
 - **LOT-15** — Data Quality;
 - **LOT-16** — Logical and Field Lineage;
 - **LOT-17** — Runtime Evidence / Identity / Observability;
@@ -660,7 +763,7 @@ docs/specifications/PYTRANSFORMKIT_V1_REVISED_IMPLEMENTATION_ROADMAP.md
 
 ---
 
-## 18. Recommended experimentation workflow
+## 19. Recommended experimentation workflow
 
 While PyTransformKit is pre-1.0:
 

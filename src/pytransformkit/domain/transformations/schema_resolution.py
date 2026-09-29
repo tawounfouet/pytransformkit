@@ -2,7 +2,15 @@
 
 from dataclasses import replace
 
-from pytransformkit.domain.data.data_types import BooleanType
+from pytransformkit.domain.data.data_types import (
+    BooleanType,
+    DecimalType,
+    FloatType,
+    IntegerType,
+    ListType,
+    StringType,
+    StructType,
+)
 from pytransformkit.domain.data.field import Field
 from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.expressions.typing import (
@@ -42,6 +50,13 @@ from pytransformkit.domain.transformations.relational import (
     JoinTransformation,
     JoinType,
     UnionTransformation,
+)
+from pytransformkit.domain.transformations.reshaping import (
+    ExplodeTransformation,
+    FlattenTransformation,
+    PivotAggregation,
+    PivotTransformation,
+    UnpivotTransformation,
 )
 from pytransformkit.domain.transformations.sorting import SortTransformation
 from pytransformkit.errors.expression import ExpressionTypeError
@@ -158,6 +173,18 @@ class OutputSchemaResolver:
                 input_schema,
             )
 
+        if isinstance(transformation, PivotTransformation):
+            return self._resolve_pivot(transformation, input_schema)
+
+        if isinstance(transformation, UnpivotTransformation):
+            return self._resolve_unpivot(transformation, input_schema)
+
+        if isinstance(transformation, ExplodeTransformation):
+            return self._resolve_explode(transformation, input_schema)
+
+        if isinstance(transformation, FlattenTransformation):
+            return self._resolve_flatten(transformation, input_schema)
+
         if isinstance(transformation, SortTransformation):
             for key in transformation.keys:
                 input_schema.field(str(key.field))
@@ -260,6 +287,132 @@ class OutputSchemaResolver:
         return Schema(tuple(fields))
 
     @staticmethod
+    def _resolve_pivot(
+        transformation: PivotTransformation,
+        input_schema: Schema,
+    ) -> Schema:
+        index_fields = tuple(
+            input_schema.field(str(path)) for path in transformation.index
+        )
+        category_field = input_schema.field(str(transformation.columns))
+        value_field = input_schema.field(str(transformation.values))
+
+        if not isinstance(category_field.data_type, StringType):
+            raise InvalidTransformationError("Pivot columns field must use StringType.")
+
+        used_names = {field.name for field in index_fields}
+        output_fields = list(index_fields)
+
+        for category in transformation.categories:
+            if category in used_names:
+                raise FieldCollisionError(category)
+            output_fields.append(
+                _pivot_output_field(
+                    category,
+                    value_field,
+                    transformation.aggregation,
+                )
+            )
+            used_names.add(category)
+
+        return Schema(tuple(output_fields))
+
+    @staticmethod
+    def _resolve_unpivot(
+        transformation: UnpivotTransformation,
+        input_schema: Schema,
+    ) -> Schema:
+        id_fields = tuple(
+            input_schema.field(str(path)) for path in transformation.id_vars
+        )
+        value_fields = tuple(
+            input_schema.field(str(path)) for path in transformation.value_vars
+        )
+
+        first = value_fields[0]
+        for field in value_fields[1:]:
+            if field.data_type != first.data_type:
+                raise InvalidTransformationError(
+                    "Unpivot value fields must use identical logical DataTypes."
+                )
+
+        reserved = {field.name for field in id_fields}
+        if transformation.variable_name in reserved:
+            raise FieldCollisionError(transformation.variable_name)
+        if transformation.value_name in reserved:
+            raise FieldCollisionError(transformation.value_name)
+
+        return Schema(
+            id_fields
+            + (
+                Field(
+                    name=transformation.variable_name,
+                    data_type=StringType(),
+                    nullable=False,
+                ),
+                Field(
+                    name=transformation.value_name,
+                    data_type=first.data_type,
+                    nullable=any(field.nullable for field in value_fields),
+                ),
+            )
+        )
+
+    @staticmethod
+    def _resolve_explode(
+        transformation: ExplodeTransformation,
+        input_schema: Schema,
+    ) -> Schema:
+        field_name = str(transformation.field)
+        current = input_schema.field(field_name)
+        if not isinstance(current.data_type, ListType):
+            raise InvalidTransformationError("Explode requires a ListType field.")
+        return input_schema.replace(
+            replace(
+                current,
+                data_type=current.data_type.element_type,
+                nullable=True,
+            )
+        )
+
+    @staticmethod
+    def _resolve_flatten(
+        transformation: FlattenTransformation,
+        input_schema: Schema,
+    ) -> Schema:
+        field_name = str(transformation.field)
+        current = input_schema.field(field_name)
+        if not isinstance(current.data_type, StructType):
+            raise InvalidTransformationError("Flatten requires a StructType field.")
+
+        existing = {
+            field.name for field in input_schema.fields if field.name != field_name
+        }
+        flattened: list[Field] = []
+
+        for nested in current.data_type.fields:
+            output_name = transformation.output_name(nested.name)
+            if output_name in existing:
+                raise FieldCollisionError(output_name)
+            flattened.append(
+                Field(
+                    name=output_name,
+                    data_type=nested.data_type,
+                    nullable=current.nullable or nested.nullable,
+                )
+            )
+            existing.add(output_name)
+
+        output_fields: list[Field] = []
+        for field in input_schema.fields:
+            if field.name == field_name:
+                output_fields.extend(flattened)
+            else:
+                output_fields.append(field)
+
+        return Schema(tuple(output_fields))
+
+    @staticmethod
     def _resolve_join(
         transformation: JoinTransformation,
         left: Schema,
@@ -343,3 +496,58 @@ def _validate_set_compatible(left: Schema, right: Schema) -> None:
                 "Set operations require identical nullability; "
                 f"field {left_field.name!r} differs."
             )
+
+
+def _pivot_output_field(
+    name: str,
+    value_field: Field,
+    aggregation: PivotAggregation,
+) -> Field:
+    if aggregation is PivotAggregation.COUNT:
+        return Field(
+            name=name,
+            data_type=IntegerType(bits=64),
+            nullable=False,
+        )
+
+    if aggregation is PivotAggregation.MEAN:
+        if not isinstance(
+            value_field.data_type,
+            (IntegerType, FloatType, DecimalType),
+        ):
+            raise InvalidTransformationError(
+                "Pivot MEAN requires a numeric values field."
+            )
+        return Field(
+            name=name,
+            data_type=FloatType(bits=64),
+            nullable=True,
+        )
+
+    if aggregation is PivotAggregation.SUM:
+        if not isinstance(
+            value_field.data_type,
+            (IntegerType, FloatType, DecimalType),
+        ):
+            raise InvalidTransformationError(
+                "Pivot SUM requires a numeric values field."
+            )
+        data_type = value_field.data_type
+        if isinstance(data_type, IntegerType):
+            data_type = IntegerType(bits=64, signed=data_type.signed)
+        return Field(
+            name=name,
+            data_type=data_type,
+            nullable=True,
+        )
+
+    if aggregation in {PivotAggregation.MIN, PivotAggregation.MAX}:
+        return Field(
+            name=name,
+            data_type=value_field.data_type,
+            nullable=True,
+        )
+
+    raise UnsupportedTransformationError(
+        f"Unsupported pivot aggregation {aggregation.value!r}."
+    )

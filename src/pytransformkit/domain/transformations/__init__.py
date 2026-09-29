@@ -44,6 +44,13 @@ from pytransformkit.domain.transformations.relational import (
     NullJoinPolicy,
     UnionTransformation,
 )
+from pytransformkit.domain.transformations.reshaping import (
+    ExplodeTransformation,
+    FlattenTransformation,
+    PivotAggregation,
+    PivotTransformation,
+    UnpivotTransformation,
+)
 from pytransformkit.domain.transformations.schema_resolution import (
     OutputSchemaResolver,
 )
@@ -67,7 +74,9 @@ __all__ = [
     "DistinctTransformation",
     "DropTransformation",
     "ExceptTransformation",
+    "ExplodeTransformation",
     "FilterTransformation",
+    "FlattenTransformation",
     "IntersectTransformation",
     "JoinKey",
     "JoinTransformation",
@@ -76,6 +85,8 @@ __all__ = [
     "NullJoinPolicy",
     "NullOrder",
     "OutputSchemaResolver",
+    "PivotAggregation",
+    "PivotTransformation",
     "Portability",
     "Purity",
     "RenameField",
@@ -88,4 +99,5 @@ __all__ = [
     "TransformationProperties",
     "TransformationSpec",
     "UnionTransformation",
+    "UnpivotTransformation",
 ]

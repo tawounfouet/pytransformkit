@@ -353,6 +353,8 @@ LOT-13 is closed by the 0.2.0b1 implementation baseline:
 
 **Target milestone:** 0.2.0
 
+**Status:** DONE — implemented and qualified on 2026-09-29
+
 ## Scope
 
 Implement the remaining stable 1.0 transformation vocabulary needed before quality/metadata layers:
@@ -378,6 +380,30 @@ explicit unsupported capability reporting
 - engine capability gaps are explicit;
 - no hidden fallback occurs;
 - relational/analytical V1 authoring examples are green.
+
+## Implementation evidence
+
+LOT-14 closes the 0.2.0 transformation-semantics line:
+
+- DurationType, ListType, StructType, StructField and MapType extend the engine-neutral logical type system;
+- Schema.resolve_path resolves nested Struct FieldPath values without native engine types;
+- nested path nullability is propagated deterministically;
+- the public functions namespace exposes year, month, day, hour, minute, second, to_date, normalize_timestamp, convert_timezone and duration_between;
+- timestamp normalization is distinct from timezone conversion;
+- duration expressions carry explicit logical time units;
+- PivotTransformation requires explicit categories so pivot output Schema is static and deterministic;
+- UnpivotTransformation requires an explicit and type-compatible value-field set;
+- ExplodeTransformation converts ListType fields to nullable element fields;
+- FlattenTransformation expands StructType fields with deterministic naming and collision checks;
+- TransformationPlanBuilder exposes pivot, unpivot, explode and flatten authoring methods;
+- engine capabilities distinguish PIVOT, UNPIVOT, EXPLODE, FLATTEN, NESTED, TEMPORAL and DURATION;
+- Pandas and Polars implement the qualified LOT-14 subset;
+- Polars supports the reshape subset in eager and lazy modes;
+- MapType is represented logically but no portable map-access operation is falsely advertised;
+- unsupported engine/native mappings fail explicitly instead of silently degrading;
+- Pandas/Polars cross-engine tests cover pivot, unpivot, explode, flatten, nested Struct access, date extraction, timestamp normalization, timezone conversion and durations;
+- Python 3.11, 3.12, 3.13 and 3.14 test matrices pass;
+- Ruff lint, Ruff format, mypy, package build, wheel install, Pandas contract, Polars contract and cross-engine contract jobs pass.
 
 ---
 
@@ -1003,15 +1029,15 @@ LOT-00 → LOT-28
 29 total lots
 
 Completed implementation
-    LOT-00 → LOT-13
-    14 lots
+    LOT-00 → LOT-14
+    15 lots
 
 Remaining revised roadmap
-    LOT-14 → LOT-28
-    15 lots
+    LOT-15 → LOT-28
+    14 lots
 ~~~
 
-The current completion count is 14 / 29 lots. Future work continues to be judged against the revised V2 acceptance criteria rather than the old roadmap text.
+The current completion count is 15 / 29 lots. Future work continues to be judged against the revised V2 acceptance criteria rather than the old roadmap text.
 
 ---
 

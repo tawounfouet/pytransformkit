@@ -11,9 +11,13 @@ from pytransformkit.domain.data.data_types import (
     DataType,
     DateType,
     DecimalType,
+    DurationType,
     FloatType,
     IntegerType,
+    ListType,
+    MapType,
     StringType,
+    StructType,
     TimestampType,
     UnknownType,
 )
@@ -47,7 +51,12 @@ class PandasTypeMapper:
             if data_type.timezone is None:
                 return "datetime64[ns]"
             return f"datetime64[ns, {data_type.timezone}]"
-        if isinstance(data_type, (DateType, BinaryType, UnknownType)):
+        if isinstance(data_type, DurationType):
+            return "timedelta64[ns]"
+        if isinstance(
+            data_type,
+            (DateType, BinaryType, ListType, StructType, MapType, UnknownType),
+        ):
             return "object"
         if isinstance(data_type, DecimalType):
             raise AdapterError(
@@ -77,6 +86,8 @@ class PandasTypeMapper:
             return TimestampType(
                 timezone=str(timezone) if timezone is not None else None
             )
+        if pdt.is_timedelta64_dtype(dtype):
+            return DurationType(unit="ns")
         if pdt.is_string_dtype(dtype):
             return StringType()
 

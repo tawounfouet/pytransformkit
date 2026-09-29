@@ -74,6 +74,14 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 - Local experimentation notebook under `notebooks/`.
 - Equivalent executable local experimentation script under `scripts/`.
 - `docs/GETTING_STARTED.md` covering installation, first Pipeline, Pandas/Polars execution, lazy execution, and test commands.
+- Immutable analytical window specifications and Pandas/Polars window execution for LOT-13.
+- Logical `DurationType`, `ListType`, `StructType`, `StructField`, and `MapType` values.
+- Nested Struct `FieldPath` resolution with nullability propagation.
+- Portable temporal functions for date/time extraction, date conversion, timestamp normalization, timezone conversion, and duration calculation.
+- Portable pivot, unpivot, explode, and flatten Transformation specifications with deterministic output Schema resolution.
+- Pandas and Polars reshape, nested-Struct, and temporal execution with cross-engine conformance tests.
+- Explicit `PIVOT`, `UNPIVOT`, `EXPLODE`, `FLATTEN`, `NESTED`, `TEMPORAL`, and `DURATION` engine capabilities.
+- Completion of LOT-14 and the PyTransformKit 0.2.x transformation-semantics line.
 
 ### Changed
 

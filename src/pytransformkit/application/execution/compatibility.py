@@ -2,6 +2,16 @@
 
 from pytransformkit.domain.engines.capabilities import EngineCapability
 from pytransformkit.domain.engines.descriptor import EngineDescriptor
+from pytransformkit.domain.expressions.aggregate import AggregateExpression
+from pytransformkit.domain.expressions.base import Expression
+from pytransformkit.domain.expressions.binary import BinaryExpression
+from pytransformkit.domain.expressions.dependencies import ExpressionDependencyExtractor
+from pytransformkit.domain.expressions.functions import FunctionCall
+from pytransformkit.domain.expressions.predicates import (
+    IsNotNullExpression,
+    IsNullExpression,
+)
+from pytransformkit.domain.expressions.unary import UnaryExpression
 from pytransformkit.domain.expressions.window import (
     WindowExpression,
     WindowFrameKind,
@@ -31,6 +41,12 @@ from pytransformkit.domain.transformations.relational import (
     JoinType,
     UnionTransformation,
 )
+from pytransformkit.domain.transformations.reshaping import (
+    ExplodeTransformation,
+    FlattenTransformation,
+    PivotTransformation,
+    UnpivotTransformation,
+)
 from pytransformkit.domain.transformations.sorting import SortTransformation
 from pytransformkit.errors.engine import UnsupportedEngineCapabilityError
 from pytransformkit.errors.transformation import UnsupportedTransformationError
@@ -50,6 +66,10 @@ _CAPABILITY_BY_TRANSFORMATION: tuple[
     (SortTransformation, EngineCapability.SORT),
     (DeduplicateTransformation, EngineCapability.DEDUPLICATE),
     (AggregateTransformation, EngineCapability.AGGREGATE),
+    (PivotTransformation, EngineCapability.PIVOT),
+    (UnpivotTransformation, EngineCapability.UNPIVOT),
+    (ExplodeTransformation, EngineCapability.EXPLODE),
+    (FlattenTransformation, EngineCapability.FLATTEN),
     (UnionTransformation, EngineCapability.UNION),
     (IntersectTransformation, EngineCapability.INTERSECT),
     (ExceptTransformation, EngineCapability.EXCEPT),
@@ -80,6 +100,19 @@ class EngineCapabilityAnalyzer:
                 continue
             transformation = node.transformation
             required.add(_capability_for(transformation))
+
+            for expression in _transformation_expressions(transformation):
+                dependencies = ExpressionDependencyExtractor().extract(expression)
+                if any(len(path.parts) > 1 for path in dependencies):
+                    required.add(EngineCapability.NESTED)
+                for current in _walk_expression(expression):
+                    if isinstance(current, FunctionCall):
+                        function_name = current.function.value
+                        if function_name.startswith("core.temporal."):
+                            required.add(EngineCapability.TEMPORAL)
+                        if function_name == "core.temporal.duration_between":
+                            required.add(EngineCapability.DURATION)
+
             if isinstance(transformation, DeriveTransformation) and isinstance(
                 transformation.expression, WindowExpression
             ):
@@ -136,6 +169,46 @@ def _capability_for(
     raise UnsupportedTransformationError(
         f"No engine capability mapping exists for {type(transformation).__name__!r}."
     )
+
+
+def _transformation_expressions(
+    transformation: TransformationSpec,
+) -> tuple[Expression, ...]:
+    if isinstance(transformation, DeriveTransformation):
+        return (transformation.expression,)
+    if isinstance(transformation, FilterTransformation):
+        return (transformation.condition,)
+    if isinstance(transformation, AggregateTransformation):
+        return transformation.group_by + tuple(
+            metric.expression for metric in transformation.metrics
+        )
+    return ()
+
+
+def _walk_expression(expression: Expression) -> tuple[Expression, ...]:
+    values: list[Expression] = [expression]
+
+    if isinstance(expression, BinaryExpression):
+        values.extend(_walk_expression(expression.left))
+        values.extend(_walk_expression(expression.right))
+    elif isinstance(
+        expression,
+        (UnaryExpression, IsNullExpression, IsNotNullExpression),
+    ):
+        values.extend(_walk_expression(expression.operand))
+    elif isinstance(expression, FunctionCall):
+        for argument in expression.arguments:
+            values.extend(_walk_expression(argument))
+    elif isinstance(expression, AggregateExpression):
+        if expression.argument is not None:
+            values.extend(_walk_expression(expression.argument))
+    elif isinstance(expression, WindowExpression):
+        if expression.argument is not None:
+            values.extend(_walk_expression(expression.argument))
+        if expression.default is not None:
+            values.extend(_walk_expression(expression.default))
+
+    return tuple(values)
 
 
 def _window_frame_capability(

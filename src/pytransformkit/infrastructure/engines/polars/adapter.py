@@ -60,6 +60,13 @@ from pytransformkit.domain.transformations.relational import (
     NullJoinPolicy,
     UnionTransformation,
 )
+from pytransformkit.domain.transformations.reshaping import (
+    ExplodeTransformation,
+    FlattenTransformation,
+    PivotAggregation,
+    PivotTransformation,
+    UnpivotTransformation,
+)
 from pytransformkit.domain.transformations.sorting import SortTransformation
 from pytransformkit.errors.engine import AdapterError
 from pytransformkit.infrastructure.engines.polars.expressions import (
@@ -87,6 +94,13 @@ _POLARS_CAPABILITIES = frozenset(
         EngineCapability.WINDOW,
         EngineCapability.WINDOW_ROWS_CUMULATIVE,
         EngineCapability.WINDOW_ROWS_MOVING,
+        EngineCapability.PIVOT,
+        EngineCapability.UNPIVOT,
+        EngineCapability.EXPLODE,
+        EngineCapability.FLATTEN,
+        EngineCapability.NESTED,
+        EngineCapability.TEMPORAL,
+        EngineCapability.DURATION,
         EngineCapability.JOIN_INNER,
         EngineCapability.JOIN_LEFT,
         EngineCapability.JOIN_RIGHT,
@@ -305,6 +319,34 @@ class PolarsAdapter:
                 output_schema,
             )
 
+        if isinstance(transformation, PivotTransformation):
+            return self._execute_pivot(
+                frame,
+                transformation,
+                output_schema,
+            )
+
+        if isinstance(transformation, UnpivotTransformation):
+            return self._execute_unpivot(
+                frame,
+                transformation,
+                output_schema,
+            )
+
+        if isinstance(transformation, ExplodeTransformation):
+            return self._execute_explode(
+                frame,
+                transformation,
+                output_schema,
+            )
+
+        if isinstance(transformation, FlattenTransformation):
+            return self._execute_flatten(
+                frame,
+                transformation,
+                output_schema,
+            )
+
         if isinstance(transformation, SortTransformation):
             return frame.sort(
                 by=[str(key.field) for key in transformation.keys],
@@ -412,6 +454,121 @@ class PolarsAdapter:
         ]
         return result.with_columns(casts).select(list(output_schema.names()))
 
+    def _execute_pivot(
+        self,
+        frame: Any,
+        transformation: PivotTransformation,
+        output_schema: Schema,
+    ) -> Any:
+        index = [str(field) for field in transformation.index]
+        category_field = str(transformation.columns)
+        value_field = str(transformation.values)
+
+        aggregates = [
+            _polars_pivot_aggregate(
+                transformation.aggregation,
+                category_field=category_field,
+                value_field=value_field,
+                category=category,
+            ).alias(category)
+            for category in transformation.categories
+        ]
+
+        if index:
+            result = frame.group_by(
+                index,
+                maintain_order=True,
+            ).agg(aggregates)
+        else:
+            result = frame.select(aggregates)
+
+        return self._coerce_output_schema(
+            result,
+            output_schema,
+        )
+
+    def _execute_unpivot(
+        self,
+        frame: Any,
+        transformation: UnpivotTransformation,
+        output_schema: Schema,
+    ) -> Any:
+        kwargs = {
+            "index": [str(field) for field in transformation.id_vars],
+            "on": [str(field) for field in transformation.value_vars],
+            "variable_name": transformation.variable_name,
+            "value_name": transformation.value_name,
+        }
+        unpivot = getattr(frame, "unpivot", None)
+        if unpivot is not None:
+            result = unpivot(**kwargs)
+        else:
+            result = frame.melt(
+                id_vars=kwargs["index"],
+                value_vars=kwargs["on"],
+                variable_name=transformation.variable_name,
+                value_name=transformation.value_name,
+            )
+        return self._coerce_output_schema(
+            result,
+            output_schema,
+        )
+
+    def _execute_explode(
+        self,
+        frame: Any,
+        transformation: ExplodeTransformation,
+        output_schema: Schema,
+    ) -> Any:
+        result = frame.explode(str(transformation.field))
+        return self._coerce_output_schema(
+            result,
+            output_schema,
+        )
+
+    def _execute_flatten(
+        self,
+        frame: Any,
+        transformation: FlattenTransformation,
+        output_schema: Schema,
+    ) -> Any:
+        field_name = str(transformation.field)
+        existing = set(_polars_columns(frame))
+        expressions: list[Any] = []
+
+        for output_field in output_schema.fields:
+            if output_field.name in existing:
+                continue
+            nested_name = _flatten_nested_name(
+                transformation,
+                output_field.name,
+            )
+            expressions.append(
+                pl.col(field_name).struct.field(nested_name).alias(output_field.name)
+            )
+
+        result = frame.with_columns(expressions).drop(field_name)
+        return self._coerce_output_schema(
+            result,
+            output_schema,
+        )
+
+    def _coerce_output_schema(
+        self,
+        frame: Any,
+        output_schema: Schema,
+    ) -> Any:
+        casts = [
+            pl.col(field.name)
+            .cast(
+                self._type_mapper.to_native(field.data_type),
+                strict=True,
+            )
+            .alias(field.name)
+            for field in output_schema.fields
+        ]
+        return frame.with_columns(casts).select(list(output_schema.names()))
+
     def _execute_relational(
         self,
         inputs: tuple[Any, ...],
@@ -455,6 +612,50 @@ class PolarsAdapter:
 
         expected = list(output_schema.names())
         return result.select(expected)
+
+
+def _polars_pivot_aggregate(
+    aggregation: PivotAggregation,
+    *,
+    category_field: str,
+    value_field: str,
+    category: str,
+) -> Any:
+    value = (
+        pl.when(pl.col(category_field) == category)
+        .then(pl.col(value_field))
+        .otherwise(None)
+    )
+
+    if aggregation is PivotAggregation.COUNT:
+        return value.count().cast(pl.Int64)
+    if aggregation is PivotAggregation.SUM:
+        count = value.count()
+        return pl.when(count == 0).then(pl.lit(None)).otherwise(value.sum())
+    if aggregation is PivotAggregation.MIN:
+        return value.min()
+    if aggregation is PivotAggregation.MAX:
+        return value.max()
+    if aggregation is PivotAggregation.MEAN:
+        return value.mean().cast(pl.Float64)
+
+    raise AdapterError(f"Unsupported Polars pivot aggregation {aggregation.value!r}.")
+
+
+def _flatten_nested_name(
+    transformation: FlattenTransformation,
+    output_name: str,
+) -> str:
+    prefix = (
+        transformation.prefix
+        if transformation.prefix is not None
+        else f"{transformation.field.name}_"
+    )
+    if not output_name.startswith(prefix):
+        raise AdapterError(
+            f"Flatten output {output_name!r} does not match prefix {prefix!r}."
+        )
+    return output_name[len(prefix) :]
 
 
 def _polars_columns(frame: Any) -> set[str]:
@@ -555,4 +756,4 @@ def _package_version() -> str:
     try:
         return version("pytransformkit")
     except PackageNotFoundError:
-        return "0.2.0b1"
+        return "0.2.0"

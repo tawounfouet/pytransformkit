@@ -333,7 +333,9 @@ def _aggregate_frame(
     if function is WindowFunction.MEAN:
         return series.mean()
 
-    raise AdapterError(f"Unsupported Pandas aggregate window function {function.value!r}.")
+    raise AdapterError(
+        f"Unsupported Pandas aggregate window function {function.value!r}."
+    )
 
 
 def _tuple_equal(

@@ -2,11 +2,11 @@
 
 from pytransformkit.domain.engines.capabilities import EngineCapability
 from pytransformkit.domain.engines.descriptor import EngineDescriptor
-from pytransformkit.domain.pipelines.plan import LogicalPlan
 from pytransformkit.domain.expressions.window import (
     WindowExpression,
     WindowFrameKind,
 )
+from pytransformkit.domain.pipelines.plan import LogicalPlan
 from pytransformkit.domain.transformations.aggregation import AggregateTransformation
 from pytransformkit.domain.transformations.base import TransformationSpec
 from pytransformkit.domain.transformations.casting import CastTransformation

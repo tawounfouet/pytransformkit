@@ -8,6 +8,7 @@ from datetime import date, datetime
 from decimal import Decimal
 
 from pytransformkit.domain.data.data_types import DataType
+from pytransformkit.domain.expressions.aggregate import AggregateExpression
 from pytransformkit.domain.expressions.base import Expression
 from pytransformkit.domain.expressions.binary import BinaryExpression
 from pytransformkit.domain.expressions.functions import FunctionCall
@@ -29,6 +30,12 @@ def expression_fingerprint(expression: Expression) -> Fingerprint:
 
 
 def canonical_expression(expression: Expression) -> str:
+    if isinstance(expression, AggregateExpression):
+        argument = (
+            "*" if expression.argument is None else canonical_expression(expression.argument)
+        )
+        return f"aggregate:{expression.function.value}:({argument})"
+
     if isinstance(expression, ColumnReference):
         return f"column:{_quoted(str(expression.path))}"
 

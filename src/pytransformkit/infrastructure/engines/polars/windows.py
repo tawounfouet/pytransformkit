@@ -258,11 +258,7 @@ def _offset_expression(
         partition_columns,
     )
 
-    default_value = (
-        pl.lit(None)
-        if default_column is None
-        else pl.col(default_column)
-    )
+    default_value = pl.lit(None) if default_column is None else pl.col(default_column)
 
     return (
         pl.when(shifted_position.is_not_null())
@@ -351,9 +347,7 @@ def _full_partition_aggregate(
     if function is WindowFunction.MEAN:
         return _over(value.mean().cast(pl.Float64), partition_columns)
 
-    raise AdapterError(
-        f"Unsupported full-partition function {function.value!r}."
-    )
+    raise AdapterError(f"Unsupported full-partition function {function.value!r}.")
 
 
 def _derive_cumulative(
@@ -385,20 +379,14 @@ def _derive_cumulative(
     )
 
     if function is WindowFunction.COUNT:
-        return frame.with_columns(
-            count_expression.cast(pl.Int64).alias(field_name)
-        )
+        return frame.with_columns(count_expression.cast(pl.Int64).alias(field_name))
 
     if function is WindowFunction.SUM:
         total = _over(
             value.fill_null(0).cum_sum(),
             partition_columns,
         )
-        result = (
-            pl.when(count_expression == 0)
-            .then(pl.lit(None))
-            .otherwise(total)
-        )
+        result = pl.when(count_expression == 0).then(pl.lit(None)).otherwise(total)
         return frame.with_columns(result.alias(field_name))
 
     if function in {

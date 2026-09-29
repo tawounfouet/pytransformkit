@@ -8,6 +8,7 @@ from typing import ClassVar
 
 from pytransformkit.domain.expressions.aggregate import AggregateExpression
 from pytransformkit.domain.expressions.base import Expression
+from pytransformkit.domain.expressions.references import ColumnReference
 from pytransformkit.domain.transformations.base import TransformationSpec
 from pytransformkit.domain.transformations.properties import (
     CardinalityEffect,
@@ -92,3 +93,13 @@ class AggregateTransformation(TransformationSpec):
                 for name, expression in metrics.items()
             ),
         )
+
+
+def group_output_name(
+    expression: Expression,
+    index: int,
+) -> str:
+    """Return the deterministic output field name for one grouping Expression."""
+    if isinstance(expression, ColumnReference):
+        return str(expression.path)
+    return f"group_{index}"

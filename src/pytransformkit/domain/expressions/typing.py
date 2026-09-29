@@ -94,8 +94,7 @@ class ExpressionTypeResolver:
 
         if isinstance(expression, WindowExpression):
             raise ExpressionTypeError(
-                "Window Expressions are only valid as direct derived-field "
-                "expressions."
+                "Window Expressions are only valid as direct derived-field expressions."
             )
 
         if isinstance(expression, ColumnReference):
@@ -337,8 +336,7 @@ class WindowExpressionTypeResolver:
     ) -> None:
         self._row_resolver = row_resolver or ExpressionTypeResolver()
         self._aggregate_resolver = (
-            aggregate_resolver
-            or AggregateExpressionTypeResolver(self._row_resolver)
+            aggregate_resolver or AggregateExpressionTypeResolver(self._row_resolver)
         )
 
     def resolve(
@@ -347,9 +345,7 @@ class WindowExpressionTypeResolver:
         schema: Schema,
     ) -> ExpressionType:
         if not isinstance(expression, WindowExpression):
-            raise TypeError(
-                "WindowExpressionTypeResolver requires a WindowExpression."
-            )
+            raise TypeError("WindowExpressionTypeResolver requires a WindowExpression.")
 
         validate_window_expression(expression)
 

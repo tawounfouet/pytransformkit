@@ -203,34 +203,23 @@ def _derive_rank(
     ):
         current_value = pl.col(column)
         previous_value = pl.col(previous)
-        same = (
-            (current_value == previous_value)
-            .fill_null(
-                current_value.is_null()
-                & previous_value.is_null()
-            )
+        same = (current_value == previous_value).fill_null(
+            current_value.is_null() & previous_value.is_null()
         )
         same_order = same_order & same
 
-    new_peer_group = (
-        (pl.col(row_number_column) == 1)
-        | ~same_order
-    )
+    new_peer_group = (pl.col(row_number_column) == 1) | ~same_order
 
     flag_column = _internal_name(existing, "peer_group_start")
     existing.add(flag_column)
-    frame = frame.with_columns(
-        new_peer_group.cast(pl.Int64).alias(flag_column)
-    )
+    frame = frame.with_columns(new_peer_group.cast(pl.Int64).alias(flag_column))
 
     if expression.function is WindowFunction.DENSE_RANK:
         rank_expression = _over(
             pl.col(flag_column).cum_sum(),
             partition_columns,
         )
-        return frame.with_columns(
-            rank_expression.cast(pl.Int64).alias(field_name)
-        )
+        return frame.with_columns(rank_expression.cast(pl.Int64).alias(field_name))
 
     candidate_column = _internal_name(existing, "rank_candidate")
     existing.add(candidate_column)
@@ -244,9 +233,7 @@ def _derive_rank(
         pl.col(candidate_column).forward_fill(),
         partition_columns,
     )
-    return frame.with_columns(
-        rank_expression.cast(pl.Int64).alias(field_name)
-    )
+    return frame.with_columns(rank_expression.cast(pl.Int64).alias(field_name))
 
 
 def _offset_expression(

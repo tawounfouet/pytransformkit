@@ -1,4 +1,4 @@
-"""Local end-to-end experimentation with PyTransformKit.
+"""Local end-to-end experimentation with the canonical PyTransformKit V1 API.
 
 Run from the repository root after installing the development and engine extras:
 
@@ -11,25 +11,16 @@ from __future__ import annotations
 import pandas as pd
 import polars as pl
 
-from pytransformkit import (
-    EngineRegistry,
-    ExecutionContext,
-    ExecutionMode,
-    RunPipelineService,
-)
+from pytransformkit import InputBinding, TransformationPlan, TransformationRuntime
+from pytransformkit.adapters.pandas import PandasEngineAdapter
+from pytransformkit.adapters.polars import PolarsEngineAdapter
 from pytransformkit.domain.data.data_types import IntegerType, StringType
 from pytransformkit.domain.data.field import Field
 from pytransformkit.domain.data.schema import Schema
-from pytransformkit.domain.pipelines import Pipeline, PipelinePlanner
+from pytransformkit.engines import EngineRegistry
 from pytransformkit.functions import col, lower, trim
-from pytransformkit.infrastructure.engines.pandas import (
-    PandasAdapter,
-    PandasDatasetHandle,
-)
-from pytransformkit.infrastructure.engines.polars import (
-    PolarsAdapter,
-    PolarsDatasetHandle,
-)
+from pytransformkit.planning import TransformationCompiler
+from pytransformkit.runtime import ExecutionMode
 
 RECORDS = [
     {
@@ -59,42 +50,34 @@ def build_schema() -> Schema:
     """Create the logical, engine-independent input Schema."""
     return Schema(
         fields=(
-            Field(
-                "customer_id",
-                IntegerType(),
-                nullable=False,
-            ),
-            Field(
-                "email",
-                StringType(),
-                nullable=True,
-            ),
-            Field(
-                "status",
-                StringType(),
-                nullable=False,
-            ),
+            Field("customer_id", IntegerType(), nullable=False),
+            Field("email", StringType(), nullable=True),
+            Field("status", StringType(), nullable=False),
         )
     )
 
 
-def build_pipeline(schema: Schema) -> Pipeline:
-    """Build one Pipeline that can execute on multiple engines."""
-    return (
-        Pipeline.create(
-            "customers",
-            schema,
-        )
-        .filter(col("status") == "ACTIVE")
-        .derive(
-            "normalized_email",
-            lower(trim(col("email"))),
-        )
-        .select(
-            "customer_id",
-            "normalized_email",
-        )
+def build_plan(schema: Schema) -> TransformationPlan:
+    """Build one TransformationPlan that can execute on multiple engines."""
+    builder = TransformationPlan.builder("customers")
+    customers = builder.input("customers", schema=schema)
+    active = builder.filter(
+        "active_customers",
+        source=customers,
+        where=col("status") == "ACTIVE",
     )
+    normalized = builder.derive(
+        "normalize_email",
+        source=active,
+        field_name="normalized_email",
+        expression=lower(trim(col("email"))),
+    )
+    selected = builder.select(
+        "customer_view",
+        source=normalized,
+        columns=("customer_id", "normalized_email"),
+    )
+    return builder.output("customers_out", selected).build()
 
 
 def print_section(title: str) -> None:
@@ -106,7 +89,7 @@ def print_section(title: str) -> None:
 
 def main() -> None:
     schema = build_schema()
-    pipeline = build_pipeline(schema)
+    transformation_plan = build_plan(schema)
 
     pandas_df = pd.DataFrame(RECORDS)
     polars_df = pl.DataFrame(RECORDS)
@@ -114,25 +97,33 @@ def main() -> None:
     print_section("1. Logical Schema")
     print(schema)
 
-    print_section("2. Pipeline")
-    print(pipeline)
+    print_section("2. TransformationPlan")
+    print(transformation_plan)
 
     print_section("3. LogicalPlan — no physical data execution")
-    plan = PipelinePlanner().plan(pipeline)
-    print("Pipeline:", plan.pipeline_name)
-    print("Output Schema:", plan.output_schema.names())
-    print("Node kinds:", [node.kind.value for node in plan.nodes])
+    logical_plan = TransformationCompiler().compile(transformation_plan)
+    print("Plan:", logical_plan.plan_name)
+    print("Inputs:", logical_plan.input_names)
+    print("Outputs:", logical_plan.output_names)
+    print("Output Schema:", logical_plan.output_schema.names())
+    print("Node kinds:", [node.kind.value for node in logical_plan.nodes])
 
     registry = EngineRegistry()
-    registry.register(PandasAdapter())
-    registry.register(PolarsAdapter())
-    service = RunPipelineService(registry)
+    registry.register(PandasEngineAdapter())
+    registry.register(PolarsEngineAdapter())
+    runtime = TransformationRuntime(engines=registry)
 
     print_section("4. Pandas execution")
-    pandas_result = service.run(
-        pipeline,
-        PandasDatasetHandle(pandas_df),
-        engine_id="pandas",
+    pandas_result = runtime.execute(
+        transformation_plan,
+        engine="pandas",
+        inputs={
+            "customers": InputBinding.from_native(
+                "customers",
+                pandas_df,
+                engine="pandas",
+            )
+        },
     )
     pandas_output = pandas_result.output_handle.dataframe
     print(pandas_output)
@@ -141,10 +132,16 @@ def main() -> None:
     print("Output Schema:", pandas_result.output_schema.names())
 
     print_section("5. Polars eager execution")
-    polars_result = service.run(
-        pipeline,
-        PolarsDatasetHandle(polars_df),
-        engine_id="polars",
+    polars_result = runtime.execute(
+        transformation_plan,
+        engine="polars",
+        inputs={
+            "customers": InputBinding.from_native(
+                "customers",
+                polars_df,
+                engine="polars",
+            )
+        },
     )
     polars_output = polars_result.output_handle.frame
     print(polars_output)
@@ -164,13 +161,17 @@ def main() -> None:
         raise AssertionError("Pandas and Polars produced different logical results.")
 
     print_section("7. Polars lazy execution")
-    lazy_result = service.run(
-        pipeline,
-        PolarsDatasetHandle(polars_df.lazy()),
-        engine_id="polars",
-        context=ExecutionContext(
-            mode=ExecutionMode.LAZY,
-        ),
+    lazy_result = runtime.execute(
+        transformation_plan,
+        engine="polars",
+        inputs={
+            "customers": InputBinding.from_native(
+                "customers",
+                polars_df.lazy(),
+                engine="polars",
+            )
+        },
+        mode=ExecutionMode.LAZY,
     )
     lazy_frame = lazy_result.output_handle.frame
 

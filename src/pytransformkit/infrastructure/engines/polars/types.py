@@ -64,7 +64,8 @@ class PolarsTypeMapper:
                 time_zone=data_type.timezone,
             )
         if isinstance(data_type, DurationType):
-            return pl.Duration(time_unit=data_type.unit)
+            physical_unit = "us" if data_type.unit == "s" else data_type.unit
+            return pl.Duration(time_unit=physical_unit)
         if isinstance(data_type, ListType):
             return pl.List(self.to_native(data_type.element_type))
         if isinstance(data_type, StructType):

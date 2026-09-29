@@ -26,11 +26,7 @@ def _schema() -> Schema:
         fields=(
             Field(
                 "profile",
-                StructType(
-                    fields=(
-                        StructField("city", StringType(), nullable=False),
-                    )
-                ),
+                StructType(fields=(StructField("city", StringType(), nullable=False),)),
                 nullable=True,
             ),
             Field(

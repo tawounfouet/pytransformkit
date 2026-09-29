@@ -43,11 +43,7 @@ def _right_schema() -> Schema:
 
 
 def _set_schema() -> Schema:
-    return Schema(
-        fields=(
-            Field("value", IntegerType(), nullable=False),
-        )
-    )
+    return Schema(fields=(Field("value", IntegerType(), nullable=False),))
 
 
 def _runtime(adapter: object) -> TransformationRuntime:
@@ -73,10 +69,7 @@ def _normalize(
     records: list[dict[str, object]],
 ) -> list[dict[str, object]]:
     normalized = [
-        {
-            key: _normalize_value(value)
-            for key, value in record.items()
-        }
+        {key: _normalize_value(value) for key, value in record.items()}
         for record in records
     ]
     return sorted(
@@ -106,11 +99,7 @@ def _execute_pandas(
             ),
         },
     )
-    return _normalize(
-        result.output_handle.dataframe.to_dict(
-            orient="records"
-        )
-    )
+    return _normalize(result.output_handle.dataframe.to_dict(orient="records"))
 
 
 def _execute_polars(
@@ -134,9 +123,7 @@ def _execute_polars(
             ),
         },
     )
-    return _normalize(
-        result.output_handle.frame.to_dicts()
-    )
+    return _normalize(result.output_handle.frame.to_dicts())
 
 
 def _join_plan(
@@ -241,10 +228,7 @@ def test_semi_and_anti_join_semantics_match_across_engines(
     polars_records = _execute_polars(plan, left, right)
 
     assert pandas_records == polars_records
-    assert all(
-        set(record) == {"customer_id", "status"}
-        for record in pandas_records
-    )
+    assert all(set(record) == {"customer_id", "status"} for record in pandas_records)
 
 
 def test_cross_join_semantics_match_across_engines() -> None:
@@ -301,9 +285,7 @@ def test_null_join_policy_never_match_is_cross_engine_equivalent() -> None:
         {"customer_id": None, "status": "RIGHT_NULL", "amount": 99},
         {"customer_id": 1, "status": "RIGHT", "amount": 10},
     ]
-    plan = _join_plan(
-        nulls=NullJoinPolicy.NEVER_MATCH
-    )
+    plan = _join_plan(nulls=NullJoinPolicy.NEVER_MATCH)
 
     pandas_records = _execute_pandas(plan, left, right)
     polars_records = _execute_polars(plan, left, right)

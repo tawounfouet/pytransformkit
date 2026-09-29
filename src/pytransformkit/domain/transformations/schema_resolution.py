@@ -5,13 +5,14 @@ from dataclasses import replace
 from pytransformkit.domain.data.data_types import BooleanType
 from pytransformkit.domain.data.field import Field
 from pytransformkit.domain.data.schema import Schema
-from pytransformkit.domain.expressions.base import Expression
-from pytransformkit.domain.expressions.references import ColumnReference
 from pytransformkit.domain.expressions.typing import (
     AggregateExpressionTypeResolver,
     ExpressionTypeResolver,
 )
-from pytransformkit.domain.transformations.aggregation import AggregateTransformation
+from pytransformkit.domain.transformations.aggregation import (
+    AggregateTransformation,
+    group_output_name,
+)
 from pytransformkit.domain.transformations.base import TransformationSpec
 from pytransformkit.domain.transformations.casting import (
     CastPolicy,
@@ -212,7 +213,7 @@ class OutputSchemaResolver:
                 expression,
                 input_schema,
             )
-            name = _group_field_name(expression, index)
+            name = group_output_name(expression, index)
             if name in used_names:
                 raise FieldCollisionError(name)
             fields.append(
@@ -300,15 +301,6 @@ class OutputSchemaResolver:
             used_names.add(output_name)
 
         return Schema(tuple(fields))
-
-
-def _group_field_name(
-    expression: Expression,
-    index: int,
-) -> str:
-    if isinstance(expression, ColumnReference):
-        return str(expression.path)
-    return f"group_{index}"
 
 
 def _validate_set_compatible(left: Schema, right: Schema) -> None:

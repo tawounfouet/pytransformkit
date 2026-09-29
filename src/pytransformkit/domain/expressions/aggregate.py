@@ -34,6 +34,4 @@ class AggregateExpression(Expression):
         if self.argument is not None and not isinstance(self.argument, Expression):
             raise TypeError("AggregateExpression argument must be an Expression.")
         if self.function is not AggregateFunction.COUNT and self.argument is None:
-            raise ValueError(
-                f"{self.function.value} requires an aggregate argument."
-            )
+            raise ValueError(f"{self.function.value} requires an aggregate argument.")

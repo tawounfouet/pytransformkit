@@ -51,9 +51,7 @@ def test_builder_creates_multi_input_join_plan() -> None:
         "customers",
         "orders",
     )
-    assert tuple(node.name for node in plan.output_nodes) == (
-        "customer_mart",
-    )
+    assert tuple(node.name for node in plan.output_nodes) == ("customer_mart",)
 
     join_node = next(
         node
@@ -85,11 +83,7 @@ def test_plan_allows_branching_to_multiple_outputs() -> None:
         where=col("email").is_not_null(),
     )
 
-    plan = (
-        builder.output("ids", only_ids)
-        .output("with_email", active)
-        .build()
-    )
+    plan = builder.output("ids", only_ids).output("with_email", active).build()
 
     assert tuple(node.name for node in plan.output_nodes) == (
         "ids",
@@ -138,9 +132,5 @@ def test_transformation_nodes_can_have_authoring_names() -> None:
     )
     plan = builder.output("out", selected).build()
 
-    node = next(
-        item
-        for item in plan.nodes
-        if isinstance(item, TransformationNode)
-    )
+    node = next(item for item in plan.nodes if isinstance(item, TransformationNode))
     assert node.name == "customer_ids"

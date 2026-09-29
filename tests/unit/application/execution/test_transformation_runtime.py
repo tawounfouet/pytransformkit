@@ -21,9 +21,9 @@ from pytransformkit.application.ports import PhysicalHandle
 from pytransformkit.domain.data.data_types import IntegerType
 from pytransformkit.domain.data.field import Field
 from pytransformkit.domain.data.schema import Schema
-from pytransformkit.domain.engines import EngineCapability, EngineDescriptor
+from pytransformkit.domain.engines import EngineDescriptor
 from pytransformkit.domain.pipelines.plan import LogicalPlan
-from pytransformkit.errors import BindingError
+from pytransformkit.errors import BindingError, EngineNotFoundError
 
 
 @dataclass(frozen=True, slots=True)
@@ -161,7 +161,7 @@ def test_runtime_does_not_fallback_to_registered_engine() -> None:
     adapter = FakeMultiAdapter()
     runtime = _runtime(adapter)
 
-    with pytest.raises(Exception, match="not registered"):
+    with pytest.raises(EngineNotFoundError, match="not registered"):
         runtime.execute(
             _plan(),
             engine="missing",

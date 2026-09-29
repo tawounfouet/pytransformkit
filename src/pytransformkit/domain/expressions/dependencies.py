@@ -55,10 +55,10 @@ class ExpressionDependencyExtractor:
             return self.extract(expression.operand)
 
         if isinstance(expression, FunctionCall):
-            dependencies: frozenset[FieldPath] = frozenset()
+            function_dependencies: frozenset[FieldPath] = frozenset()
             for argument in expression.arguments:
-                dependencies = dependencies | self.extract(argument)
-            return dependencies
+                function_dependencies = function_dependencies | self.extract(argument)
+            return function_dependencies
 
         raise ExpressionError(
             f"Unsupported Expression node {type(expression).__name__!r}."

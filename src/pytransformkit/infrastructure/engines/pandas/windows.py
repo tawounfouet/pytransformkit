@@ -25,9 +25,7 @@ class PandasWindowCompiler:
         self,
         expression_compiler: PandasExpressionCompiler | None = None,
     ) -> None:
-        self._expression_compiler = (
-            expression_compiler or PandasExpressionCompiler()
-        )
+        self._expression_compiler = expression_compiler or PandasExpressionCompiler()
 
     def compile(
         self,
@@ -37,9 +35,7 @@ class PandasWindowCompiler:
         if not isinstance(dataframe, pd.DataFrame):
             raise TypeError("Pandas windows require a pandas.DataFrame.")
 
-        work = pd.DataFrame(
-            {"__ptk_position__": range(len(dataframe))}
-        )
+        work = pd.DataFrame({"__ptk_position__": range(len(dataframe))})
 
         partition_columns: list[str] = []
         for index, field in enumerate(expression.spec.partition_keys):
@@ -103,9 +99,7 @@ class PandasWindowCompiler:
             WindowFunction.LEAD,
         }:
             if argument_column is None:
-                raise AdapterError(
-                    f"{expression.function.value} requires an argument."
-                )
+                raise AdapterError(f"{expression.function.value} requires an argument.")
             values = _offset(
                 work,
                 groups,
@@ -180,8 +174,7 @@ def _group_positions(
         sort=False,
     ).indices
     return tuple(
-        tuple(int(position) for position in positions)
-        for positions in groups.values()
+        tuple(int(position) for position in positions) for positions in groups.values()
     )
 
 
@@ -212,8 +205,7 @@ def _rank(
 
         for ordinal, position in enumerate(positions, start=1):
             current = tuple(
-                dataframe.iloc[position][column]
-                for column in order_columns
+                dataframe.iloc[position][column] for column in order_columns
             )
             if previous is None or not _tuple_equal(previous, current):
                 current_rank = ordinal
@@ -301,9 +293,7 @@ def _frame_bounds(
             raise AdapterError("Moving ROWS frame is missing its PRECEDING offset.")
         return max(0, current_index - frame.start.offset), current_index + 1
 
-    raise AdapterError(
-        f"Unsupported Pandas frame kind {frame_kind.value!r}."
-    )
+    raise AdapterError(f"Unsupported Pandas frame kind {frame_kind.value!r}.")
 
 
 def _aggregate_frame(

@@ -10,9 +10,14 @@ from pytransformkit.domain.data.data_types import (
     DataType,
     DateType,
     DecimalType,
+    DurationType,
     FloatType,
     IntegerType,
+    ListType,
+    MapType,
     StringType,
+    StructField,
+    StructType,
     TimestampType,
     TimeType,
     UnknownType,
@@ -58,6 +63,19 @@ class PolarsTypeMapper:
                 time_unit=data_type.unit,
                 time_zone=data_type.timezone,
             )
+        if isinstance(data_type, DurationType):
+            return pl.Duration(time_unit=data_type.unit)
+        if isinstance(data_type, ListType):
+            return pl.List(self.to_native(data_type.element_type))
+        if isinstance(data_type, StructType):
+            return pl.Struct(
+                [
+                    pl.Field(field.name, self.to_native(field.data_type))
+                    for field in data_type.fields
+                ]
+            )
+        if isinstance(data_type, MapType):
+            raise AdapterError("Polars MapType mapping is not supported.")
         if isinstance(data_type, BinaryType):
             return pl.Binary
         if isinstance(data_type, UnknownType):
@@ -103,6 +121,27 @@ class PolarsTypeMapper:
             return TimestampType(
                 unit=dtype.time_unit,
                 timezone=dtype.time_zone,
+            )
+
+        if isinstance(dtype, pl.Duration):
+            return DurationType(unit=dtype.time_unit)
+
+        if isinstance(dtype, pl.List):
+            return ListType(
+                element_type=self.from_native(dtype.inner),
+                element_nullable=True,
+            )
+
+        if isinstance(dtype, pl.Struct):
+            return StructType(
+                fields=tuple(
+                    StructField(
+                        name=field.name,
+                        data_type=self.from_native(field.dtype),
+                        nullable=True,
+                    )
+                    for field in dtype.fields
+                )
             )
 
         if isinstance(dtype, pl.Decimal):

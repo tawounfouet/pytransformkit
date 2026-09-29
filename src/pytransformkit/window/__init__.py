@@ -44,7 +44,7 @@ def asc(
 def desc(
     field: str,
     *,
-    nulls: NullOrder = NullOrder.LAST,
+    nulls: WindowNullOrder = WindowNullOrder.LAST,
 ) -> WindowOrderKey:
     """Create a descending window order key."""
     return WindowOrderKey(

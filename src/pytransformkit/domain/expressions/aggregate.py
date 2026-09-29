@@ -28,7 +28,9 @@ class AggregateExpression(Expression):
 
     def __post_init__(self) -> None:
         if not isinstance(self.function, AggregateFunction):
-            raise TypeError("AggregateExpression function must be an AggregateFunction.")
+            raise TypeError(
+                "AggregateExpression function must be an AggregateFunction."
+            )
         if self.argument is not None and not isinstance(self.argument, Expression):
             raise TypeError("AggregateExpression argument must be an Expression.")
         if self.function is not AggregateFunction.COUNT and self.argument is None:

@@ -2,7 +2,7 @@
 
 PyTransformKit lets you define engine-neutral transformation semantics once, compile them into a LogicalPlan, and execute them explicitly through supported physical engines.
 
-The current development line targets **0.2.0a1** and includes LOT-11: the V1 public model migration plus portable relational transformations.
+The current development line targets **0.2.0a2** and includes LOT-12: typed aggregation and grouping on top of the V1 public model and relational core.
 
 The canonical path is:
 
@@ -383,7 +383,60 @@ Set operations require compatible logical Schemas.
 
 ---
 
-## 10. InputBinding, ResourceReference and OutputBinding
+## 10. Aggregation and grouping
+
+LOT-12 adds a dedicated aggregate-expression context. Aggregate functions are authored through `pytransformkit.functions`:
+
+~~~python
+from pytransformkit import functions as fn
+from pytransformkit.functions import col
+
+builder = TransformationPlan.builder("order_stats")
+
+orders = builder.input(
+    "orders",
+    schema=orders_schema,
+)
+
+stats = builder.aggregate(
+    "order_stats",
+    source=orders,
+    group_by=(
+        col("customer_id"),
+    ),
+    metrics={
+        "order_count": fn.count(),
+        "paid_order_count": fn.count(col("order_id")),
+        "distinct_status_count": fn.count_distinct(col("status")),
+        "revenue": fn.sum(col("amount")),
+        "minimum_amount": fn.min(col("amount")),
+        "maximum_amount": fn.max(col("amount")),
+        "mean_amount": fn.mean(col("amount")),
+    },
+)
+
+aggregate_plan = builder.output(
+    "stats",
+    stats,
+).build()
+~~~
+
+The aggregate context is validated during logical compilation. Row-level expressions cannot embed aggregate functions accidentally, and aggregate arguments cannot contain nested aggregate expressions.
+
+Current NULL semantics are explicit:
+
+- `count()` counts rows;
+- `count(expr)` counts non-null values;
+- `count_distinct(expr)` counts distinct non-null values;
+- `sum`, `min`, `max`, and `mean` ignore null inputs;
+- groups containing only null values yield null for `sum`, `min`, `max`, and `mean`;
+- global aggregation over an empty dataset returns one row, with counts equal to zero and nullable aggregates equal to null.
+
+Pandas and Polars are qualified against the same normalized semantics.
+
+---
+
+## 11. InputBinding, ResourceReference and OutputBinding
 
 InputBinding separates the logical Dataset model from physical data supplied at runtime.
 
@@ -403,7 +456,7 @@ This distinction prevents PyTransformKit from accidentally taking ownership of i
 
 ---
 
-## 11. Transformations currently available
+## 12. Transformations currently available
 
 Current portable Transformation semantics include:
 
@@ -420,7 +473,8 @@ Current portable Transformation semantics include:
 - join;
 - union;
 - intersect;
-- except.
+- except;
+- aggregate/group by.
 
 The Expression DSL currently includes:
 
@@ -434,11 +488,17 @@ The Expression DSL currently includes:
 - lower();
 - upper();
 - trim();
-- concat().
+- concat();
+- count();
+- count_distinct();
+- sum();
+- min();
+- max();
+- mean() / avg().
 
 ---
 
-## 12. Run the local experimentation script
+## 13. Run the local experimentation script
 
 The repository includes:
 
@@ -465,7 +525,7 @@ It demonstrates:
 
 ---
 
-## 13. Run the notebook
+## 14. Run the notebook
 
 An interactive equivalent is available at:
 
@@ -478,7 +538,7 @@ Start your preferred Jupyter frontend and open the notebook from the repository 
 
 ---
 
-## 14. Run the test suites
+## 15. Run the test suites
 
 ### Complete default suite
 
@@ -517,11 +577,10 @@ The CI matrix currently verifies Python 3.11, 3.12, 3.13 and 3.14 plus dedicated
 
 ---
 
-## 15. What comes next
+## 16. What comes next
 
 The revised V1 roadmap continues with:
 
-- **LOT-12** — Aggregation and Grouping;
 - **LOT-13** — Analytical Windows;
 - **LOT-14** — Reshape / Temporal / Nested;
 - **LOT-15** — Data Quality;
@@ -547,7 +606,7 @@ docs/specifications/PYTRANSFORMKIT_V1_REVISED_IMPLEMENTATION_ROADMAP.md
 
 ---
 
-## 16. Recommended experimentation workflow
+## 17. Recommended experimentation workflow
 
 While PyTransformKit is pre-1.0:
 

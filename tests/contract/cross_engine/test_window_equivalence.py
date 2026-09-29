@@ -142,9 +142,7 @@ def _window_plan() -> TransformationPlan:
         "partition_sum",
         source=result,
         field_name="partition_sum",
-        expression=window.sum(col("amount")).over(
-            window.partition_by("customer_id")
-        ),
+        expression=window.sum(col("amount")).over(window.partition_by("customer_id")),
     )
     result = builder.derive(
         "cumulative_count",
@@ -181,9 +179,7 @@ def _window_plan() -> TransformationPlan:
 
 
 def _descending_plan() -> TransformationPlan:
-    spec = window.partition_by("customer_id").order_by(
-        window.desc("ordered_at")
-    )
+    spec = window.partition_by("customer_id").order_by(window.desc("ordered_at"))
     builder = TransformationPlan.builder("descending_rank")
     orders = builder.input("orders", schema=_schema())
     result = builder.derive(
@@ -227,9 +223,7 @@ def _pandas_execute(plan: TransformationPlan) -> list[dict[str, object]]:
             )
         },
     )
-    return _normalize(
-        result.output_handle.dataframe.to_dict(orient="records")
-    )
+    return _normalize(result.output_handle.dataframe.to_dict(orient="records"))
 
 
 def _polars_execute(
@@ -268,11 +262,7 @@ def test_common_window_suite_matches_pandas_and_polars() -> None:
 
     assert pandas_records == polars_records
 
-    first_customer = [
-        record
-        for record in pandas_records
-        if record["customer_id"] == 1
-    ]
+    first_customer = [record for record in pandas_records if record["customer_id"] == 1]
 
     assert [record["row_number"] for record in first_customer] == [2, 1, 3, 4]
     assert [record["rank"] for record in first_customer] == [2, 1, 2, 4]
@@ -325,11 +315,7 @@ def test_descending_window_order_matches_engines() -> None:
 
     assert pandas_records == polars_records
 
-    first_customer = [
-        record
-        for record in pandas_records
-        if record["customer_id"] == 1
-    ]
+    first_customer = [record for record in pandas_records if record["customer_id"] == 1]
     assert [record["row_number_desc"] for record in first_customer] == [
         2,
         4,

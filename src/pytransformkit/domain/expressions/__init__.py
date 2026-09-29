@@ -31,8 +31,22 @@ from pytransformkit.domain.expressions.typing import (
     AggregateExpressionTypeResolver,
     ExpressionType,
     ExpressionTypeResolver,
+    WindowExpressionTypeResolver,
 )
 from pytransformkit.domain.expressions.unary import UnaryExpression
+from pytransformkit.domain.expressions.window import (
+    WindowBoundary,
+    WindowBoundaryKind,
+    WindowDeterminism,
+    WindowExpression,
+    WindowFrame,
+    WindowFrameKind,
+    WindowFrameMode,
+    WindowFunction,
+    WindowFunctionCall,
+    WindowOrderKey,
+    WindowSpec,
+)
 
 __all__ = [
     "AggregateExpression",
@@ -52,6 +66,18 @@ __all__ = [
     "Literal",
     "UnaryExpression",
     "UnaryOperator",
+    "WindowBoundary",
+    "WindowBoundaryKind",
+    "WindowDeterminism",
+    "WindowExpression",
+    "WindowExpressionTypeResolver",
+    "WindowFrame",
+    "WindowFrameKind",
+    "WindowFrameMode",
+    "WindowFunction",
+    "WindowFunctionCall",
+    "WindowOrderKey",
+    "WindowSpec",
     "canonical_expression",
     "ensure_expression",
     "expression_fingerprint",

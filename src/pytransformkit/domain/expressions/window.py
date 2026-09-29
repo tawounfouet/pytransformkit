@@ -167,9 +167,7 @@ class WindowOrderKey:
         if not isinstance(self.field, FieldPath):
             raise TypeError("Window order field must be a FieldPath.")
         if not isinstance(self.direction, WindowSortDirection):
-            raise TypeError(
-                "Window order direction must be a WindowSortDirection."
-            )
+            raise TypeError("Window order direction must be a WindowSortDirection.")
         if not isinstance(self.nulls, WindowNullOrder):
             raise TypeError("Window null ordering must be a WindowNullOrder.")
 
@@ -283,25 +281,25 @@ class WindowFunctionCall:
             if self.offset <= 0:
                 raise ValueError("Window offset must be greater than zero.")
         elif self.offset != 1:
-            raise ValueError(
-                f"{self.function.value} does not accept an offset."
-            )
-
-        if self.function in {
-            WindowFunction.SUM,
-            WindowFunction.MIN,
-            WindowFunction.MAX,
-            WindowFunction.MEAN,
-        } and self.argument is None:
-            raise ValueError(f"{self.function.value} requires an argument.")
+            raise ValueError(f"{self.function.value} does not accept an offset.")
 
         if (
-            self.default is not None
-            and self.function not in {WindowFunction.LAG, WindowFunction.LEAD}
+            self.function
+            in {
+                WindowFunction.SUM,
+                WindowFunction.MIN,
+                WindowFunction.MAX,
+                WindowFunction.MEAN,
+            }
+            and self.argument is None
         ):
-            raise ValueError(
-                f"{self.function.value} does not accept a default value."
-            )
+            raise ValueError(f"{self.function.value} requires an argument.")
+
+        if self.default is not None and self.function not in {
+            WindowFunction.LAG,
+            WindowFunction.LEAD,
+        }:
+            raise ValueError(f"{self.function.value} does not accept a default value.")
 
     def over(self, spec: WindowSpec) -> WindowExpression:
         """Bind this function call to one immutable WindowSpec."""

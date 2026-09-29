@@ -47,20 +47,30 @@ class TransformationId(Identifier):
 
 
 @dataclass(frozen=True, slots=True)
-class PipelineId(Identifier):
-    """Identity of a Pipeline."""
+class TransformationPlanId(Identifier):
+    """Identity of a TransformationPlan authoring value."""
+
+
+# Pre-1.0 internal compatibility name. The canonical V1 name is
+# TransformationPlanId.
+PipelineId = TransformationPlanId
 
 
 @dataclass(frozen=True, slots=True)
 class NodeId(Identifier):
-    """Identity of a Pipeline node."""
+    """Identity of an internal logical-plan node."""
 
 
 @dataclass(frozen=True, slots=True)
 class StepId(Identifier):
-    """Identity of a logical or runtime step."""
+    """Identity of one logical transformation occurrence."""
 
 
 @dataclass(frozen=True, slots=True)
-class ExecutionId(Identifier):
-    """Identity of an execution."""
+class TransformationExecutionId(Identifier):
+    """Identity of one semantic TransformationRuntime execution."""
+
+
+# Pre-1.0 internal compatibility name. The canonical V1 name is
+# TransformationExecutionId.
+ExecutionId = TransformationExecutionId

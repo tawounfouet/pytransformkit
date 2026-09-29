@@ -1,4 +1,9 @@
-"""Logical Pipeline node model."""
+"""Internal logical-plan node model.
+
+These graph nodes are implementation details shared by the legacy Pipeline facade
+and the V1 TransformationPlan authoring model. They are intentionally not part
+of the stable package-root API.
+"""
 
 from dataclasses import dataclass
 from enum import StrEnum
@@ -16,21 +21,21 @@ class PipelineNodeKind(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class PipelineNode:
-    """Base immutable Pipeline graph node."""
+    """Base immutable internal logical-plan node."""
 
     id: NodeId
     kind: PipelineNodeKind
 
     def __post_init__(self) -> None:
         if not isinstance(self.id, NodeId):
-            raise TypeError("Pipeline node id must be a NodeId.")
+            raise TypeError("Logical node id must be a NodeId.")
         if not isinstance(self.kind, PipelineNodeKind):
-            raise TypeError("Pipeline node kind must be a PipelineNodeKind.")
+            raise TypeError("Logical node kind must be a PipelineNodeKind.")
 
 
 @dataclass(frozen=True, slots=True)
 class InputNode(PipelineNode):
-    """Single logical Pipeline input for the initial MVP."""
+    """One named logical input."""
 
     name: str
     schema: Schema
@@ -56,10 +61,11 @@ class InputNode(PipelineNode):
 
 @dataclass(frozen=True, slots=True)
 class TransformationNode(PipelineNode):
-    """One occurrence of a Transformation inside a Pipeline."""
+    """One occurrence of a Transformation inside a logical plan."""
 
     step_id: StepId
     transformation: TransformationSpec
+    name: str | None = None
 
     def __post_init__(self) -> None:
         super(TransformationNode, self).__post_init__()
@@ -73,23 +79,28 @@ class TransformationNode(PipelineNode):
             raise TypeError(
                 "Transformation node transformation must be a TransformationSpec."
             )
+        if self.name is not None and not self.name.strip():
+            raise ValueError("Transformation node name must not be blank.")
 
     @classmethod
     def create(
         cls,
         transformation: TransformationSpec,
+        *,
+        name: str | None = None,
     ) -> "TransformationNode":
         return cls(
             id=NodeId.new(),
             kind=PipelineNodeKind.TRANSFORMATION,
             step_id=StepId.new(),
             transformation=transformation,
+            name=name,
         )
 
 
 @dataclass(frozen=True, slots=True)
 class OutputNode(PipelineNode):
-    """Single logical Pipeline output for the initial MVP."""
+    """One named logical output."""
 
     name: str
 

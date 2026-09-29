@@ -91,3 +91,9 @@ The V2 vocabulary baseline is intended to drive the future PyIngestKit 2.0 and P
 ## PyWorkflowKit V2 public API
 
 - `PYWORKFLOWKIT_V2_PUBLIC_API_SPEC.md` — normative PyWorkflowKit 2.0 public API contract covering WorkflowDefinition/TaskDefinition authoring, ExecutionPlan compilation, WorkflowRuntime, WorkflowRun/TaskRun/TaskAttempt identities and states, retry/timeout/cancellation, Executor and MetadataStore protocols, ExternalRunRef, recovery/reconciliation, serialization, plugins, optional sibling integrations and V1-to-V2 migration.
+
+- `PYTRANSFORMKIT_V1_REVISED_IMPLEMENTATION_ROADMAP.md` — normative revised PyTransformKit 1.0 roadmap retaining LOT-00→LOT-10 history and remapping LOT-11→LOT-28 to the V2 TransformationPlan/LogicalPlan/TransformationRuntime architecture, bounded physical I/O, wire contracts, conformance and 1.0 release gates.
+
+- `PYINGESTKIT_V2_IMPLEMENTATION_ROADMAP.md` — normative PyIngestKit 2.0 clean-slate roadmap from domain/source acquisition through RAW, DatasetVersion, publication, reconciliation, replay, providers, serialization, optional PyTransformKit integration, migration, Customer 360 and 2.0 release qualification.
+
+- `PYWORKFLOWKIT_V2_IMPLEMENTATION_ROADMAP.md` — normative PyWorkflowKit 2.0 clean-slate roadmap from WorkflowDefinition/ExecutionPlan and state machines through local execution, retry/cancellation, persistence, ExternalRunRef, recovery, executors, sibling integrations, migration, Customer 360 and 2.0 release qualification.

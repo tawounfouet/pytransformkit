@@ -4,12 +4,13 @@ from dataclasses import FrozenInstanceError
 
 import pytest
 
-from pytransformkit import TransformationPlan
+from pytransformkit import TransformationPlan, col
 from pytransformkit.domain.data.data_types import IntegerType, StringType
 from pytransformkit.domain.data.field import Field
 from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.pipelines.nodes import TransformationNode
 from pytransformkit.domain.transformations.relational import JoinTransformation
+from pytransformkit.errors.pipeline import InvalidPipelineError
 
 
 def _customer_schema() -> Schema:
@@ -81,7 +82,7 @@ def test_plan_allows_branching_to_multiple_outputs() -> None:
     active = builder.filter(
         "has_email",
         source=source,
-        where=__import__("pytransformkit").col("email").is_not_null(),
+        where=col("email").is_not_null(),
     )
 
     plan = (
@@ -102,7 +103,7 @@ def test_builder_rejects_dataset_from_another_builder() -> None:
     external = left.input("source", schema=_customer_schema())
     right.input("right_source", schema=_customer_schema())
 
-    with pytest.raises(Exception, match="does not belong"):
+    with pytest.raises(InvalidPipelineError, match="does not belong"):
         right.select(
             "invalid",
             source=external,

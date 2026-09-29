@@ -60,6 +60,7 @@ packages = ["src/pytransformkit"]
 [tool.ruff]
 line-length = 88
 target-version = "py311"
+extend-exclude = ["docs", "notebooks"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from pytransformkit.domain.transformations.base import TransformationSpec
 from pytransformkit.domain.transformations.relational import (
     ExceptTransformation,
     IntersectTransformation,
@@ -63,7 +64,7 @@ def test_join_preserves_explicit_null_policy() -> None:
     ],
 )
 def test_relational_transformations_require_two_inputs(
-    transformation: object,
+    transformation: TransformationSpec,
 ) -> None:
     assert relational_input_count(transformation) == 2
 

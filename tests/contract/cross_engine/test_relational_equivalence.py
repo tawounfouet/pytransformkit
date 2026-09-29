@@ -208,7 +208,6 @@ def test_join_semantics_match_across_pandas_and_polars(how: str) -> None:
     }
 
 
-
 @pytest.mark.parametrize("how", ["semi", "anti"])
 def test_semi_and_anti_join_semantics_match_across_engines(
     how: str,
@@ -257,6 +256,7 @@ def test_cross_join_semantics_match_across_engines() -> None:
 
     assert pandas_records == polars_records
     assert len(pandas_records) == 4
+
 
 def test_null_join_policy_match_is_cross_engine_equivalent() -> None:
     left = [

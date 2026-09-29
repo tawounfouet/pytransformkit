@@ -1,4 +1,4 @@
-"""Logical Pipeline dependencies."""
+"""Logical plan dependencies."""
 
 from dataclasses import dataclass
 from enum import StrEnum
@@ -12,11 +12,12 @@ class DependencyKind(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class Dependency:
-    """Directed dependency between two Pipeline nodes."""
+    """Directed data dependency between two internal logical-plan nodes."""
 
     source: NodeId
     target: NodeId
     kind: DependencyKind = DependencyKind.DATA
+    input_index: int = 0
 
     def __post_init__(self) -> None:
         if not isinstance(self.source, NodeId):
@@ -25,5 +26,9 @@ class Dependency:
             raise TypeError("Dependency target must be a NodeId.")
         if not isinstance(self.kind, DependencyKind):
             raise TypeError("Dependency kind must be a DependencyKind.")
+        if isinstance(self.input_index, bool) or not isinstance(self.input_index, int):
+            raise TypeError("Dependency input_index must be an integer.")
+        if self.input_index < 0:
+            raise ValueError("Dependency input_index must be non-negative.")
         if self.source == self.target:
-            raise ValueError("A Pipeline dependency cannot be self-referential.")
+            raise ValueError("A logical dependency cannot be self-referential.")

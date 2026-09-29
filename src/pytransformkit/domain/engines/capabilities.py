@@ -31,6 +31,10 @@ class EngineCapability(StrEnum):
 
     AGGREGATE = "aggregate"
     WINDOW = "window"
+    WINDOW_ROWS_CUMULATIVE = "window_rows_cumulative"
+    WINDOW_ROWS_MOVING = "window_rows_moving"
+    WINDOW_ROWS_ARBITRARY = "window_rows_arbitrary"
+    WINDOW_RANGE = "window_range"
     PIVOT = "pivot"
     UNPIVOT = "unpivot"
     NESTED = "nested"

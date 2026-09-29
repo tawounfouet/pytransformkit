@@ -345,7 +345,7 @@ class TransformationPlanBuilder:
             transformation=ExceptTransformation(),
         )
 
-    def output(self, name: str, dataset: Dataset) -> "TransformationPlanBuilder":
+    def output(self, name: str, dataset: Dataset) -> TransformationPlanBuilder:
         """Declare one named plan output."""
         if name in self._output_names:
             raise InvalidPipelineError(

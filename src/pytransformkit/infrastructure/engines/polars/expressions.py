@@ -32,7 +32,7 @@ class PolarsExpressionCompiler:
         del frame
 
         if isinstance(expression, ColumnReference):
-            return pl.col(str(expression.path))
+            return _column_reference(expression)
 
         if isinstance(expression, Literal):
             return pl.lit(expression.value)
@@ -129,8 +129,64 @@ class PolarsExpressionCompiler:
                 separator="",
                 ignore_nulls=False,
             )
+        if name == "core.temporal.year":
+            return arguments[0].dt.year().cast(pl.Int32)
+        if name == "core.temporal.month":
+            return arguments[0].dt.month().cast(pl.Int32)
+        if name == "core.temporal.day":
+            return arguments[0].dt.day().cast(pl.Int32)
+        if name == "core.temporal.hour":
+            return arguments[0].dt.hour().cast(pl.Int32)
+        if name == "core.temporal.minute":
+            return arguments[0].dt.minute().cast(pl.Int32)
+        if name == "core.temporal.second":
+            return arguments[0].dt.second().cast(pl.Int32)
+        if name == "core.temporal.to_date":
+            return arguments[0].dt.date()
+        if name == "core.temporal.normalize_timestamp":
+            timezone = _literal_string(
+                expression.arguments[1],
+                "normalize_timestamp timezone",
+            )
+            unit = _literal_string(
+                expression.arguments[2],
+                "normalize_timestamp unit",
+            )
+            return (
+                arguments[0]
+                .dt.replace_time_zone(timezone)
+                .cast(pl.Datetime(time_unit=unit, time_zone=timezone))
+            )
+        if name == "core.temporal.convert_timezone":
+            timezone = _literal_string(
+                expression.arguments[1],
+                "convert_timezone timezone",
+            )
+            return arguments[0].dt.convert_time_zone(timezone)
+        if name == "core.temporal.duration_between":
+            unit = _literal_string(
+                expression.arguments[2],
+                "duration_between unit",
+            )
+            return (arguments[1] - arguments[0]).cast(
+                pl.Duration(time_unit=unit)
+            )
 
         raise AdapterError(f"Polars does not compile logical function {name!r}.")
+
+
+def _column_reference(expression: ColumnReference) -> Any:
+    parts = expression.path.parts
+    value = pl.col(parts[0])
+    for part in parts[1:]:
+        value = value.struct.field(part)
+    return value
+
+
+def _literal_string(expression: Expression, label: str) -> str:
+    if not isinstance(expression, Literal) or not isinstance(expression.value, str):
+        raise AdapterError(f"{label} must be a string literal.")
+    return expression.value
 
 
 def _is_null_literal(expression: Expression) -> bool:

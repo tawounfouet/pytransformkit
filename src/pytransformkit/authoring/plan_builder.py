@@ -12,6 +12,7 @@ from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.expressions.aggregate import AggregateExpression
 from pytransformkit.domain.expressions.base import Expression
 from pytransformkit.domain.pipelines.dependencies import Dependency
+from pytransformkit.domain.quality.rules import ValidationSpec
 from pytransformkit.domain.pipelines.nodes import (
     InputNode,
     OutputNode,
@@ -45,6 +46,7 @@ from pytransformkit.domain.transformations.projection import (
     RenameTransformation,
     SelectTransformation,
 )
+from pytransformkit.domain.transformations.quality import QualityGate
 from pytransformkit.domain.transformations.relational import (
     ExceptTransformation,
     IntersectTransformation,
@@ -381,6 +383,20 @@ class TransformationPlanBuilder:
                 field=FieldPath.of(field),
                 prefix=prefix,
             ),
+        )
+
+    def validate(
+        self,
+        name: str,
+        *,
+        source: Dataset,
+        spec: ValidationSpec,
+    ) -> Dataset:
+        """Validate logical data without changing rows or Schema."""
+        return self.apply(
+            name,
+            source=source,
+            transformation=QualityGate(spec=spec),
         )
 
     def join(

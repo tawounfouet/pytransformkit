@@ -35,6 +35,7 @@ from pytransformkit.domain.transformations.properties import (
     SchemaEffect,
     TransformationProperties,
 )
+from pytransformkit.domain.transformations.quality import QualityGate
 from pytransformkit.domain.transformations.relational import (
     ExceptTransformation,
     IntersectTransformation,
@@ -89,6 +90,7 @@ __all__ = [
     "PivotTransformation",
     "Portability",
     "Purity",
+    "QualityGate",
     "RenameField",
     "RenameTransformation",
     "SchemaEffect",

@@ -361,15 +361,12 @@ class PandasAdapter:
                     aggfunc=_pandas_group_aggfunc(metric.expression),
                 )
 
-            result = (
-                work.groupby(
-                    group_columns,
-                    dropna=False,
-                    sort=False,
-                    as_index=False,
-                )
-                .agg(**named_aggregations)
-            )
+            result = work.groupby(
+                group_columns,
+                dropna=False,
+                sort=False,
+                as_index=False,
+            ).agg(**named_aggregations)
             result = result.rename(
                 columns={
                     internal_name: group_output_name(expression, index)
@@ -538,9 +535,7 @@ def _pandas_group_aggfunc(
         return "max"
     if expression.function is AggregateFunction.MEAN:
         return "mean"
-    raise AdapterError(
-        f"Unsupported aggregate function {expression.function.value!r}."
-    )
+    raise AdapterError(f"Unsupported aggregate function {expression.function.value!r}.")
 
 
 def _pandas_scalar_aggregate(
@@ -566,9 +561,7 @@ def _pandas_scalar_aggregate(
         return series.max()
     if expression.function is AggregateFunction.MEAN:
         return series.mean()
-    raise AdapterError(
-        f"Unsupported aggregate function {expression.function.value!r}."
-    )
+    raise AdapterError(f"Unsupported aggregate function {expression.function.value!r}.")
 
 
 def _join(

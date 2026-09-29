@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 from pytransformkit.application.ports.engines import PhysicalHandle
 from pytransformkit.domain.data.schema import Schema
+from pytransformkit.domain.quality.results import ValidationResult
 
 
 @dataclass(frozen=True, slots=True)
@@ -28,6 +29,7 @@ class EngineExecutionResult:
     output_handle: PhysicalHandle
     output_schema: Schema
     named_outputs: tuple[NamedEngineOutput, ...] = ()
+    validations: tuple[ValidationResult, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.output_schema, Schema):
@@ -39,6 +41,15 @@ class EngineExecutionResult:
         ):
             raise TypeError(
                 "Execution result named_outputs must contain NamedEngineOutput."
+            )
+        if not isinstance(self.validations, tuple):
+            raise TypeError("Execution result validations must be a tuple.")
+        if any(
+            not isinstance(result, ValidationResult)
+            for result in self.validations
+        ):
+            raise TypeError(
+                "Execution result validations must contain ValidationResult."
             )
 
     def output(self, name: str) -> NamedEngineOutput:

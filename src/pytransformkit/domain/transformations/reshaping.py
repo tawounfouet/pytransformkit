@@ -62,8 +62,7 @@ class PivotTransformation(TransformationSpec):
                 "Pivot requires at least one explicit category."
             )
         if any(
-            not isinstance(value, str) or not value.strip()
-            for value in self.categories
+            not isinstance(value, str) or not value.strip() for value in self.categories
         ):
             raise InvalidTransformationError(
                 "Pivot categories must be non-empty strings."
@@ -114,13 +113,9 @@ class UnpivotTransformation(TransformationSpec):
                 "Unpivot id_vars and value_vars must not overlap."
             )
         if not self.variable_name or not self.variable_name.strip():
-            raise InvalidTransformationError(
-                "Unpivot variable_name must not be empty."
-            )
+            raise InvalidTransformationError("Unpivot variable_name must not be empty.")
         if not self.value_name or not self.value_name.strip():
-            raise InvalidTransformationError(
-                "Unpivot value_name must not be empty."
-            )
+            raise InvalidTransformationError("Unpivot value_name must not be empty.")
         if self.variable_name == self.value_name:
             raise InvalidTransformationError(
                 "Unpivot variable_name and value_name must differ."

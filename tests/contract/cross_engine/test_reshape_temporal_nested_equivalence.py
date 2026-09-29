@@ -90,9 +90,7 @@ def _execute_pandas(
             )
         },
     )
-    return _normalize(
-        result.output_handle.dataframe.to_dict(orient="records")
-    )
+    return _normalize(result.output_handle.dataframe.to_dict(orient="records"))
 
 
 def _execute_polars(

@@ -80,9 +80,8 @@ class EngineCapabilityAnalyzer:
                 continue
             transformation = node.transformation
             required.add(_capability_for(transformation))
-            if (
-                isinstance(transformation, DeriveTransformation)
-                and isinstance(transformation.expression, WindowExpression)
+            if isinstance(transformation, DeriveTransformation) and isinstance(
+                transformation.expression, WindowExpression
             ):
                 required.add(EngineCapability.WINDOW)
                 frame_capability = _window_frame_capability(
@@ -139,7 +138,6 @@ def _capability_for(
     )
 
 
-
 def _window_frame_capability(
     frame_kind: WindowFrameKind,
 ) -> EngineCapability | None:
@@ -153,6 +151,4 @@ def _window_frame_capability(
         return EngineCapability.WINDOW_ROWS_ARBITRARY
     if frame_kind is WindowFrameKind.RANGE:
         return EngineCapability.WINDOW_RANGE
-    raise UnsupportedTransformationError(
-        f"Unknown window frame kind {frame_kind!r}."
-    )
+    raise UnsupportedTransformationError(f"Unknown window frame kind {frame_kind!r}.")

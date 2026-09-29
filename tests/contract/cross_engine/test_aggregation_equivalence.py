@@ -315,9 +315,7 @@ def test_global_empty_aggregate_preserves_null_semantics() -> None:
     pandas_records = _normalize(
         pandas_result.output_handle.dataframe.to_dict(orient="records")
     )
-    polars_records = _normalize(
-        polars_result.output_handle.frame.to_dicts()
-    )
+    polars_records = _normalize(polars_result.output_handle.frame.to_dicts())
 
     assert pandas_records == polars_records
     assert pandas_records == [

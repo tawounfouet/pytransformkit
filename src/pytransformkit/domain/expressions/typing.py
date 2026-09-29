@@ -277,7 +277,9 @@ class ExpressionTypeResolver:
 
         if name == "core.temporal.to_date":
             if len(arguments) != 1:
-                raise ExpressionTypeError("core.temporal.to_date requires one argument.")
+                raise ExpressionTypeError(
+                    "core.temporal.to_date requires one argument."
+                )
             argument = arguments[0]
             if not isinstance(argument.data_type, (DateType, TimestampType)):
                 raise ExpressionTypeError(
@@ -288,7 +290,8 @@ class ExpressionTypeResolver:
         if name == "core.temporal.normalize_timestamp":
             if len(arguments) != 3:
                 raise ExpressionTypeError(
-                    "core.temporal.normalize_timestamp requires value, timezone and unit."
+                    "core.temporal.normalize_timestamp requires "
+                    "value, timezone and unit."
                 )
             source = arguments[0]
             if not isinstance(source.data_type, TimestampType):
@@ -322,7 +325,8 @@ class ExpressionTypeResolver:
                 )
             if source.data_type.timezone is None:
                 raise ExpressionTypeError(
-                    "core.temporal.convert_timezone requires a timezone-aware Timestamp."
+                    "core.temporal.convert_timezone requires "
+                    "a timezone-aware Timestamp."
                 )
             timezone = _literal_string_argument(
                 expression,

@@ -21,7 +21,10 @@ from pytransformkit.application.execution.context import (
 from pytransformkit.application.execution.registry import EngineRegistry
 from pytransformkit.application.execution.results import EngineExecutionResult
 from pytransformkit.application.planning import TransformationCompiler
-from pytransformkit.application.ports.engines import PhysicalHandle
+from pytransformkit.application.ports.engines import (
+    MultiInputEngineAdapter,
+    PhysicalHandle,
+)
 from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.engines import EngineCapability, EngineDescriptor
 from pytransformkit.domain.pipelines.plan import LogicalPlan
@@ -162,7 +165,7 @@ class TransformationRuntime:
         )
         context = ExecutionContext(mode=mode)
 
-        if hasattr(adapter, "execute_many"):
+        if isinstance(adapter, MultiInputEngineAdapter):
             engine_result = adapter.execute_many(
                 logical_plan,
                 handles,
@@ -238,7 +241,7 @@ class TransformationRuntime:
             value = binding.native_value
             if isinstance(value, PhysicalHandle):
                 handle = value
-            elif hasattr(adapter, "bind_native"):
+            elif isinstance(adapter, MultiInputEngineAdapter):
                 handle = adapter.bind_native(value)
             else:
                 raise BindingError(

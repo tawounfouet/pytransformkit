@@ -481,11 +481,7 @@ def _polars_aggregate_expression(
     if expression.function is AggregateFunction.COUNT_DISTINCT:
         return value.drop_nulls().n_unique().cast(pl.Int64)
     if expression.function is AggregateFunction.SUM:
-        return (
-            pl.when(value.count() == 0)
-            .then(pl.lit(None))
-            .otherwise(value.sum())
-        )
+        return pl.when(value.count() == 0).then(pl.lit(None)).otherwise(value.sum())
     if expression.function is AggregateFunction.MIN:
         return value.min()
     if expression.function is AggregateFunction.MAX:
@@ -493,9 +489,7 @@ def _polars_aggregate_expression(
     if expression.function is AggregateFunction.MEAN:
         return value.mean().cast(pl.Float64)
 
-    raise AdapterError(
-        f"Unsupported aggregate function {expression.function.value!r}."
-    )
+    raise AdapterError(f"Unsupported aggregate function {expression.function.value!r}.")
 
 
 def _join(

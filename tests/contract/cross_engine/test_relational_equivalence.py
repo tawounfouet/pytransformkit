@@ -72,13 +72,17 @@ def _normalize_value(value: object) -> object:
 def _normalize(
     records: list[dict[str, object]],
 ) -> list[dict[str, object]]:
-    return [
+    normalized = [
         {
             key: _normalize_value(value)
             for key, value in record.items()
         }
         for record in records
     ]
+    return sorted(
+        normalized,
+        key=repr,
+    )
 
 
 def _execute_pandas(

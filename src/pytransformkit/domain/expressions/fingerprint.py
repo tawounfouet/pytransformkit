@@ -19,6 +19,7 @@ from pytransformkit.domain.expressions.predicates import (
 )
 from pytransformkit.domain.expressions.references import ColumnReference
 from pytransformkit.domain.expressions.unary import UnaryExpression
+from pytransformkit.domain.expressions.window import WindowExpression
 from pytransformkit.domain.shared.fingerprint import Fingerprint
 from pytransformkit.errors.expression import ExpressionError
 
@@ -37,6 +38,50 @@ def canonical_expression(expression: Expression) -> str:
             else canonical_expression(expression.argument)
         )
         return f"aggregate:{expression.function.value}:({argument})"
+
+    if isinstance(expression, WindowExpression):
+        partition = ",".join(
+            _quoted(str(field))
+            for field in expression.spec.partition_keys
+        )
+        ordering = ",".join(
+            ":".join(
+                (
+                    _quoted(str(key.field)),
+                    key.direction.value,
+                    key.nulls.value,
+                )
+            )
+            for key in expression.spec.order_keys
+        )
+        if expression.spec.frame is None:
+            frame = "none"
+        else:
+            frame = ":".join(
+                (
+                    expression.spec.frame.mode.value,
+                    expression.spec.frame.start.kind.value,
+                    str(expression.spec.frame.start.offset),
+                    expression.spec.frame.end.kind.value,
+                    str(expression.spec.frame.end.offset),
+                )
+            )
+        argument = (
+            "none"
+            if expression.argument is None
+            else canonical_expression(expression.argument)
+        )
+        default = (
+            "none"
+            if expression.default is None
+            else canonical_expression(expression.default)
+        )
+        return (
+            f"window:{expression.function.value}:"
+            f"partition=({partition}):order=({ordering}):"
+            f"frame=({frame}):offset={expression.offset}:"
+            f"argument=({argument}):default=({default})"
+        )
 
     if isinstance(expression, ColumnReference):
         return f"column:{_quoted(str(expression.path))}"

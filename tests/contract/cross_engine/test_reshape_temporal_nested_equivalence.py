@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime, timedelta, timezone
 import math
+from datetime import UTC, date, datetime, timedelta
 
 import pytest
 
@@ -155,14 +155,14 @@ def _nested_temporal_records() -> list[dict[str, object]]:
         {
             "customer_id": 1,
             "profile": {"city": "Paris", "score": 10},
-            "event_at": datetime(2026, 9, 29, 8, 30, tzinfo=timezone.utc),
-            "previous_at": datetime(2026, 9, 29, 7, 0, tzinfo=timezone.utc),
+            "event_at": datetime(2026, 9, 29, 8, 30, tzinfo=UTC),
+            "previous_at": datetime(2026, 9, 29, 7, 0, tzinfo=UTC),
         },
         {
             "customer_id": 2,
             "profile": {"city": "Lyon", "score": None},
-            "event_at": datetime(2026, 10, 1, 18, 15, tzinfo=timezone.utc),
-            "previous_at": datetime(2026, 10, 1, 18, 0, tzinfo=timezone.utc),
+            "event_at": datetime(2026, 10, 1, 18, 15, tzinfo=UTC),
+            "previous_at": datetime(2026, 10, 1, 18, 0, tzinfo=UTC),
         },
     ]
 

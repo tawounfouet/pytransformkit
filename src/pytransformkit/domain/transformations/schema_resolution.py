@@ -498,7 +498,6 @@ def _validate_set_compatible(left: Schema, right: Schema) -> None:
             )
 
 
-
 def _pivot_output_field(
     name: str,
     value_field: Field,

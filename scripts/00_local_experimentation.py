@@ -161,9 +161,7 @@ def main() -> None:
     print("Equivalent:", pandas_records == polars_records)
 
     if pandas_records != polars_records:
-        raise AssertionError(
-            "Pandas and Polars produced different logical results."
-        )
+        raise AssertionError("Pandas and Polars produced different logical results.")
 
     print_section("7. Polars lazy execution")
     lazy_result = service.run(

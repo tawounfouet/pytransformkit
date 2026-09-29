@@ -694,9 +694,7 @@ def _pandas_pivot_aggregate(
         return grouped.mean()
     if aggregation is PivotAggregation.COUNT:
         return grouped.count()
-    raise AdapterError(
-        f"Unsupported Pandas pivot aggregation {aggregation.value!r}."
-    )
+    raise AdapterError(f"Unsupported Pandas pivot aggregation {aggregation.value!r}.")
 
 
 def _pandas_nested_value(value: object, key: str) -> object:

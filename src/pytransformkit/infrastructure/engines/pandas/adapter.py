@@ -527,7 +527,7 @@ def _pandas_group_aggfunc(
     expression: AggregateExpression,
 ) -> Any:
     if expression.function is AggregateFunction.COUNT:
-        return "size" if expression.argument is None else "count"
+        return (lambda values: len(values)) if expression.argument is None else "count"
     if expression.function is AggregateFunction.COUNT_DISTINCT:
         return lambda values: values.nunique(dropna=True)
     if expression.function is AggregateFunction.SUM:

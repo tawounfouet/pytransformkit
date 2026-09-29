@@ -191,9 +191,10 @@ def _walk_expression(expression: Expression) -> tuple[Expression, ...]:
     if isinstance(expression, BinaryExpression):
         values.extend(_walk_expression(expression.left))
         values.extend(_walk_expression(expression.right))
-    elif isinstance(expression, UnaryExpression):
-        values.extend(_walk_expression(expression.operand))
-    elif isinstance(expression, (IsNullExpression, IsNotNullExpression)):
+    elif isinstance(expression, UnaryExpression) or isinstance(
+        expression,
+        (IsNullExpression, IsNotNullExpression),
+    ):
         values.extend(_walk_expression(expression.operand))
     elif isinstance(expression, FunctionCall):
         for argument in expression.arguments:

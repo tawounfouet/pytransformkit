@@ -150,9 +150,7 @@ def _validate_unique_names(
 ) -> None:
     names = tuple(node.name for node in nodes)
     if len(names) != len(set(names)):
-        raise InvalidPipelineError(
-            f"TransformationPlan {kind} names must be unique."
-        )
+        raise InvalidPipelineError(f"TransformationPlan {kind} names must be unique.")
 
 
 def _validate_reachability(

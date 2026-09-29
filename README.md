@@ -30,8 +30,9 @@ The implementation baseline now covers:
 - **LOT-09 — Initial Application Execution Service**
 - **LOT-10 — Polars Adapter & Multi-Engine Contract**
 - **LOT-11 — V1 Public Model Migration & Relational Core**
+- **LOT-12 — Aggregation & Grouping**
 
-The current development line targets **0.2.0a1**.
+The current development line targets **0.2.0a2**.
 
 ### Canonical V1 model
 
@@ -83,15 +84,18 @@ The portable Transformation model currently includes:
 - join;
 - union;
 - intersect;
-- except.
+- except;
+- aggregate/group by.
 
 LOT-11 adds multi-input logical dependencies, deterministic relational schema resolution, explicit join-key semantics, column-collision handling and configurable NULL join behavior.
+
+LOT-12 adds a typed aggregate-expression context with `count`, `count_distinct`, `sum`, `min`, `max`, `mean`/`avg`, deterministic grouped-schema propagation, NULL-aware aggregate semantics, and Pandas/Polars conformance for grouped and global aggregation.
 
 ### Runtime and engines
 
 Runtime input is expressed through `InputBinding`, separating logical Dataset values from physical native values. The runtime resolves one explicitly requested engine from `EngineRegistry`; there is no implicit engine fallback.
 
-Pandas and Polars are optional extras. Both implement the relational contract, and dedicated cross-engine tests verify semantic equivalence for joins and set operations. Polars also supports lazy execution.
+Pandas and Polars are optional extras. Both implement the relational and aggregation contracts, and dedicated cross-engine tests verify semantic equivalence for joins, set operations, grouped aggregates, global aggregates, NULL handling and empty-input aggregate behavior. Polars also supports lazy execution.
 
 Public engine namespaces are available under:
 
@@ -168,9 +172,9 @@ The historical `docs/ROADMAP_LOT_11_TO_1_0.md` remains useful as project history
 Current count:
 
 - Total roadmap: **29 lots** (`LOT-00` → `LOT-28`)
-- Completed after LOT-11: **12 lots** (`LOT-00` → `LOT-11`)
-- Remaining: **17 lots** (`LOT-12` → `LOT-28`)
-- Next lot: **LOT-12 — Aggregation and Grouping**
+- Completed after LOT-12: **13 lots** (`LOT-00` → `LOT-12`)
+- Remaining: **16 lots** (`LOT-13` → `LOT-28`)
+- Next lot: **LOT-13 — Window and Analytical Semantics**
 - Final lot: **LOT-28 — PyTransformKit 1.0.0 Stable Release**
 
 ## Development

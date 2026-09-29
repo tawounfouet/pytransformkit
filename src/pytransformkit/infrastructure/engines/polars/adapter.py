@@ -26,6 +26,7 @@ from pytransformkit.domain.expressions.aggregate import (
     AggregateExpression,
     AggregateFunction,
 )
+from pytransformkit.domain.expressions.window import WindowExpression
 from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
 from pytransformkit.domain.pipelines.plan import LogicalPlan
 from pytransformkit.domain.transformations.aggregation import (
@@ -68,6 +69,7 @@ from pytransformkit.infrastructure.engines.polars.handle import (
     PolarsDatasetHandle,
 )
 from pytransformkit.infrastructure.engines.polars.types import PolarsTypeMapper
+from pytransformkit.infrastructure.engines.polars.windows import PolarsWindowCompiler
 
 _POLARS_CAPABILITIES = frozenset(
     {
@@ -82,6 +84,9 @@ _POLARS_CAPABILITIES = frozenset(
         EngineCapability.SORT,
         EngineCapability.DEDUPLICATE,
         EngineCapability.AGGREGATE,
+        EngineCapability.WINDOW,
+        EngineCapability.WINDOW_ROWS_CUMULATIVE,
+        EngineCapability.WINDOW_ROWS_MOVING,
         EngineCapability.JOIN_INNER,
         EngineCapability.JOIN_LEFT,
         EngineCapability.JOIN_RIGHT,
@@ -106,6 +111,7 @@ class PolarsAdapter:
         type_mapper: PolarsTypeMapper | None = None,
     ) -> None:
         self._expression_compiler = expression_compiler or PolarsExpressionCompiler()
+        self._window_compiler = PolarsWindowCompiler(self._expression_compiler)
         self._type_mapper = type_mapper or PolarsTypeMapper()
         self._compatibility = EngineCompatibilityService()
 
@@ -280,6 +286,12 @@ class PolarsAdapter:
             return frame.with_columns(expression.alias(field_name))
 
         if isinstance(transformation, DeriveTransformation):
+            if isinstance(transformation.expression, WindowExpression):
+                return self._window_compiler.derive(
+                    frame,
+                    transformation.expression,
+                    field_name=transformation.field_name,
+                )
             expression = self._expression_compiler.compile(
                 transformation.expression,
                 frame,

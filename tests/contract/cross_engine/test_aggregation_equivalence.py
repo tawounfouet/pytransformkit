@@ -9,12 +9,12 @@ import pytest
 pd = pytest.importorskip("pandas")
 pl = pytest.importorskip("polars")
 
-from pytransformkit import functions as fn
 from pytransformkit import (
     InputBinding,
     TransformationPlan,
     TransformationRuntime,
 )
+from pytransformkit import functions as fn
 from pytransformkit.adapters.pandas import PandasEngineAdapter
 from pytransformkit.adapters.polars import PolarsEngineAdapter
 from pytransformkit.domain.data.data_types import (

@@ -22,7 +22,7 @@ from pytransformkit.domain.plans import TransformationPlan
 from pytransformkit.domain.resources import ResourceReference
 from pytransformkit.domain.shared.identifiers import TransformationExecutionId
 from pytransformkit.functions import col, lit
-from pytransformkit import window
+from . import window
 
 try:
     __version__ = version("pytransformkit")

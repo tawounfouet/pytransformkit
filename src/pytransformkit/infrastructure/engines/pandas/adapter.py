@@ -196,9 +196,7 @@ class PandasAdapter:
                 values[node.node_id] = values[node.input_node_ids[0]]
                 continue
 
-            raise AdapterError(
-                f"Unsupported LogicalPlan node kind {node.kind!r}."
-            )
+            raise AdapterError(f"Unsupported LogicalPlan node kind {node.kind!r}.")
 
         named_outputs: list[NamedEngineOutput] = []
         for node in plan.nodes:
@@ -308,15 +306,12 @@ class PandasAdapter:
                 result = result.drop_duplicates(keep="first")
         elif isinstance(transformation, IntersectTransformation):
             columns = list(output_schema.names())
-            result = (
-                left.merge(
-                    right.drop_duplicates(),
-                    on=columns,
-                    how="inner",
-                    sort=False,
-                )
-                .drop_duplicates(keep="first")
-            )
+            result = left.merge(
+                right.drop_duplicates(),
+                on=columns,
+                how="inner",
+                sort=False,
+            ).drop_duplicates(keep="first")
         elif isinstance(transformation, ExceptTransformation):
             columns = list(output_schema.names())
             marker = "__ptk_set_membership__"
@@ -327,9 +322,8 @@ class PandasAdapter:
                 indicator=marker,
                 sort=False,
             )
-            result = (
-                merged.loc[merged[marker] == "left_only", columns]
-                .drop_duplicates(keep="first")
+            result = merged.loc[merged[marker] == "left_only", columns].drop_duplicates(
+                keep="first"
             )
         else:
             raise AdapterError(
@@ -341,8 +335,7 @@ class PandasAdapter:
         missing = [name for name in expected if name not in result.columns]
         if missing:
             raise AdapterError(
-                "Pandas relational result is missing expected columns: "
-                f"{missing!r}."
+                f"Pandas relational result is missing expected columns: {missing!r}."
             )
         return result.loc[:, expected].reset_index(drop=True)
 
@@ -509,9 +502,7 @@ def _restore_null_sentinels(dataframe: Any) -> Any:
         if result[column].dtype != "object":
             continue
         result[column] = result[column].map(
-            lambda value: (
-                pd.NA if isinstance(value, _NullSentinel) else value
-            )
+            lambda value: pd.NA if isinstance(value, _NullSentinel) else value
         )
     return result
 

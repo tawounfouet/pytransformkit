@@ -1,5 +1,6 @@
 """Compilation of logical Expressions to Pandas values."""
 
+from collections.abc import Mapping
 from typing import Any
 
 import pandas as pd
@@ -30,7 +31,7 @@ class PandasExpressionCompiler:
         dataframe: Any,
     ) -> Any:
         if isinstance(expression, ColumnReference):
-            return dataframe[str(expression.path)]
+            return _column_reference(dataframe, expression)
 
         if isinstance(expression, Literal):
             return expression.value
@@ -129,6 +130,32 @@ class PandasExpressionCompiler:
             return _string_unary(arguments[0], "strip")
         if name == "core.concat":
             return _concat(arguments)
+        if name == "core.temporal.year":
+            return _temporal_component(arguments[0], "year")
+        if name == "core.temporal.month":
+            return _temporal_component(arguments[0], "month")
+        if name == "core.temporal.day":
+            return _temporal_component(arguments[0], "day")
+        if name == "core.temporal.hour":
+            return _temporal_component(arguments[0], "hour")
+        if name == "core.temporal.minute":
+            return _temporal_component(arguments[0], "minute")
+        if name == "core.temporal.second":
+            return _temporal_component(arguments[0], "second")
+        if name == "core.temporal.to_date":
+            return _to_date(arguments[0])
+        if name == "core.temporal.normalize_timestamp":
+            return _normalize_timestamp(
+                arguments[0],
+                timezone=arguments[1],
+            )
+        if name == "core.temporal.convert_timezone":
+            return _convert_timezone(
+                arguments[0],
+                timezone=arguments[1],
+            )
+        if name == "core.temporal.duration_between":
+            return arguments[1] - arguments[0]
 
         raise AdapterError(f"Pandas does not compile logical function {name!r}.")
 
@@ -137,6 +164,81 @@ class PandasExpressionCompiler:
         if isinstance(value, pd.Series):
             return value.isna()
         return pd.isna(value)
+
+
+def _column_reference(
+    dataframe: Any,
+    expression: ColumnReference,
+) -> Any:
+    parts = expression.path.parts
+    value = dataframe[parts[0]]
+    for part in parts[1:]:
+        value = value.map(lambda item, key=part: _nested_value(item, key))
+    return value
+
+
+def _nested_value(value: object, key: str) -> object:
+    if value is None or value is pd.NA:
+        return pd.NA
+    if isinstance(value, Mapping):
+        return value.get(key, pd.NA)
+    try:
+        return getattr(value, key)
+    except AttributeError as error:
+        raise AdapterError(
+            f"Pandas nested value does not expose field {key!r}."
+        ) from error
+
+
+def _temporal_component(value: Any, component: str) -> Any:
+    if isinstance(value, pd.Series):
+        converted = pd.to_datetime(value)
+        return getattr(converted.dt, component).astype("Int32")
+    if _is_null_scalar(value):
+        return pd.NA
+    converted = pd.Timestamp(value)
+    return int(getattr(converted, component))
+
+
+def _to_date(value: Any) -> Any:
+    if isinstance(value, pd.Series):
+        return pd.to_datetime(value).dt.date
+    if _is_null_scalar(value):
+        return pd.NA
+    return pd.Timestamp(value).date()
+
+
+def _normalize_timestamp(
+    value: Any,
+    *,
+    timezone: object,
+) -> Any:
+    target = str(timezone)
+    if isinstance(value, pd.Series):
+        converted = pd.to_datetime(value)
+        current = converted.dt.tz
+        if current is not None:
+            converted = converted.dt.tz_localize(None)
+        return converted.dt.tz_localize(target)
+    if _is_null_scalar(value):
+        return pd.NaT
+    converted = pd.Timestamp(value)
+    if converted.tzinfo is not None:
+        converted = converted.tz_localize(None)
+    return converted.tz_localize(target)
+
+
+def _convert_timezone(
+    value: Any,
+    *,
+    timezone: object,
+) -> Any:
+    target = str(timezone)
+    if isinstance(value, pd.Series):
+        return pd.to_datetime(value).dt.tz_convert(target)
+    if _is_null_scalar(value):
+        return pd.NaT
+    return pd.Timestamp(value).tz_convert(target)
 
 
 def _is_null_scalar(value: Any) -> bool:

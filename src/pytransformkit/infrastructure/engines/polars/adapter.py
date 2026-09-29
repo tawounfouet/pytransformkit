@@ -21,11 +21,11 @@ from pytransformkit.application.execution.results import (
 )
 from pytransformkit.application.ports.engines import PhysicalHandle
 from pytransformkit.domain.data.schema import Schema
+from pytransformkit.domain.engines import EngineCapability, EngineDescriptor
 from pytransformkit.domain.expressions.aggregate import (
     AggregateExpression,
     AggregateFunction,
 )
-from pytransformkit.domain.engines import EngineCapability, EngineDescriptor
 from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
 from pytransformkit.domain.pipelines.plan import LogicalPlan
 from pytransformkit.domain.transformations.aggregation import (

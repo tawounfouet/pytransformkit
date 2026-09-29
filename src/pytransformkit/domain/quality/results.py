@@ -19,16 +19,18 @@ class ValidationPolicy(StrEnum):
 class ValidationThreshold:
     """Maximum violation budget accepted by one validation rule."""
 
-    max_violations: int = 0
+    max_violations: int | None = 0
     max_violation_rate: float | None = None
 
     def __post_init__(self) -> None:
-        if (
+        if self.max_violations is not None and (
             not isinstance(self.max_violations, int)
             or isinstance(self.max_violations, bool)
             or self.max_violations < 0
         ):
-            raise ValueError("max_violations must be a non-negative integer.")
+            raise ValueError(
+                "max_violations must be a non-negative integer or None."
+            )
         if self.max_violation_rate is not None and not (
             0.0 <= self.max_violation_rate <= 1.0
         ):
@@ -46,7 +48,10 @@ class ValidationThreshold:
         if violation_count > evaluated_count:
             raise ValueError("violation_count must not exceed evaluated_count.")
 
-        if violation_count > self.max_violations:
+        if (
+            self.max_violations is not None
+            and violation_count > self.max_violations
+        ):
             return False
 
         if self.max_violation_rate is None:

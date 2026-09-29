@@ -4,7 +4,7 @@
 
 PyTransformKit is an engine-agnostic Python framework for defining typed, composable data transformations independently from their physical execution engine.
 
-> Status: early pre-1.0 implementation. Public APIs may evolve while the core contracts are being qualified.
+> Status: early pre-1.0 implementation. Public APIs may still evolve while the V1 contracts are being qualified.
 
 ## Goals
 
@@ -12,10 +12,11 @@ PyTransformKit is an engine-agnostic Python framework for defining typed, compos
 - Keep the Domain model free from engine-specific types.
 - Make schema propagation, validation, lineage, observability, and optimization first-class concerns.
 - Prove semantic consistency through contract and cross-engine tests.
+- Keep ingestion lifecycle and workflow orchestration outside PyTransformKit ownership.
 
 ## Current implementation status
 
-The following implementation lots are now in place:
+The implementation baseline now covers:
 
 - **LOT-00 — Repository Bootstrap**
 - **LOT-01 — Shared Kernel**
@@ -23,56 +24,158 @@ The following implementation lots are now in place:
 - **LOT-03 — Dataset Domain Model**
 - **LOT-04 — Expression AST Core**
 - **LOT-05 — Transformation Model MVP**
-- **LOT-06 — Pipeline & DAG Core**
+- **LOT-06 — Initial DAG Core**
 - **LOT-07 — Engine Runtime Contracts**
 - **LOT-08 — Pandas Reference Adapter**
-- **LOT-09 — Application Execution Service**
+- **LOT-09 — Initial Application Execution Service**
 - **LOT-10 — Polars Adapter & Multi-Engine Contract**
+- **LOT-11 — V1 Public Model Migration & Relational Core**
 
-The logical data layer now provides:
+The current development line targets **0.2.0a1**.
 
-- engine-independent primitive DataTypes;
-- immutable `FieldPath`, `Field`, and ordered `Schema`;
-- `DatasetMetadata` and `DatasetStatistics`;
-- `DatasetReference` and `LogicalDatasetReference`;
-- an immutable logical `Dataset` whose identity is independent from any DataFrame, Table, Relation, or other physical engine object.
+### Canonical V1 model
 
-The Expression layer now provides a portable immutable AST, public `col/lit` DSL, string functions, static logical typing, NULL-aware nullability propagation, dependency extraction, and canonical structural fingerprints.
+The canonical public path is now:
 
-The Transformation layer now models projection, row selection, casting, derivation, sorting and deduplication as immutable engine-independent specifications. Output Schemas are resolved statically before any physical execution.
+~~~text
+TransformationPlan
+        ↓
+TransformationCompiler
+        ↓
+LogicalPlan
+        ↓
+TransformationRuntime
+        ↓
+explicit EngineAdapter
+        ↓
+TransformationResult
+~~~
 
-The Pipeline layer now provides an immutable single-input/single-output DAG, explicit dependencies, structural validation, deterministic topological ordering, static Schema propagation and an engine-independent LogicalPlan. The public package now exposes `Pipeline`.
+The package root promotes:
 
-The runtime boundary now defines portable engine capabilities and descriptors, opaque Dataset handles, an EngineAdapter protocol, immutable execution context/results, an explicit EngineRegistry and pre-execution capability compatibility checks. No physical engine is imported by the Core.
+- `TransformationPlan`;
+- `LogicalPlan`;
+- `TransformationRuntime`;
+- `TransformationExecutionId`;
+- `TransformationResult`;
+- `InputBinding`;
+- `OutputBinding`;
+- `ResourceReference`;
+- `Dataset`, `Schema`, `Field`, `DataType`;
+- `Expression`, `col()`, `lit()`.
 
-The first physical engine is now implemented as the optional `pytransformkit[pandas]` extra. The Pandas adapter provides a typed Dataset handle, conservative Schema inspection, logical/native type mapping, Expression compilation and eager execution for the initial Transformation set. Dedicated contract tests run separately from the Core suite.
+The former `Pipeline` / `RunPipelineService` path is retained only as a pre-V1 compatibility surface and is no longer the canonical API.
 
-The application layer now exposes `RunPipelineService`, which plans a Pipeline, resolves one explicitly requested engine from `EngineRegistry`, validates logical capabilities and execution mode, executes the adapter, and verifies output engine/schema contracts. `PipelineExecutionResult` retains the execution id, engine descriptor and LogicalPlan.
+### Logical data and expressions
 
-The first implementation roadmap, **LOT-00 through LOT-10**, is now complete.
+The logical data layer provides engine-independent primitive DataTypes, immutable Fields and Schemas, logical Dataset identity and portable Dataset references. A logical Dataset never stores a Pandas DataFrame, Polars DataFrame, Arrow Table or other native engine object.
 
-Polars is available through the optional `pytransformkit[polars]` extra with both eager `DataFrame` and lazy `LazyFrame` execution. The same logical Pipeline, Expression AST, Transformation specifications and LogicalPlan are executed without Domain changes across Pandas and Polars. Dedicated cross-engine contract tests verify semantic equivalence, including NULL comparison/filter behavior.
+The Expression layer provides a portable immutable AST, `col/lit` DSL, string functions, static logical typing, NULL-aware nullability propagation, dependency extraction and canonical structural fingerprints.
 
-This closes the first engine-agnostic implementation cycle: Core → logical planning → explicit runtime contracts → Pandas → Polars → cross-engine semantic conformance.
+### Transformations and relational semantics
 
-The first release line targets `0.1.0a1`.
+The portable Transformation model currently includes:
 
-## Frozen roadmap to 1.0.0
+- select, drop and rename;
+- filter, limit and distinct;
+- cast and derive;
+- sort and deduplicate;
+- join;
+- union;
+- intersect;
+- except.
 
-The official implementation roadmap from **LOT-11 through LOT-28** is frozen in
-`docs/ROADMAP_LOT_11_TO_1_0.md`.
+LOT-11 adds multi-input logical dependencies, deterministic relational schema resolution, explicit join-key semantics, column-collision handling and configurable NULL join behavior.
+
+### Runtime and engines
+
+Runtime input is expressed through `InputBinding`, separating logical Dataset values from physical native values. The runtime resolves one explicitly requested engine from `EngineRegistry`; there is no implicit engine fallback.
+
+Pandas and Polars are optional extras. Both implement the relational contract, and dedicated cross-engine tests verify semantic equivalence for joins and set operations. Polars also supports lazy execution.
+
+Public engine namespaces are available under:
+
+~~~text
+pytransformkit.engines
+pytransformkit.adapters.pandas
+pytransformkit.adapters.polars
+pytransformkit.planning
+pytransformkit.runtime
+~~~
+
+## Quick example
+
+~~~python
+import pandas as pd
+
+from pytransformkit import InputBinding, TransformationPlan, TransformationRuntime
+from pytransformkit.adapters.pandas import PandasEngineAdapter
+from pytransformkit.domain.data.data_types import IntegerType, StringType
+from pytransformkit.domain.data.field import Field
+from pytransformkit.domain.data.schema import Schema
+from pytransformkit.engines import EngineRegistry
+from pytransformkit.functions import col
+
+schema = Schema(
+    fields=(
+        Field("customer_id", IntegerType(), nullable=False),
+        Field("status", StringType(), nullable=False),
+    )
+)
+
+builder = TransformationPlan.builder("active_customers")
+customers = builder.input("customers", schema=schema)
+active = builder.filter(
+    "active_only",
+    source=customers,
+    where=col("status") == "ACTIVE",
+)
+plan = builder.output("result", active).build()
+
+registry = EngineRegistry()
+registry.register(PandasEngineAdapter())
+
+runtime = TransformationRuntime(engines=registry)
+
+result = runtime.execute(
+    plan,
+    engine="pandas",
+    inputs={
+        "customers": InputBinding.from_native(
+            "customers",
+            pd.DataFrame(
+                {
+                    "customer_id": [1, 2],
+                    "status": ["ACTIVE", "INACTIVE"],
+                }
+            ),
+            engine="pandas",
+        )
+    },
+)
+
+print(result.output_handle.dataframe)
+~~~
+
+## Revised roadmap to 1.0.0
+
+The current normative implementation roadmap is:
+
+`docs/specifications/PYTRANSFORMKIT_V1_REVISED_IMPLEMENTATION_ROADMAP.md`
+
+The historical `docs/ROADMAP_LOT_11_TO_1_0.md` remains useful as project history but no longer governs future implementation where it conflicts with the PyKit Ecosystem V2 architecture.
+
+Current count:
 
 - Total roadmap: **29 lots** (`LOT-00` → `LOT-28`)
-- Completed: **11 lots** (`LOT-00` → `LOT-10`)
-- Remaining: **18 lots** (`LOT-11` → `LOT-28`)
+- Completed after LOT-11: **12 lots** (`LOT-00` → `LOT-11`)
+- Remaining: **17 lots** (`LOT-12` → `LOT-28`)
+- Next lot: **LOT-12 — Aggregation and Grouping**
 - Final lot: **LOT-28 — PyTransformKit 1.0.0 Stable Release**
-
-The roadmap is normative: material changes to lot ordering, boundaries, or 1.0.0
-acceptance criteria require an explicit roadmap amendment.
 
 ## Development
 
-```bash
+~~~bash
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
@@ -83,33 +186,36 @@ ruff format --check .
 mypy src/pytransformkit
 pytest
 python -m build
-```
+~~~
 
 On Windows PowerShell:
 
-```powershell
+~~~powershell
 .venv\Scripts\Activate.ps1
-```
+~~~
 
 ## Architectural invariants
 
 - No engine-specific types in the Domain.
 - A logical Dataset never stores native engine data.
+- TransformationPlan owns logical transformation meaning, not workflow execution.
 - No hidden engine fallback.
 - Optional engines remain optional dependencies.
+- Physical data enters execution through explicit bindings.
+- ResourceReference is not a live physical handle.
 - Public semantic behavior is test-driven.
-- A capability is not `SUPPORTED` until its contract tests pass.
+- A capability is not supported until its contract tests pass.
 
 ## Documentation
 
 Start with:
 
-- `docs/GETTING_STARTED.md` — installation, first Pipeline, Pandas/Polars execution and local testing;
+- `docs/GETTING_STARTED.md` — canonical V1 authoring and execution path;
 - `notebooks/00 - Local Experimentation.ipynb` — interactive first experiment;
-- `scripts/00_local_experimentation.py` — executable equivalent of the notebook;
-- `docs/ROADMAP_LOT_11_TO_1_0.md` — frozen implementation roadmap to 1.0.0.
-
-Architecture and functional specifications belong under `docs/specifications/` as they are added to the repository.
+- `scripts/00_local_experimentation.py` — executable equivalent;
+- `docs/specifications/PYTRANSFORMKIT_V1_TARGET_ARCHITECTURE.md` — V1 target architecture;
+- `docs/specifications/PYTRANSFORMKIT_V1_PUBLIC_API_SPEC.md` — V1 public API contract;
+- `docs/specifications/PYTRANSFORMKIT_V1_REVISED_IMPLEMENTATION_ROADMAP.md` — normative roadmap to 1.0.0.
 
 ## License
 

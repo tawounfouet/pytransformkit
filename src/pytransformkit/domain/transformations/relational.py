@@ -52,7 +52,7 @@ class JoinKey:
             raise TypeError("Join right key must be a FieldPath.")
 
     @classmethod
-    def of(cls, left: str, right: str | None = None) -> "JoinKey":
+    def of(cls, left: str, right: str | None = None) -> JoinKey:
         return cls(
             left=FieldPath.of(left),
             right=FieldPath.of(right if right is not None else left),

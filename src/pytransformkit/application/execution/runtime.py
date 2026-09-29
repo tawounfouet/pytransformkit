@@ -71,8 +71,7 @@ class TransformationResult:
     def __post_init__(self) -> None:
         if not isinstance(self.execution_id, TransformationExecutionId):
             raise TypeError(
-                "TransformationResult execution_id must be "
-                "a TransformationExecutionId."
+                "TransformationResult execution_id must be a TransformationExecutionId."
             )
         if not isinstance(self.status, ExecutionStatus):
             raise TypeError("TransformationResult status must be an ExecutionStatus.")

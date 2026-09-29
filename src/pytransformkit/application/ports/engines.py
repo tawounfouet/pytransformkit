@@ -51,8 +51,7 @@ class MultiInputEngineAdapter(Protocol):
     """V1 adapter extension for named multi-input plan execution."""
 
     @property
-    def descriptor(self) -> EngineDescriptor:
-        ...
+    def descriptor(self) -> EngineDescriptor: ...
 
     def bind_native(self, value: object) -> PhysicalHandle:
         """Wrap one engine-native value in an opaque PhysicalHandle."""

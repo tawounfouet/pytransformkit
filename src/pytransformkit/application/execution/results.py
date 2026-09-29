@@ -35,8 +35,7 @@ class EngineExecutionResult:
         if not isinstance(self.named_outputs, tuple):
             raise TypeError("Execution result named_outputs must be a tuple.")
         if any(
-            not isinstance(output, NamedEngineOutput)
-            for output in self.named_outputs
+            not isinstance(output, NamedEngineOutput) for output in self.named_outputs
         ):
             raise TypeError(
                 "Execution result named_outputs must contain NamedEngineOutput."

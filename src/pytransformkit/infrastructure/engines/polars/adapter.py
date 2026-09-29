@@ -185,9 +185,7 @@ class PolarsAdapter:
                 values[node.node_id] = values[node.input_node_ids[0]]
                 continue
 
-            raise AdapterError(
-                f"Unsupported LogicalPlan node kind {node.kind!r}."
-            )
+            raise AdapterError(f"Unsupported LogicalPlan node kind {node.kind!r}.")
 
         named_outputs: list[NamedEngineOutput] = []
         for node in plan.nodes:
@@ -320,26 +318,20 @@ class PolarsAdapter:
                 result = result.unique(maintain_order=True)
         elif isinstance(transformation, IntersectTransformation):
             columns = list(output_schema.names())
-            result = (
-                left.join(
-                    right.unique(maintain_order=True),
-                    on=columns,
-                    how="semi",
-                    nulls_equal=True,
-                )
-                .unique(maintain_order=True)
-            )
+            result = left.join(
+                right.unique(maintain_order=True),
+                on=columns,
+                how="semi",
+                nulls_equal=True,
+            ).unique(maintain_order=True)
         elif isinstance(transformation, ExceptTransformation):
             columns = list(output_schema.names())
-            result = (
-                left.join(
-                    right.unique(maintain_order=True),
-                    on=columns,
-                    how="anti",
-                    nulls_equal=True,
-                )
-                .unique(maintain_order=True)
-            )
+            result = left.join(
+                right.unique(maintain_order=True),
+                on=columns,
+                how="anti",
+                nulls_equal=True,
+            ).unique(maintain_order=True)
         else:
             raise AdapterError(
                 "Polars relational execution is not implemented for "
@@ -349,7 +341,7 @@ class PolarsAdapter:
         expected = list(output_schema.names())
         return result.select(expected)
 
-    
+
 def _join(
     left: Any,
     right: Any,

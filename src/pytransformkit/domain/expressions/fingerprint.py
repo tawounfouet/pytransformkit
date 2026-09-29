@@ -32,7 +32,9 @@ def expression_fingerprint(expression: Expression) -> Fingerprint:
 def canonical_expression(expression: Expression) -> str:
     if isinstance(expression, AggregateExpression):
         argument = (
-            "*" if expression.argument is None else canonical_expression(expression.argument)
+            "*"
+            if expression.argument is None
+            else canonical_expression(expression.argument)
         )
         return f"aggregate:{expression.function.value}:({argument})"
 

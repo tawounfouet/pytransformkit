@@ -24,9 +24,7 @@ class PolarsWindowCompiler:
         self,
         expression_compiler: PolarsExpressionCompiler | None = None,
     ) -> None:
-        self._expression_compiler = (
-            expression_compiler or PolarsExpressionCompiler()
-        )
+        self._expression_compiler = expression_compiler or PolarsExpressionCompiler()
 
     def derive(
         self,
@@ -41,14 +39,8 @@ class PolarsWindowCompiler:
 
         work = _with_row_index(frame, position)
 
-        partition_columns = [
-            str(field)
-            for field in expression.spec.partition_keys
-        ]
-        order_columns = [
-            str(key.field)
-            for key in expression.spec.order_keys
-        ]
+        partition_columns = [str(field) for field in expression.spec.partition_keys]
+        order_columns = [str(key.field) for key in expression.spec.order_keys]
 
         sort_columns = partition_columns + order_columns
         if sort_columns:
@@ -63,10 +55,7 @@ class PolarsWindowCompiler:
                 ),
                 nulls_last=(
                     [False] * len(partition_columns)
-                    + [
-                        key.nulls.value == "last"
-                        for key in expression.spec.order_keys
-                    ]
+                    + [key.nulls.value == "last" for key in expression.spec.order_keys]
                 ),
                 maintain_order=True,
             )
@@ -116,9 +105,7 @@ class PolarsWindowCompiler:
             WindowFunction.LEAD,
         }:
             if argument_column is None:
-                raise AdapterError(
-                    f"{expression.function.value} requires an argument."
-                )
+                raise AdapterError(f"{expression.function.value} requires an argument.")
             work = work.with_columns(
                 _offset_expression(
                     expression,

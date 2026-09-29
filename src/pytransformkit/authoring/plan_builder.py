@@ -54,6 +54,13 @@ from pytransformkit.domain.transformations.relational import (
     NullJoinPolicy,
     UnionTransformation,
 )
+from pytransformkit.domain.transformations.reshaping import (
+    ExplodeTransformation,
+    FlattenTransformation,
+    PivotAggregation,
+    PivotTransformation,
+    UnpivotTransformation,
+)
 from pytransformkit.domain.transformations.schema_resolution import (
     OutputSchemaResolver,
 )
@@ -293,6 +300,86 @@ class TransformationPlanBuilder:
             transformation=AggregateTransformation.from_mapping(
                 group_by=group_by,
                 metrics=metrics,
+            ),
+        )
+
+    def pivot(
+        self,
+        name: str,
+        *,
+        source: Dataset,
+        index: tuple[str, ...],
+        columns: str,
+        values: str,
+        categories: tuple[str, ...],
+        aggregation: PivotAggregation,
+    ) -> Dataset:
+        """Pivot explicit categories into deterministic output fields."""
+        return self.apply(
+            name,
+            source=source,
+            transformation=PivotTransformation(
+                index=tuple(FieldPath.of(field) for field in index),
+                columns=FieldPath.of(columns),
+                values=FieldPath.of(values),
+                categories=categories,
+                aggregation=aggregation,
+            ),
+        )
+
+    def unpivot(
+        self,
+        name: str,
+        *,
+        source: Dataset,
+        id_vars: tuple[str, ...],
+        value_vars: tuple[str, ...],
+        variable_name: str = "variable",
+        value_name: str = "value",
+    ) -> Dataset:
+        """Unpivot explicit value columns into variable/value rows."""
+        return self.apply(
+            name,
+            source=source,
+            transformation=UnpivotTransformation(
+                id_vars=tuple(FieldPath.of(field) for field in id_vars),
+                value_vars=tuple(FieldPath.of(field) for field in value_vars),
+                variable_name=variable_name,
+                value_name=value_name,
+            ),
+        )
+
+    def explode(
+        self,
+        name: str,
+        *,
+        source: Dataset,
+        field: str,
+    ) -> Dataset:
+        """Explode one top-level List field."""
+        return self.apply(
+            name,
+            source=source,
+            transformation=ExplodeTransformation(
+                field=FieldPath.of(field),
+            ),
+        )
+
+    def flatten(
+        self,
+        name: str,
+        *,
+        source: Dataset,
+        field: str,
+        prefix: str | None = None,
+    ) -> Dataset:
+        """Flatten one top-level Struct field into deterministic columns."""
+        return self.apply(
+            name,
+            source=source,
+            transformation=FlattenTransformation(
+                field=FieldPath.of(field),
+                prefix=prefix,
             ),
         )
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from pytransformkit.application.execution.context import ExecutionContext
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
 
 
 @runtime_checkable
-class DatasetHandle(Protocol):
+class PhysicalHandle(Protocol):
     """Opaque engine-owned handle to physical tabular data."""
 
     @property
@@ -22,9 +23,13 @@ class DatasetHandle(Protocol):
         ...
 
 
+# Pre-1.0 compatibility name.
+DatasetHandle = PhysicalHandle
+
+
 @runtime_checkable
 class EngineAdapter(Protocol):
-    """Physical execution adapter contract."""
+    """Legacy-compatible physical execution adapter contract."""
 
     @property
     def descriptor(self) -> EngineDescriptor:
@@ -34,8 +39,30 @@ class EngineAdapter(Protocol):
     def execute(
         self,
         plan: LogicalPlan,
-        input_handle: DatasetHandle,
+        input_handle: PhysicalHandle,
         context: ExecutionContext,
     ) -> EngineExecutionResult:
-        """Execute a validated LogicalPlan using one physical engine."""
+        """Execute a single-input LogicalPlan compatibility path."""
+        ...
+
+
+@runtime_checkable
+class MultiInputEngineAdapter(Protocol):
+    """V1 adapter extension for named multi-input plan execution."""
+
+    @property
+    def descriptor(self) -> EngineDescriptor:
+        ...
+
+    def bind_native(self, value: object) -> PhysicalHandle:
+        """Wrap one engine-native value in an opaque PhysicalHandle."""
+        ...
+
+    def execute_many(
+        self,
+        plan: LogicalPlan,
+        input_handles: Mapping[str, PhysicalHandle],
+        context: ExecutionContext,
+    ) -> EngineExecutionResult:
+        """Execute a LogicalPlan with explicit named physical inputs."""
         ...

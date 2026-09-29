@@ -324,9 +324,7 @@ def _require_numeric(
         expression_type.data_type,
         (IntegerType, FloatType, DecimalType),
     ):
-        raise ExpressionTypeError(
-            f"{function_name} requires a numeric Expression."
-        )
+        raise ExpressionTypeError(f"{function_name} requires a numeric Expression.")
 
 
 def _resolve_numeric_result(

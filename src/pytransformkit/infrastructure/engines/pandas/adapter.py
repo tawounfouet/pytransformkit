@@ -313,6 +313,34 @@ class PandasAdapter:
                 output_schema,
             )
 
+        if isinstance(transformation, PivotTransformation):
+            return self._execute_pivot(
+                dataframe,
+                transformation,
+                output_schema,
+            )
+
+        if isinstance(transformation, UnpivotTransformation):
+            return self._execute_unpivot(
+                dataframe,
+                transformation,
+                output_schema,
+            )
+
+        if isinstance(transformation, ExplodeTransformation):
+            return self._execute_explode(
+                dataframe,
+                transformation,
+                output_schema,
+            )
+
+        if isinstance(transformation, FlattenTransformation):
+            return self._execute_flatten(
+                dataframe,
+                transformation,
+                output_schema,
+            )
+
         if isinstance(transformation, SortTransformation):
             return _sort(dataframe, transformation)
 
@@ -417,6 +445,123 @@ class PandasAdapter:
                 )
             result = pd.DataFrame([row])
 
+        result = result.loc[:, list(output_schema.names())]
+        return self._coerce_output_schema(
+            result,
+            output_schema,
+        )
+
+    def _execute_pivot(
+        self,
+        dataframe: Any,
+        transformation: PivotTransformation,
+        output_schema: Schema,
+    ) -> Any:
+        index = [str(field) for field in transformation.index]
+        column = str(transformation.columns)
+        value = str(transformation.values)
+        categories = list(transformation.categories)
+
+        work = dataframe.loc[
+            dataframe[column].isin(categories),
+            index + [column, value],
+        ]
+
+        if index:
+            grouped = work.groupby(
+                index + [column],
+                dropna=False,
+                sort=False,
+            )[value]
+            aggregated = _pandas_pivot_aggregate(
+                grouped,
+                transformation.aggregation,
+            )
+            result = aggregated.unstack(column)
+            result = result.reindex(columns=categories).reset_index()
+        else:
+            grouped = work.groupby(
+                column,
+                dropna=False,
+                sort=False,
+            )[value]
+            aggregated = _pandas_pivot_aggregate(
+                grouped,
+                transformation.aggregation,
+            )
+            row = {
+                category: (
+                    aggregated.get(category, 0)
+                    if transformation.aggregation is PivotAggregation.COUNT
+                    else aggregated.get(category, pd.NA)
+                )
+                for category in categories
+            }
+            result = pd.DataFrame([row])
+
+        if transformation.aggregation is PivotAggregation.COUNT:
+            for category in categories:
+                result[category] = result[category].fillna(0)
+
+        return self._coerce_output_schema(
+            result,
+            output_schema,
+        )
+
+    def _execute_unpivot(
+        self,
+        dataframe: Any,
+        transformation: UnpivotTransformation,
+        output_schema: Schema,
+    ) -> Any:
+        result = dataframe.melt(
+            id_vars=[str(field) for field in transformation.id_vars],
+            value_vars=[str(field) for field in transformation.value_vars],
+            var_name=transformation.variable_name,
+            value_name=transformation.value_name,
+            ignore_index=True,
+        )
+        return self._coerce_output_schema(
+            result,
+            output_schema,
+        )
+
+    def _execute_explode(
+        self,
+        dataframe: Any,
+        transformation: ExplodeTransformation,
+        output_schema: Schema,
+    ) -> Any:
+        result = dataframe.explode(
+            str(transformation.field),
+            ignore_index=True,
+        )
+        return self._coerce_output_schema(
+            result,
+            output_schema,
+        )
+
+    def _execute_flatten(
+        self,
+        dataframe: Any,
+        transformation: FlattenTransformation,
+        output_schema: Schema,
+    ) -> Any:
+        field_name = str(transformation.field)
+        result = dataframe.copy()
+
+        for output_field in output_schema.fields:
+            if output_field.name in dataframe.columns:
+                continue
+            nested_name = _flatten_nested_name(
+                transformation,
+                output_field.name,
+            )
+            result[output_field.name] = result[field_name].map(
+                lambda value, key=nested_name: _pandas_nested_value(value, key)
+            )
+
+        result = result.drop(columns=[field_name])
         result = result.loc[:, list(output_schema.names())]
         return self._coerce_output_schema(
             result,
@@ -533,6 +678,54 @@ class PandasAdapter:
         raise AdapterError(
             f"Pandas casting is not implemented for {type(data_type).__name__!r}."
         )
+
+
+def _pandas_pivot_aggregate(
+    grouped: Any,
+    aggregation: PivotAggregation,
+) -> Any:
+    if aggregation is PivotAggregation.SUM:
+        return grouped.sum(min_count=1)
+    if aggregation is PivotAggregation.MIN:
+        return grouped.min()
+    if aggregation is PivotAggregation.MAX:
+        return grouped.max()
+    if aggregation is PivotAggregation.MEAN:
+        return grouped.mean()
+    if aggregation is PivotAggregation.COUNT:
+        return grouped.count()
+    raise AdapterError(
+        f"Unsupported Pandas pivot aggregation {aggregation.value!r}."
+    )
+
+
+def _pandas_nested_value(value: object, key: str) -> object:
+    if value is None or value is pd.NA:
+        return pd.NA
+    if isinstance(value, Mapping):
+        return value.get(key, pd.NA)
+    try:
+        return getattr(value, key)
+    except AttributeError as error:
+        raise AdapterError(
+            f"Pandas nested value does not expose field {key!r}."
+        ) from error
+
+
+def _flatten_nested_name(
+    transformation: FlattenTransformation,
+    output_name: str,
+) -> str:
+    prefix = (
+        transformation.prefix
+        if transformation.prefix is not None
+        else f"{transformation.field.name}_"
+    )
+    if not output_name.startswith(prefix):
+        raise AdapterError(
+            f"Flatten output {output_name!r} does not match prefix {prefix!r}."
+        )
+    return output_name[len(prefix) :]
 
 
 def _pandas_internal_name(

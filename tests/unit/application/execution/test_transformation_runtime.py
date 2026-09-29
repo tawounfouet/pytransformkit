@@ -85,11 +85,7 @@ class FakeMultiAdapter:
 
 
 def _schema() -> Schema:
-    return Schema(
-        fields=(
-            Field("customer_id", IntegerType(), nullable=False),
-        )
-    )
+    return Schema(fields=(Field("customer_id", IntegerType(), nullable=False),))
 
 
 def _plan() -> TransformationPlan:

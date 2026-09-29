@@ -61,7 +61,7 @@ class InputBinding:
         value: object,
         *,
         engine: str,
-    ) -> "InputBinding":
+    ) -> InputBinding:
         return cls(
             input_name=input_name,
             kind=InputBindingKind.NATIVE,
@@ -74,7 +74,7 @@ class InputBinding:
         cls,
         input_name: str,
         resource: ResourceReference,
-    ) -> "InputBinding":
+    ) -> InputBinding:
         return cls(
             input_name=input_name,
             kind=InputBindingKind.RESOURCE,
@@ -109,7 +109,7 @@ class OutputBinding:
         resource: ResourceReference,
         *,
         mode: OutputMode | str = OutputMode.CREATE_NEW,
-    ) -> "OutputBinding":
+    ) -> OutputBinding:
         return cls(
             output_name=output_name,
             resource=resource,

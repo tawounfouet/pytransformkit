@@ -30,9 +30,7 @@ class AggregateMetric:
 
     def __post_init__(self) -> None:
         if not self.name or not self.name.strip():
-            raise InvalidTransformationError(
-                "Aggregate metric name must not be empty."
-            )
+            raise InvalidTransformationError("Aggregate metric name must not be empty.")
         if not isinstance(self.expression, AggregateExpression):
             raise TypeError(
                 "Aggregate metric expression must be an AggregateExpression."
@@ -59,9 +57,7 @@ class AggregateTransformation(TransformationSpec):
         if not isinstance(self.group_by, tuple):
             raise TypeError("Aggregate group_by must be provided as a tuple.")
         if any(not isinstance(item, Expression) for item in self.group_by):
-            raise TypeError(
-                "Aggregate group_by must contain only Expression values."
-            )
+            raise TypeError("Aggregate group_by must contain only Expression values.")
         if not isinstance(self.metrics, tuple):
             raise TypeError("Aggregate metrics must be provided as a tuple.")
         if not self.metrics:
@@ -75,9 +71,7 @@ class AggregateTransformation(TransformationSpec):
 
         metric_names = tuple(metric.name for metric in self.metrics)
         if len(metric_names) != len(set(metric_names)):
-            raise InvalidTransformationError(
-                "Aggregate metric names must be unique."
-            )
+            raise InvalidTransformationError("Aggregate metric names must be unique.")
 
     @classmethod
     def from_mapping(

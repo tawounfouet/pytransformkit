@@ -1,4 +1,8 @@
-"""Logical Pipeline planning and Schema propagation."""
+"""Legacy Pipeline planning and Schema propagation.
+
+PipelinePlanner is retained as a pre-1.0 compatibility facade. New code should
+compile TransformationPlan through application.planning.TransformationCompiler.
+"""
 
 from collections import defaultdict
 
@@ -23,7 +27,7 @@ from pytransformkit.errors.pipeline import InvalidPipelineError
 
 
 class PipelinePlanner:
-    """Validate a Pipeline and propagate Schemas through its DAG."""
+    """Compatibility planner for the legacy linear Pipeline API."""
 
     def __init__(
         self,
@@ -62,6 +66,7 @@ class PipelinePlanner:
             pipeline_name=pipeline.name,
             nodes=tuple(planned_nodes),
             output_schema=output_schema,
+            output_schemas=((pipeline.output_node.name, output_schema),),
         )
 
     def _plan_node(
@@ -78,11 +83,12 @@ class PipelinePlanner:
                 kind=node.kind,
                 input_schema=None,
                 output_schema=node.schema,
+                name=node.name,
             )
 
         if len(predecessor_ids) != 1:
             raise InvalidPipelineError(
-                "The initial Pipeline planner requires exactly one "
+                "The legacy Pipeline planner requires exactly one "
                 "predecessor for every non-input node."
             )
 
@@ -100,6 +106,9 @@ class PipelinePlanner:
                 output_schema=output_schema,
                 step_id=node.step_id,
                 transformation=node.transformation,
+                name=node.name,
+                input_node_ids=predecessor_ids,
+                input_schemas=(input_schema,),
             )
 
         if isinstance(node, OutputNode):
@@ -108,6 +117,9 @@ class PipelinePlanner:
                 kind=node.kind,
                 input_schema=input_schema,
                 output_schema=input_schema,
+                name=node.name,
+                input_node_ids=predecessor_ids,
+                input_schemas=(input_schema,),
             )
 
         raise InvalidPipelineError(

@@ -17,6 +17,7 @@ from pytransformkit.domain.expressions.window import (
     WindowFrameKind,
 )
 from pytransformkit.domain.pipelines.plan import LogicalPlan
+from pytransformkit.domain.quality.rules import ExpressionValidation
 from pytransformkit.domain.transformations.aggregation import AggregateTransformation
 from pytransformkit.domain.transformations.base import TransformationSpec
 from pytransformkit.domain.transformations.casting import CastTransformation
@@ -34,6 +35,7 @@ from pytransformkit.domain.transformations.projection import (
     RenameTransformation,
     SelectTransformation,
 )
+from pytransformkit.domain.transformations.quality import QualityGate
 from pytransformkit.domain.transformations.relational import (
     ExceptTransformation,
     IntersectTransformation,
@@ -70,6 +72,7 @@ _CAPABILITY_BY_TRANSFORMATION: tuple[
     (UnpivotTransformation, EngineCapability.UNPIVOT),
     (ExplodeTransformation, EngineCapability.EXPLODE),
     (FlattenTransformation, EngineCapability.FLATTEN),
+    (QualityGate, EngineCapability.QUALITY),
     (UnionTransformation, EngineCapability.UNION),
     (IntersectTransformation, EngineCapability.INTERSECT),
     (ExceptTransformation, EngineCapability.EXCEPT),
@@ -181,6 +184,12 @@ def _transformation_expressions(
     if isinstance(transformation, AggregateTransformation):
         return transformation.group_by + tuple(
             metric.expression for metric in transformation.metrics
+        )
+    if isinstance(transformation, QualityGate):
+        return tuple(
+            rule.expression
+            for rule in transformation.spec.rules
+            if isinstance(rule, ExpressionValidation)
         )
     return ()
 

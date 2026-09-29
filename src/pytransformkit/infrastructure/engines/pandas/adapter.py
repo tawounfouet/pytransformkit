@@ -34,6 +34,7 @@ from pytransformkit.domain.expressions.aggregate import (
     AggregateExpression,
     AggregateFunction,
 )
+from pytransformkit.domain.expressions.window import WindowExpression
 from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
 from pytransformkit.domain.pipelines.plan import LogicalPlan
 from pytransformkit.domain.transformations.aggregation import (
@@ -76,6 +77,7 @@ from pytransformkit.infrastructure.engines.pandas.handle import (
     PandasDatasetHandle,
 )
 from pytransformkit.infrastructure.engines.pandas.types import PandasTypeMapper
+from pytransformkit.infrastructure.engines.pandas.windows import PandasWindowCompiler
 
 _PANDAS_CAPABILITIES = frozenset(
     {
@@ -90,6 +92,9 @@ _PANDAS_CAPABILITIES = frozenset(
         EngineCapability.SORT,
         EngineCapability.DEDUPLICATE,
         EngineCapability.AGGREGATE,
+        EngineCapability.WINDOW,
+        EngineCapability.WINDOW_ROWS_CUMULATIVE,
+        EngineCapability.WINDOW_ROWS_MOVING,
         EngineCapability.JOIN_INNER,
         EngineCapability.JOIN_LEFT,
         EngineCapability.JOIN_RIGHT,
@@ -113,6 +118,7 @@ class PandasAdapter:
         type_mapper: PandasTypeMapper | None = None,
     ) -> None:
         self._expression_compiler = expression_compiler or PandasExpressionCompiler()
+        self._window_compiler = PandasWindowCompiler(self._expression_compiler)
         self._type_mapper = type_mapper or PandasTypeMapper()
         self._compatibility = EngineCompatibilityService()
 
@@ -274,10 +280,16 @@ class PandasAdapter:
             return dataframe.assign(**{field_name: casted})
 
         if isinstance(transformation, DeriveTransformation):
-            value = self._expression_compiler.compile(
-                transformation.expression,
-                dataframe,
-            )
+            if isinstance(transformation.expression, WindowExpression):
+                value = self._window_compiler.compile(
+                    transformation.expression,
+                    dataframe,
+                )
+            else:
+                value = self._expression_compiler.compile(
+                    transformation.expression,
+                    dataframe,
+                )
             return dataframe.assign(**{transformation.field_name: value})
 
         if isinstance(transformation, AggregateTransformation):

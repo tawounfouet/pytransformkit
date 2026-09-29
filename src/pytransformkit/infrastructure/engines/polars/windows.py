@@ -395,14 +395,8 @@ def _derive_cumulative(
     }:
         raw_column = _internal_name(existing, "cumulative")
         existing.add(raw_column)
-        raw = (
-            value.cum_min()
-            if function is WindowFunction.MIN
-            else value.cum_max()
-        )
-        frame = frame.with_columns(
-            _over(raw, partition_columns).alias(raw_column)
-        )
+        raw = value.cum_min() if function is WindowFunction.MIN else value.cum_max()
+        frame = frame.with_columns(_over(raw, partition_columns).alias(raw_column))
         filled = _over(
             pl.col(raw_column).forward_fill(),
             partition_columns,
@@ -422,9 +416,7 @@ def _derive_cumulative(
         )
         return frame.with_columns(result.alias(field_name))
 
-    raise AdapterError(
-        f"Unsupported cumulative function {function.value!r}."
-    )
+    raise AdapterError(f"Unsupported cumulative function {function.value!r}.")
 
 
 def _moving_aggregate(
@@ -474,9 +466,7 @@ def _moving_aggregate(
             min_samples=1,
         ).cast(pl.Float64)
     else:
-        raise AdapterError(
-            f"Unsupported moving function {function.value!r}."
-        )
+        raise AdapterError(f"Unsupported moving function {function.value!r}.")
 
     return _over(rolling, partition_columns)
 

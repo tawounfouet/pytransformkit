@@ -448,6 +448,18 @@ def _join(
         suffixes=("", transformation.right_suffix),
         sort=False,
     )
+    if transformation.how in {JoinType.RIGHT, JoinType.FULL}:
+        for left_key, right_key in zip(
+            left_keys,
+            right_keys,
+            strict=True,
+        ):
+            if left_key == right_key or right_key not in result.columns:
+                continue
+            result[left_key] = result[left_key].where(
+                ~result[left_key].isna(),
+                result[right_key],
+            )
     return _restore_null_sentinels(result)
 
 

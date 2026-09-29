@@ -948,4 +948,4 @@ def _package_version() -> str:
     try:
         return version("pytransformkit")
     except PackageNotFoundError:
-        return "0.2.0b1"
+        return "0.2.0"

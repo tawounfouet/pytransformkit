@@ -23,6 +23,11 @@ from pytransformkit.domain.expressions.aggregate import (
     AggregateExpression,
     AggregateFunction,
 )
+from pytransformkit.domain.expressions.window import (
+    WindowExpression,
+    WindowFunction,
+    validate_window_expression,
+)
 from pytransformkit.domain.expressions.base import Expression
 from pytransformkit.domain.expressions.binary import BinaryExpression
 from pytransformkit.domain.expressions.functions import FunctionCall
@@ -85,6 +90,12 @@ class ExpressionTypeResolver:
             raise ExpressionTypeError(
                 "Aggregate Expressions are only valid inside "
                 "AggregateTransformation metric context."
+            )
+
+        if isinstance(expression, WindowExpression):
+            raise ExpressionTypeError(
+                "Window Expressions are only valid as direct derived-field "
+                "expressions."
             )
 
         if isinstance(expression, ColumnReference):
@@ -303,6 +314,131 @@ class AggregateExpressionTypeResolver:
 
         raise ExpressionTypeError(
             f"Unsupported aggregate function {expression.function.value!r}."
+        )
+
+
+class WindowExpressionTypeResolver:
+    """Resolve one analytical WindowExpression in derive context."""
+
+    _AGGREGATE_FUNCTIONS = frozenset(
+        {
+            WindowFunction.COUNT,
+            WindowFunction.SUM,
+            WindowFunction.MIN,
+            WindowFunction.MAX,
+            WindowFunction.MEAN,
+        }
+    )
+
+    def __init__(
+        self,
+        row_resolver: ExpressionTypeResolver | None = None,
+        aggregate_resolver: AggregateExpressionTypeResolver | None = None,
+    ) -> None:
+        self._row_resolver = row_resolver or ExpressionTypeResolver()
+        self._aggregate_resolver = (
+            aggregate_resolver
+            or AggregateExpressionTypeResolver(self._row_resolver)
+        )
+
+    def resolve(
+        self,
+        expression: WindowExpression,
+        schema: Schema,
+    ) -> ExpressionType:
+        if not isinstance(expression, WindowExpression):
+            raise TypeError(
+                "WindowExpressionTypeResolver requires a WindowExpression."
+            )
+
+        validate_window_expression(expression)
+
+        for key in expression.spec.partition_keys:
+            schema.field(str(key))
+        for key in expression.spec.order_keys:
+            schema.field(str(key.field))
+
+        if (
+            expression.function not in self._AGGREGATE_FUNCTIONS
+            and expression.spec.frame is not None
+        ):
+            raise ExpressionTypeError(
+                f"{expression.function.value} does not accept a window frame."
+            )
+
+        if expression.function in {
+            WindowFunction.ROW_NUMBER,
+            WindowFunction.RANK,
+            WindowFunction.DENSE_RANK,
+        }:
+            return ExpressionType(IntegerType(bits=64), False)
+
+        if expression.function in {
+            WindowFunction.LAG,
+            WindowFunction.LEAD,
+        }:
+            if expression.argument is None:
+                raise ExpressionTypeError(
+                    f"{expression.function.value} requires an argument."
+                )
+            argument_type = self._row_resolver.resolve(
+                expression.argument,
+                schema,
+            )
+
+            if expression.default is None:
+                return ExpressionType(
+                    argument_type.data_type,
+                    True,
+                )
+
+            default_type = self._row_resolver.resolve(
+                expression.default,
+                schema,
+            )
+            _require_compatible_types(
+                argument_type.data_type,
+                default_type.data_type,
+                context=f"{expression.function.value} default",
+            )
+            return ExpressionType(
+                argument_type.data_type,
+                argument_type.nullable or default_type.nullable,
+            )
+
+        if expression.function in self._AGGREGATE_FUNCTIONS:
+            aggregate_function = {
+                WindowFunction.COUNT: AggregateFunction.COUNT,
+                WindowFunction.SUM: AggregateFunction.SUM,
+                WindowFunction.MIN: AggregateFunction.MIN,
+                WindowFunction.MAX: AggregateFunction.MAX,
+                WindowFunction.MEAN: AggregateFunction.MEAN,
+            }[expression.function]
+            return self._aggregate_resolver.resolve(
+                AggregateExpression(
+                    function=aggregate_function,
+                    argument=expression.argument,
+                ),
+                schema,
+            )
+
+        raise ExpressionTypeError(
+            f"Unsupported window function {expression.function.value!r}."
+        )
+
+
+def _require_compatible_types(
+    left: DataType,
+    right: DataType,
+    *,
+    context: str,
+) -> None:
+    if isinstance(right, UnknownType):
+        return
+    if left != right:
+        raise ExpressionTypeError(
+            f"{context} must resolve to the same logical DataType "
+            "as the window argument."
         )
 
 

@@ -51,6 +51,7 @@ from pytransformkit.domain.engines import (
     EngineDescriptor,
 )
 from pytransformkit.domain.lineage import LineageAnalyzer, TransformationLineage
+from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
 from pytransformkit.domain.pipelines.plan import LogicalPlan
 from pytransformkit.domain.plans import TransformationPlan
 from pytransformkit.domain.quality.results import ValidationResult
@@ -78,6 +79,7 @@ from pytransformkit.domain.shared.identifiers import (
     TransformationPlanId,
 )
 from pytransformkit.errors.base import PyTransformKitError
+from pytransformkit.errors.io import ResourceIOError, ResourceWriteError
 from pytransformkit.errors.engine import (
     AdapterError,
     BindingError,
@@ -689,13 +691,17 @@ class TransformationRuntime:
                 raise
             raise normalized_error from raw_error
 
-    @staticmethod
     def _bind_inputs(
+        self,
         plan: LogicalPlan,
         adapter: object,
         bindings: Mapping[str, InputBinding],
         engine_id: str,
-    ) -> dict[str, PhysicalHandle]:
+    ) -> tuple[
+        dict[str, PhysicalHandle],
+        dict[str, ResourceReference],
+        tuple[Diagnostic, ...],
+    ]:
         expected = set(plan.input_names)
         supplied = set(bindings)
 
@@ -708,6 +714,9 @@ class TransformationRuntime:
             )
 
         handles: dict[str, PhysicalHandle] = {}
+        resources: dict[str, ResourceReference] = {}
+        diagnostics: list[Diagnostic] = []
+
         for name in plan.input_names:
             binding = bindings[name]
             if binding.input_name != name:
@@ -717,25 +726,56 @@ class TransformationRuntime:
                 )
 
             if binding.kind is InputBindingKind.RESOURCE:
-                raise ResourceResolutionError(
-                    "ResourceReference input resolution is introduced in LOT-20."
-                )
+                if binding.resource is None:
+                    raise ResourceResolutionError(
+                        f"Resource input {name!r} has no ResourceReference."
+                    )
+                if self._resources is None:
+                    raise ResourceResolutionError(
+                        "Resource input resolution requires ResourceIORegistry."
+                    )
+                if not isinstance(adapter, ArrowBindableEngineAdapter):
+                    raise ResourceResolutionError(
+                        f"Engine {engine_id!r} cannot bind Arrow resource reads."
+                    )
 
-            if binding.engine_id != engine_id:
-                raise BindingError(
-                    f"Input {name!r} is bound for engine "
-                    f"{binding.engine_id!r}, not {engine_id!r}."
-                )
+                try:
+                    reader = self._resources.reader_for(binding.resource.scheme)
+                    read_result = reader.read(
+                        ReadRequest(
+                            resource=binding.resource,
+                            expected_schema=_input_schema(plan, name),
+                            credential=binding.credential,
+                        )
+                    )
+                except ResourceIOError as error:
+                    raise ResourceResolutionError(
+                        f"Failed to resolve resource input {name!r}: {error}"
+                    ) from error
 
-            value = binding.native_value
-            if isinstance(value, PhysicalHandle):
-                handle = value
-            elif isinstance(adapter, MultiInputEngineAdapter):
-                handle = adapter.bind_native(value)
+                if read_result.representation is not ReadRepresentation.ARROW:
+                    raise ResourceResolutionError(
+                        "LOT-20 runtime only binds Arrow Reader representations."
+                    )
+                handle = adapter.bind_arrow(read_result.value)
+                resources[name] = binding.resource
+                diagnostics.extend(read_result.diagnostics)
             else:
-                raise BindingError(
-                    f"Engine {engine_id!r} cannot bind native input values."
-                )
+                if binding.engine_id != engine_id:
+                    raise BindingError(
+                        f"Input {name!r} is bound for engine "
+                        f"{binding.engine_id!r}, not {engine_id!r}."
+                    )
+
+                value = binding.native_value
+                if isinstance(value, PhysicalHandle):
+                    handle = value
+                elif isinstance(adapter, MultiInputEngineAdapter):
+                    handle = adapter.bind_native(value)
+                else:
+                    raise BindingError(
+                        f"Engine {engine_id!r} cannot bind native input values."
+                    )
 
             if handle.engine_id != engine_id:
                 raise BindingError(
@@ -744,7 +784,76 @@ class TransformationRuntime:
                 )
             handles[name] = handle
 
-        return handles
+        return handles, resources, tuple(diagnostics)
+
+    def _write_outputs(
+        self,
+        plan: LogicalPlan,
+        outputs: tuple[TransformationOutput, ...],
+        bindings: Mapping[str, OutputBinding],
+    ) -> tuple[
+        tuple[WriteResult, ...],
+        dict[str, ResourceReference],
+        tuple[Diagnostic, ...],
+    ]:
+        if not bindings:
+            return (), {}, ()
+
+        if self._resources is None:
+            raise BindingError(
+                "Physical output materialization requires ResourceIORegistry."
+            )
+
+        known_outputs = set(plan.output_names)
+        unknown = sorted(set(bindings) - known_outputs)
+        if unknown:
+            raise BindingError(
+                f"Output bindings contain unknown LogicalPlan outputs: {unknown!r}."
+            )
+
+        by_name = {output.name: output for output in outputs}
+        write_results: list[WriteResult] = []
+        resources: dict[str, ResourceReference] = {}
+        diagnostics: list[Diagnostic] = []
+
+        for name in plan.output_names:
+            if name not in bindings:
+                continue
+
+            binding = bindings[name]
+            if binding.output_name != name:
+                raise BindingError(
+                    f"Output binding key {name!r} does not match "
+                    f"OutputBinding name {binding.output_name!r}."
+                )
+            output = by_name[name]
+            writer = self._resources.writer_for(binding.resource.scheme)
+            result = writer.write(
+                WriteRequest(
+                    resource=binding.resource,
+                    handle=output.handle,
+                    schema=output.schema,
+                    mode=binding.mode,
+                    credential=binding.credential,
+                    retry_safety=binding.retry_safety,
+                )
+            )
+            diagnostics.extend(result.diagnostics)
+            write_results.append(result)
+
+            if result.status is WriteStatus.UNKNOWN_OUTCOME:
+                raise UnknownOutcomeExecutionError(
+                    "Physical output write has UNKNOWN_OUTCOME for "
+                    f"{binding.resource.scheme}:{binding.resource.locator}."
+                )
+            if result.status is WriteStatus.FAILED:
+                raise ResourceWriteError(
+                    f"Physical output write failed for {name!r}."
+                )
+
+            resources[name] = result.resource
+
+        return tuple(write_results), resources, tuple(diagnostics)
 
     @staticmethod
     def _validate_result_contract(
@@ -972,3 +1081,10 @@ def _package_version() -> str:
         return version("pytransformkit")
     except PackageNotFoundError:
         return "0.3.0"
+
+
+def _input_schema(plan: LogicalPlan, name: str) -> Schema:
+    for node in plan.nodes:
+        if node.kind is PipelineNodeKind.INPUT and node.name == name:
+            return node.output_schema
+    raise KeyError(name)

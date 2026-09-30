@@ -949,6 +949,8 @@ targeting **`0.5.0`**.
 
 # 17. LOT-23 — Extension and Plugin Architecture
 
+**Status:** DONE — `0.5.0`
+
 **Target milestone:** 0.5.0
 
 ## Scope
@@ -977,6 +979,32 @@ duplicate/conflict handling
 - built-ins can conform to public extension Protocols;
 - plugin compatibility is machine-checkable;
 - untrusted wire payload cannot activate code.
+
+## Implementation closure
+
+LOT-23 stabilizes the extension boundary with:
+
+- a public qualified `pytransformkit.plugins` namespace without promoting plugin machinery to the package root;
+- `PluginRegistry.discover()` over the `pytransformkit.plugins` entry-point group;
+- discovery that captures only entry-point metadata and never calls `load()`;
+- explicit `activate(plugin_id)` as the only plugin-code loading path;
+- `PluginDescriptor` and `PluginCompatibility` with machine-checkable framework and plugin-protocol ranges;
+- plugin API protocol version 1;
+- public extension Protocols for EngineAdapter, Reader, Writer, ResourceResolver, FunctionExtension, OptimizerRule and TelemetrySink;
+- FunctionRegistry, OptimizerRuleRegistry, ResourceResolverRegistry and TelemetrySinkRegistry;
+- explicit duplicate/conflict rejection with opt-in replacement only on direct registry APIs;
+- freeze semantics across PluginRegistry, EngineRegistry, ResourceIORegistry and new extension registries;
+- PluginActivationContext as the explicit set of registries a trusted activated plugin may mutate;
+- extension optimizer rules wired into LogicalOptimizer without moving physical lowering into planning;
+- LocalFilePathResolver adapted to the ResourceResolver contract;
+- built-in protocol-conformance tests across official engine adapters, local I/O/resolver and NullTelemetrySink;
+- a plugin-specific public error hierarchy;
+- security tests proving PluginDescriptor remains outside the closed semantic wire registry;
+- import tests proving neither core import nor public plugin-namespace import performs entry-point discovery;
+- a dedicated plugin-contract CI gate.
+
+The next implementation lot is **LOT-24 — Cross-Engine Conformance and Customer 360 Transformation Gate**,
+targeting **`0.6.0`**.
 
 ---
 

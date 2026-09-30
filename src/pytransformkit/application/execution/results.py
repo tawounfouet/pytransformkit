@@ -54,9 +54,7 @@ class EngineExecutionResult:
         if not isinstance(self.diagnostics, tuple):
             raise TypeError("Execution result diagnostics must be a tuple.")
         if any(not isinstance(item, Diagnostic) for item in self.diagnostics):
-            raise TypeError(
-                "Execution result diagnostics must contain Diagnostic."
-            )
+            raise TypeError("Execution result diagnostics must contain Diagnostic.")
         if not isinstance(self.provider_retries, tuple):
             raise TypeError("Execution result provider_retries must be a tuple.")
         if any(

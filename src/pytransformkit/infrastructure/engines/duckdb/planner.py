@@ -219,9 +219,7 @@ class DuckDBPlanCompiler:
                 )
                 for field in input_schema.fields
             )
-            return DuckDBSQLFragment(
-                f"SELECT {columns} FROM {source_sql}"
-            )
+            return DuckDBSQLFragment(f"SELECT {columns} FROM {source_sql}")
 
         if isinstance(transformation, FilterTransformation):
             condition = self._expressions.compile(transformation.condition)
@@ -258,9 +256,7 @@ class DuckDBPlanCompiler:
                 )
                 for field in input_schema.fields
             )
-            return DuckDBSQLFragment(
-                f"SELECT {columns} FROM {source_sql}"
-            )
+            return DuckDBSQLFragment(f"SELECT {columns} FROM {source_sql}")
 
         if isinstance(transformation, DeriveTransformation):
             expression = self._expressions.compile(transformation.expression)

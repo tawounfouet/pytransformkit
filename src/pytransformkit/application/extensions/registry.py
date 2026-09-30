@@ -415,9 +415,9 @@ class PluginRegistry:
 
 def _plugin_instance(value: object) -> Plugin:
     candidate = value
-    if isinstance(candidate, type):
-        candidate = candidate()
-    elif not isinstance(candidate, Plugin) and callable(candidate):
+    if isinstance(candidate, type) or (
+        not isinstance(candidate, Plugin) and callable(candidate)
+    ):
         candidate = candidate()
 
     if not isinstance(candidate, Plugin):

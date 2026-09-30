@@ -1,5 +1,6 @@
 """Logical capability analysis and engine compatibility checks."""
 
+from pytransformkit.domain.data.field_path import FieldPath
 from pytransformkit.domain.engines.capabilities import EngineCapability
 from pytransformkit.domain.engines.descriptor import EngineDescriptor
 from pytransformkit.domain.expressions.aggregate import AggregateExpression
@@ -238,7 +239,7 @@ def _walk_expression(expression: Expression) -> tuple[Expression, ...]:
 
 def _quality_rule_paths(
     rule: ValidationRule,
-) -> tuple[object, ...]:
+) -> tuple[FieldPath, ...]:
     if isinstance(rule, (NotNull, Range, AllowedValues, Regex)):
         return (rule.field,)
     if isinstance(rule, Unique):

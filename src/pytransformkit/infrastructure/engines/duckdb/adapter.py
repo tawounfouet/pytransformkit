@@ -291,16 +291,12 @@ class DuckDBAdapter:
                 raise AdapterError(f"Missing DuckDB input handle for {name!r}.")
             handle = input_handles[name]
             if not isinstance(handle, DuckDBDatasetHandle):
-                raise AdapterError(
-                    "DuckDBAdapter requires DuckDBDatasetHandle inputs."
-                )
+                raise AdapterError("DuckDBAdapter requires DuckDBDatasetHandle inputs.")
 
             if handle.connection is self._connection:
                 relation = handle.relation
             else:
-                relation = self._connection.from_arrow(
-                    handle.relation.to_arrow_table()
-                )
+                relation = self._connection.from_arrow(handle.relation.to_arrow_table())
 
             view_name = f"{prefix}_{index}"
             relation.create_view(view_name, replace=False)
@@ -313,9 +309,7 @@ class DuckDBAdapter:
         for view_name in view_names:
             try:
                 escaped = view_name.replace('"', '""')
-                self._connection.execute(
-                    f'DROP VIEW IF EXISTS "{escaped}"'
-                )
+                self._connection.execute(f'DROP VIEW IF EXISTS "{escaped}"')
             except Exception:
                 continue
             self._leased_views.pop(view_name, None)

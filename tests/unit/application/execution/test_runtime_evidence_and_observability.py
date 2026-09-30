@@ -31,6 +31,7 @@ from pytransformkit.domain.engines import (
 )
 from pytransformkit.errors import (
     BindingError,
+    EngineContractViolationError,
     ExecutionCancelledError,
     UnknownOutcomeExecutionError,
 )
@@ -416,8 +417,6 @@ def test_provider_retry_evidence_is_visible_without_runtime_retry_stacking() -> 
 
 
 def test_engine_contract_violation_is_structured_without_message_parsing() -> None:
-    from pytransformkit.errors import EngineContractViolationError
-
     adapter = EvidenceAdapter(wrong_engine_output=True)
 
     with pytest.raises(EngineContractViolationError) as captured:

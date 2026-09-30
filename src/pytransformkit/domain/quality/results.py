@@ -28,9 +28,7 @@ class ValidationThreshold:
             or isinstance(self.max_violations, bool)
             or self.max_violations < 0
         ):
-            raise ValueError(
-                "max_violations must be a non-negative integer or None."
-            )
+            raise ValueError("max_violations must be a non-negative integer or None.")
         if self.max_violation_rate is not None and not (
             0.0 <= self.max_violation_rate <= 1.0
         ):
@@ -48,19 +46,14 @@ class ValidationThreshold:
         if violation_count > evaluated_count:
             raise ValueError("violation_count must not exceed evaluated_count.")
 
-        if (
-            self.max_violations is not None
-            and violation_count > self.max_violations
-        ):
+        if self.max_violations is not None and violation_count > self.max_violations:
             return False
 
         if self.max_violation_rate is None:
             return True
 
         violation_rate = (
-            0.0
-            if evaluated_count == 0
-            else violation_count / evaluated_count
+            0.0 if evaluated_count == 0 else violation_count / evaluated_count
         )
         return violation_rate <= self.max_violation_rate
 
@@ -92,9 +85,7 @@ class ValidationRuleResult:
             evaluated_count=self.evaluated_count,
         )
         if self.passed is not expected:
-            raise ValueError(
-                "Validation result passed flag must match its threshold."
-            )
+            raise ValueError("Validation result passed flag must match its threshold.")
 
     @property
     def violation_rate(self) -> float:
@@ -121,8 +112,7 @@ class ValidationResult:
         if not isinstance(self.rule_results, tuple):
             raise TypeError("ValidationResult rule_results must be a tuple.")
         if any(
-            not isinstance(result, ValidationRuleResult)
-            for result in self.rule_results
+            not isinstance(result, ValidationRuleResult) for result in self.rule_results
         ):
             raise TypeError(
                 "ValidationResult rule_results must contain ValidationRuleResult."
@@ -136,9 +126,7 @@ class ValidationResult:
                 raise ValueError("Ignored validation results must not evaluate rules.")
             if not self.passed:
                 raise ValueError("Ignored validation results are non-blocking.")
-        elif self.passed is not all(
-            result.passed for result in self.rule_results
-        ):
+        elif self.passed is not all(result.passed for result in self.rule_results):
             raise ValueError(
                 "ValidationResult passed flag must match its rule results."
             )

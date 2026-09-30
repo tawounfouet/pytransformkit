@@ -413,6 +413,8 @@ LOT-14 closes the 0.2.0 transformation-semantics line:
 
 **Target milestone:** 0.3.0a1
 
+**Status:** DONE — implemented and qualified on 2026-09-30
+
 ## Scope
 
 Implement transformation-owned quality semantics:
@@ -450,6 +452,33 @@ It does not absorb PyIngestKit source-decoding contract validation or ingestion 
 - quality semantics remain engine-neutral;
 - core rules pass Pandas/Polars conformance;
 - quality evidence is structured and lineage-compatible.
+
+## Implementation evidence
+
+LOT-15 is closed by the 0.3.0a1 implementation baseline:
+
+- ValidationRule and ValidationSpec define an immutable engine-neutral quality declaration model;
+- ValidationPolicy defines FAIL_FAST, FAIL_AT_END, WARN_ONLY and IGNORE behavior;
+- ValidationThreshold supports absolute and violation-rate budgets;
+- ValidationRuleResult and ValidationResult provide structured quality evidence without log parsing;
+- built-in rules include NotNull, Unique, Range, AllowedValues, Regex, SchemaValidation, RowCount and ExpressionValidation;
+- QualityGate is a deterministic, portable, pure transformation checkpoint that preserves rows and Schema;
+- TransformationPlanBuilder.validate authors QualityGate nodes without introducing an ingestion-contract abstraction;
+- expression-based validation is statically required to resolve to BooleanType;
+- Regex validation is statically restricted to StringType fields;
+- nested quality field references participate in engine capability analysis;
+- QUALITY is an explicit EngineCapability;
+- Pandas and Polars execute the common quality contract and emit equivalent ValidationResult evidence;
+- FAIL_FAST raises QualityGateError on the first rejected rule;
+- FAIL_AT_END evaluates the complete rule set before raising QualityGateError;
+- WARN_ONLY preserves execution while retaining failed-rule evidence;
+- IGNORE skips rule evaluation explicitly and records an ignored result;
+- blocking data-quality violations are represented separately from AdapterError and ExecutionError;
+- TransformationResult exposes validation evidence by gate name;
+- Polars LazyFrame validation produces real physical evidence while preserving a lazy output handle;
+- SchemaValidation validates the transformation-owned logical Schema and does not absorb PyIngestKit decode/publication policy;
+- Python 3.11, 3.12, 3.13 and 3.14 test matrices pass;
+- Ruff lint, Ruff format, mypy, package build, wheel install, Pandas contract, Polars contract and cross-engine contract jobs pass.
 
 ---
 
@@ -1029,15 +1058,15 @@ LOT-00 → LOT-28
 29 total lots
 
 Completed implementation
-    LOT-00 → LOT-14
-    15 lots
+    LOT-00 → LOT-15
+    16 lots
 
 Remaining revised roadmap
-    LOT-15 → LOT-28
-    14 lots
+    LOT-16 → LOT-28
+    13 lots
 ~~~
 
-The current completion count is 15 / 29 lots. Future work continues to be judged against the revised V2 acceptance criteria rather than the old roadmap text.
+The current completion count is 16 / 29 lots. Future work continues to be judged against the revised V2 acceptance criteria rather than the old roadmap text.
 
 ---
 

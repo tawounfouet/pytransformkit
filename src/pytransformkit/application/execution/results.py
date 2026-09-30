@@ -44,10 +44,7 @@ class EngineExecutionResult:
             )
         if not isinstance(self.validations, tuple):
             raise TypeError("Execution result validations must be a tuple.")
-        if any(
-            not isinstance(result, ValidationResult)
-            for result in self.validations
-        ):
+        if any(not isinstance(result, ValidationResult) for result in self.validations):
             raise TypeError(
                 "Execution result validations must contain ValidationResult."
             )

@@ -133,6 +133,10 @@ class DuckDBAdapter:
             "DuckDBAdapter native values must be DuckDB relations or Arrow objects."
         )
 
+    def bind_arrow(self, value: object) -> PhysicalHandle:
+        """Bind an Arrow interchange value into this DuckDB connection."""
+        return self.bind_native(value)
+
     def execute(
         self,
         plan: LogicalPlan,

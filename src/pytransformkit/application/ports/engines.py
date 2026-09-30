@@ -28,6 +28,24 @@ DatasetHandle = PhysicalHandle
 
 
 @runtime_checkable
+class ArrowExportablePhysicalHandle(PhysicalHandle, Protocol):
+    """Physical handle that can expose an Arrow Table at an explicit I/O boundary."""
+
+    def to_arrow_table(self) -> object:
+        """Materialize this handle as an Arrow-compatible table object."""
+        ...
+
+
+@runtime_checkable
+class ArrowBindableEngineAdapter(Protocol):
+    """Engine adapter capable of binding an Arrow interchange value."""
+
+    def bind_arrow(self, value: object) -> PhysicalHandle:
+        """Bind an Arrow Table/RecordBatch into an engine-owned handle."""
+        ...
+
+
+@runtime_checkable
 class EngineAdapter(Protocol):
     """Legacy-compatible physical execution adapter contract."""
 

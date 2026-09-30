@@ -41,9 +41,7 @@ class PolarsQualityEvaluator:
         self,
         expression_compiler: PolarsExpressionCompiler | None = None,
     ) -> None:
-        self._expression_compiler = (
-            expression_compiler or PolarsExpressionCompiler()
-        )
+        self._expression_compiler = expression_compiler or PolarsExpressionCompiler()
 
     def evaluate(
         self,
@@ -76,10 +74,7 @@ class PolarsQualityEvaluator:
             )
             rule_results.append(result)
 
-            if (
-                spec.policy is ValidationPolicy.FAIL_FAST
-                and not result.passed
-            ):
+            if spec.policy is ValidationPolicy.FAIL_FAST and not result.passed:
                 validation = ValidationResult(
                     gate_name=spec.name,
                     policy=spec.policy,
@@ -95,10 +90,7 @@ class PolarsQualityEvaluator:
             rule_results=tuple(rule_results),
         )
 
-        if (
-            spec.policy is ValidationPolicy.FAIL_AT_END
-            and not validation.passed
-        ):
+        if spec.policy is ValidationPolicy.FAIL_AT_END and not validation.passed:
             raise QualityGateError(validation)
 
         return validation
@@ -118,10 +110,7 @@ class PolarsQualityEvaluator:
             )
 
         if isinstance(rule, Unique):
-            columns = [
-                self._field_values(frame, field)
-                for field in rule.fields
-            ]
+            columns = [self._field_values(frame, field) for field in rule.fields]
             seen: set[tuple[object, ...]] = set()
             duplicates = 0
             for values in zip(*columns, strict=True):
@@ -164,8 +153,7 @@ class PolarsQualityEvaluator:
         if isinstance(rule, AllowedValues):
             values = self._field_values(frame, rule.field)
             violations = sum(
-                not _is_missing(value) and value not in rule.values
-                for value in values
+                not _is_missing(value) and value not in rule.values for value in values
             )
             return _result(
                 rule,
@@ -177,8 +165,7 @@ class PolarsQualityEvaluator:
             values = self._field_values(frame, rule.field)
             matcher = re.compile(rule.pattern)
             violations = sum(
-                not _is_missing(value)
-                and matcher.fullmatch(str(value)) is None
+                not _is_missing(value) and matcher.fullmatch(str(value)) is None
                 for value in values
             )
             return _result(
@@ -201,9 +188,8 @@ class PolarsQualityEvaluator:
 
         if isinstance(rule, RowCount):
             count = frame.height
-            valid = (
-                (rule.minimum is None or count >= rule.minimum)
-                and (rule.maximum is None or count <= rule.maximum)
+            valid = (rule.minimum is None or count >= rule.minimum) and (
+                rule.maximum is None or count <= rule.maximum
             )
             return _result(
                 rule,
@@ -216,9 +202,11 @@ class PolarsQualityEvaluator:
                 rule.expression,
                 frame,
             )
-            values = frame.select(
-                expression.alias("__pytransformkit_quality_condition__")
-            ).to_series().to_list()
+            values = (
+                frame.select(expression.alias("__pytransformkit_quality_condition__"))
+                .to_series()
+                .to_list()
+            )
             violations = sum(value is not True for value in values)
             return _result(
                 rule,

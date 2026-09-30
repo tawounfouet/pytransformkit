@@ -31,6 +31,14 @@ from pytransformkit.errors.io import (
     UnsupportedResourceSchemeError,
 )
 from pytransformkit.errors.lineage import LineageError, UnsupportedLineageError
+from pytransformkit.errors.plugin import (
+    PluginActivationError,
+    PluginCompatibilityError,
+    PluginConflictError,
+    PluginError,
+    PluginNotFoundError,
+    RegistryFrozenError,
+)
 from pytransformkit.errors.pipeline import (
     InvalidPipelineError,
     PipelineCycleError,
@@ -89,12 +97,18 @@ __all__ = [
     "MigrationError",
     "NonPortableValueError",
     "PipelineCycleError",
+    "PluginActivationError",
+    "PluginCompatibilityError",
+    "PluginConflictError",
+    "PluginError",
+    "PluginNotFoundError",
     "PipelineError",
     "PayloadTooLargeError",
     "PipelineNodeNotFoundError",
     "PyTransformKitError",
     "QualityError",
     "QualityGateError",
+    "RegistryFrozenError",
     "ResourceIOError",
     "ResourcePathViolationError",
     "ResourceReadError",

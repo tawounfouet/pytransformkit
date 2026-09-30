@@ -17,7 +17,15 @@ from pytransformkit.domain.expressions.window import (
     WindowFrameKind,
 )
 from pytransformkit.domain.pipelines.plan import LogicalPlan
-from pytransformkit.domain.quality.rules import ExpressionValidation
+from pytransformkit.domain.quality.rules import (
+    AllowedValues,
+    ExpressionValidation,
+    NotNull,
+    Range,
+    Regex,
+    Unique,
+    ValidationRule,
+)
 from pytransformkit.domain.transformations.aggregation import AggregateTransformation
 from pytransformkit.domain.transformations.base import TransformationSpec
 from pytransformkit.domain.transformations.casting import CastTransformation
@@ -115,6 +123,14 @@ class EngineCapabilityAnalyzer:
                             required.add(EngineCapability.TEMPORAL)
                         if function_name == "core.temporal.duration_between":
                             required.add(EngineCapability.DURATION)
+
+            if isinstance(transformation, QualityGate):
+                for rule in transformation.spec.rules:
+                    if any(
+                        len(path.parts) > 1
+                        for path in _quality_rule_paths(rule)
+                    ):
+                        required.add(EngineCapability.NESTED)
 
             if isinstance(transformation, DeriveTransformation) and isinstance(
                 transformation.expression, WindowExpression
@@ -218,6 +234,16 @@ def _walk_expression(expression: Expression) -> tuple[Expression, ...]:
             values.extend(_walk_expression(expression.default))
 
     return tuple(values)
+
+
+def _quality_rule_paths(
+    rule: ValidationRule,
+) -> tuple[object, ...]:
+    if isinstance(rule, (NotNull, Range, AllowedValues, Regex)):
+        return (rule.field,)
+    if isinstance(rule, Unique):
+        return rule.fields
+    return ()
 
 
 def _window_frame_capability(

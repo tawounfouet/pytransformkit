@@ -563,9 +563,9 @@ class LogicalOptimizer:
                 continue
             if len(consumers[parent.node_id]) != 1:
                 continue
-            if _is_materialization_boundary(
-                parent
-            ) or _is_materialization_boundary(node):
+            if _is_materialization_boundary(parent) or _is_materialization_boundary(
+                node
+            ):
                 continue
             if not _pure_deterministic(parent) or not _pure_deterministic(node):
                 continue
@@ -644,25 +644,22 @@ def _is_materialization_boundary(node: LogicalPlanNode) -> bool:
     transformation = node.transformation
     if transformation is None:
         return False
-    return (
-        len(node.input_node_ids) > 1
-        or isinstance(
-            transformation,
-            (
-                AggregateTransformation,
-                DistinctTransformation,
-                LimitTransformation,
-                QualityGate,
-                JoinTransformation,
-                UnionTransformation,
-                IntersectTransformation,
-                ExceptTransformation,
-                PivotTransformation,
-                UnpivotTransformation,
-                ExplodeTransformation,
-                FlattenTransformation,
-            ),
-        )
+    return len(node.input_node_ids) > 1 or isinstance(
+        transformation,
+        (
+            AggregateTransformation,
+            DistinctTransformation,
+            LimitTransformation,
+            QualityGate,
+            JoinTransformation,
+            UnionTransformation,
+            IntersectTransformation,
+            ExceptTransformation,
+            PivotTransformation,
+            UnpivotTransformation,
+            ExplodeTransformation,
+            FlattenTransformation,
+        ),
     )
 
 

@@ -191,10 +191,7 @@ def _literal_bool(expression: Expression, expected: bool) -> bool:
 
 
 def _foldable_scalar(value: object) -> bool:
-    return (
-        value is None
-        or isinstance(value, (bool, int, float, str, Decimal))
-    )
+    return value is None or isinstance(value, (bool, int, float, str, Decimal))
 
 
 def _dedupe(values: tuple[str, ...]) -> tuple[str, ...]:

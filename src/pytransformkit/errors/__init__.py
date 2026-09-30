@@ -42,6 +42,12 @@ from pytransformkit.errors.quality import (
     QualityError,
     QualityGateError,
 )
+from pytransformkit.errors.schema import (
+    DuplicateFieldError,
+    FieldCollisionError,
+    FieldNotFoundError,
+    SchemaError,
+)
 from pytransformkit.errors.serialization import (
     InvalidWirePayloadError,
     MigrationError,
@@ -51,12 +57,6 @@ from pytransformkit.errors.serialization import (
     UnknownContractError,
     UnsupportedContractVersionError,
     WireParseError,
-)
-from pytransformkit.errors.schema import (
-    DuplicateFieldError,
-    FieldCollisionError,
-    FieldNotFoundError,
-    SchemaError,
 )
 from pytransformkit.errors.transformation import (
     InvalidTransformationError,

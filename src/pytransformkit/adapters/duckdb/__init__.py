@@ -7,8 +7,8 @@ from pytransformkit.infrastructure.engines.duckdb import (
     DuckDBDatasetHandle,
     DuckDBExpressionCompiler,
     DuckDBPlanCompiler,
-    DuckDBSQLFragment,
     DuckDBSchemaInspector,
+    DuckDBSQLFragment,
     DuckDBTypeMapper,
     quote_identifier,
 )

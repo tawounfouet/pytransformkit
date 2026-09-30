@@ -422,7 +422,8 @@ def _plugin_instance(value: object) -> Plugin:
 
     if not isinstance(candidate, Plugin):
         raise PluginActivationError(
-            "Plugin entry point must resolve to a Plugin or zero-argument Plugin factory."
+            "Plugin entry point must resolve to a Plugin "
+            "or zero-argument Plugin factory."
         )
     return candidate
 

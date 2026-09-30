@@ -8,6 +8,17 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 
 ### Added
 
+- LOT-20 physical I/O and resource boundary, completing the `0.4.0` line.
+- Portable `CredentialReference`, `ResourceFormat`, `RetrySafety`, `WriteMode`, and `WriteStatus` values with no raw secret material.
+- Explicit `ReadRequest` / `ReadResult` and `WriteRequest` / `WriteResult` contracts plus Reader/Writer protocols and `ResourceIORegistry`.
+- Local filesystem Reader/Writer profile with configured-root confinement for CSV, JSONL, Parquet, and Arrow IPC.
+- Parquet projection/predicate pushdown and Hive partition pruning with structured pushdown evidence; non-Parquet post-scan filtering/projection is reported explicitly.
+- Arrow I/O bridge protocols allowing resource reads and physical writes across Pandas, Polars, PyArrow, and DuckDB without engine types entering the Domain.
+- Resource-backed `InputBinding` resolution and physical `OutputBinding` materialization in `TransformationRuntime`.
+- Physical input/output ResourceReference links preserved in transformation lineage.
+- Typed physical write modes, explicit retry-safety declarations, and reconciliation-required `UNKNOWN_OUTCOME` propagation for uncertain writes.
+- Optional `pytransformkit[io]` dependency and dedicated physical-I/O contract gate in CI.
+
 - LOT-19 DuckDB relational SQL backend targeting `0.4.0a2`.
 - Optional `pytransformkit[duckdb]` dependency with Arrow-backed relation binding.
 - `DuckDBDatasetHandle`, logical/native type mapping, conservative relation Schema inspection, and safe SQL identifier quoting.

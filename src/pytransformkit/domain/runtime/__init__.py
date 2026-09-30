@@ -18,6 +18,7 @@ from pytransformkit.domain.runtime.failure import (
     Retryability,
     RetryDecision,
 )
+from pytransformkit.domain.runtime.references import TransformationExecutionReference
 from pytransformkit.domain.runtime.observability import (
     MetricKind,
     NullTelemetrySink,
@@ -50,4 +51,5 @@ __all__ = [
     "TelemetryRedactor",
     "TelemetrySink",
     "TransformationExecution",
+    "TransformationExecutionReference",
 ]

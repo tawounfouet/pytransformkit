@@ -96,9 +96,7 @@ class DuckDBPlanCompiler:
 
             if node.kind is PipelineNodeKind.INPUT:
                 if node.name is None or node.name not in input_views:
-                    raise AdapterError(
-                        f"Missing DuckDB input view for {node.name!r}."
-                    )
+                    raise AdapterError(f"Missing DuckDB input view for {node.name!r}.")
                 source = quote_identifier(input_views[node.name])
                 ctes.append(
                     (
@@ -146,25 +144,15 @@ class DuckDBPlanCompiler:
             raise AdapterError("LogicalPlan did not produce any outputs.")
 
         cte_sql = ",\n".join(
-            f"{quote_identifier(alias)} AS ({fragment.sql})"
-            for alias, fragment in ctes
+            f"{quote_identifier(alias)} AS ({fragment.sql})" for alias, fragment in ctes
         )
-        params = tuple(
-            value
-            for _, fragment in ctes
-            for value in fragment.params
-        )
+        params = tuple(value for _, fragment in ctes for value in fragment.params)
 
         return DuckDBCompiledPlan(
             outputs=tuple(
                 DuckDBCompiledQuery(
                     name=name,
-                    sql=(
-                        "WITH "
-                        + cte_sql
-                        + "\nSELECT * FROM "
-                        + quote_identifier(alias)
-                    ),
+                    sql=("WITH " + cte_sql + "\nSELECT * FROM " + quote_identifier(alias)),
                     params=params,
                 )
                 for name, alias in output_aliases
@@ -212,9 +200,7 @@ class DuckDBPlanCompiler:
             columns = ", ".join(
                 quote_identifier(str(field)) for field in transformation.fields
             )
-            return DuckDBSQLFragment(
-                f"SELECT {columns} FROM {source_sql}"
-            )
+            return DuckDBSQLFragment(f"SELECT {columns} FROM {source_sql}")
 
         if isinstance(transformation, DropTransformation):
             columns = _schema_projection(output_schema)
@@ -306,9 +292,7 @@ class DuckDBPlanCompiler:
                 )
                 for key in transformation.keys
             )
-            return DuckDBSQLFragment(
-                f"SELECT * FROM {source_sql} ORDER BY {order_by}"
-            )
+            return DuckDBSQLFragment(f"SELECT * FROM {source_sql} ORDER BY {order_by}")
 
         if isinstance(transformation, AggregateTransformation):
             return self._compile_aggregate(transformation, source_sql)
@@ -337,15 +321,12 @@ class DuckDBPlanCompiler:
         for metric in transformation.metrics:
             compiled = self._expressions.compile_aggregate(metric.expression)
             params.extend(compiled.params)
-            selections.append(
-                f"{compiled.sql} AS {quote_identifier(metric.name)}"
-            )
+            selections.append(f"{compiled.sql} AS {quote_identifier(metric.name)}")
 
         sql = f"SELECT {', '.join(selections)} FROM {source_sql}"
         if transformation.group_by:
             positions = ", ".join(
-                str(index)
-                for index in range(1, len(transformation.group_by) + 1)
+                str(index) for index in range(1, len(transformation.group_by) + 1)
             )
             sql += f" GROUP BY {positions}"
 
@@ -449,9 +430,7 @@ def _join_sql(
         return sql
 
     operator = (
-        "IS NOT DISTINCT FROM"
-        if transformation.nulls is NullJoinPolicy.MATCH
-        else "="
+        "IS NOT DISTINCT FROM" if transformation.nulls is NullJoinPolicy.MATCH else "="
     )
     predicates = " AND ".join(
         (
@@ -484,10 +463,7 @@ def _join_projection(
             and field.name in key_by_left
         ):
             right_key = key_by_left[field.name]
-            source = (
-                f"COALESCE({source}, "
-                f"{right_alias}.{quote_identifier(right_key)})"
-            )
+            source = f"COALESCE({source}, {right_alias}.{quote_identifier(right_key)})"
         expressions.append(f"{source} AS {quote_identifier(field.name)}")
         used_names.add(field.name)
 

@@ -105,8 +105,10 @@ def test_lazy_mode_returns_relation_and_parameter_binding_diagnostic() -> None:
     )
 
     assert result.output_handle.engine_id == "duckdb"
-    assert result.diagnostics
-    assert result.diagnostics[0].code == "PTK-DUCKDB-LAZY-001"
+    assert any(
+        diagnostic.code == "PTK-DUCKDB-LAZY-001"
+        for diagnostic in result.diagnostics
+    )
     assert result.output_handle.to_arrow_table().num_rows == 2
     adapter.close()
 

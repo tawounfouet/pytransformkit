@@ -486,6 +486,8 @@ LOT-15 is closed by the 0.3.0a1 implementation baseline:
 
 **Target milestone:** 0.3.0a2
 
+**Status:** DONE — implemented and qualified on 2026-09-30
+
 ## Scope
 
 Implement:
@@ -522,6 +524,32 @@ UNKNOWN
 - logical lineage is derivable without data execution;
 - native engine conversion creates no false logical lineage;
 - Customer 360 field lineage shape can be expressed.
+
+## Implementation evidence
+
+LOT-16 is closed by the 0.3.0a2 implementation baseline:
+
+- authored logical DatasetId values survive TransformationPlan compilation into LogicalPlan;
+- FieldReference identifies one FieldPath within one logical DatasetReference;
+- TransformationLineage separates dataset derivation, field value derivation and operational field dependencies;
+- LineageConfidence freezes EXACT, DECLARED, INFERRED, PARTIAL and UNKNOWN as the confidence vocabulary;
+- built-in declarative transformations currently emit EXACT lineage where semantics are statically known;
+- rename, cast and ordinary derivation distinguish RENAMED, CAST and DERIVED field ancestry;
+- filter dependencies are represented separately from value ancestry;
+- sort, deduplication and distinct expose ordering/selection dependencies without fabricating field derivation;
+- aggregate lineage separates grouping dependencies from AGGREGATED metric ancestry;
+- join lineage preserves input-side field origin, suffix resolution and JOIN-key dependencies;
+- analytical-window lineage separates value, partition and ordering dependencies;
+- union exposes both value sources while intersect/except preserve left value ancestry and record right-side set-membership dependency;
+- pivot, unpivot, explode and flatten have deterministic static lineage for the current explicit transformation semantics;
+- QualityGate preserves direct field lineage and exposes quality-rule dependencies without turning validation fields into value ancestors;
+- ResourceReference linkage connects logical inputs/outputs without performing physical resolution or I/O;
+- LineageImpactAnalyzer provides transitive upstream/downstream field and Dataset traversal;
+- pytransformkit.lineage exposes public static analysis over TransformationPlan or LogicalPlan;
+- unsupported future/opaque semantics fail through UnsupportedLineageError rather than inventing exact ancestry;
+- Pandas and Polars execution of the same logical plan produces identical logical lineage evidence;
+- Python 3.11, 3.12, 3.13 and 3.14 test matrices pass;
+- Ruff lint, Ruff format, mypy, package build, installed-wheel smoke, Pandas contract, Polars contract and cross-engine contract jobs pass.
 
 ---
 
@@ -1058,15 +1086,15 @@ LOT-00 → LOT-28
 29 total lots
 
 Completed implementation
-    LOT-00 → LOT-15
-    16 lots
+    LOT-00 → LOT-16
+    17 lots
 
 Remaining revised roadmap
-    LOT-16 → LOT-28
-    13 lots
+    LOT-17 → LOT-28
+    12 lots
 ~~~
 
-The current completion count is 16 / 29 lots. Future work continues to be judged against the revised V2 acceptance criteria rather than the old roadmap text.
+The current completion count is 17 / 29 lots. Future work continues to be judged against the revised V2 acceptance criteria rather than the old roadmap text.
 
 ---
 

@@ -190,10 +190,7 @@ def test_warn_only_quality_evidence_matches_pandas_and_polars() -> None:
     assert validation.passed is False
     assert validation.failed_rule_count == 5
 
-    by_name = {
-        item.rule_name: item
-        for item in validation.rule_results
-    }
+    by_name = {item.rule_name: item for item in validation.rule_results}
     assert by_name["email_required"].violation_count == 1
     assert by_name["customer_id_unique"].violation_count == 1
     assert by_name["score_range"].violation_count == 1

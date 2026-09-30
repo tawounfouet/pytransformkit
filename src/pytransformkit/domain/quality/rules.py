@@ -145,9 +145,7 @@ class RowCount(ValidationRule):
             (self.maximum, "maximum"),
         ):
             if value is not None and (
-                not isinstance(value, int)
-                or isinstance(value, bool)
-                or value < 0
+                not isinstance(value, int) or isinstance(value, bool) or value < 0
             ):
                 raise ValueError(f"RowCount {label} must be a non-negative integer.")
         if (

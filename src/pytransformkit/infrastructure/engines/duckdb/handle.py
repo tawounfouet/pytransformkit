@@ -15,9 +15,7 @@ class DuckDBDatasetHandle:
 
     def __post_init__(self) -> None:
         if not isinstance(self.relation, duckdb.DuckDBPyRelation):
-            raise TypeError(
-                "DuckDBDatasetHandle relation must be a DuckDBPyRelation."
-            )
+            raise TypeError("DuckDBDatasetHandle relation must be a DuckDBPyRelation.")
         if self.connection is not None and not isinstance(
             self.connection,
             duckdb.DuckDBPyConnection,

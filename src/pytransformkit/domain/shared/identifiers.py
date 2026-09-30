@@ -71,6 +71,16 @@ class TransformationExecutionId(Identifier):
     """Identity of one semantic TransformationRuntime execution."""
 
 
+@dataclass(frozen=True, slots=True)
+class CorrelationId(Identifier):
+    """Identity grouping related work without replacing native execution IDs."""
+
+
+@dataclass(frozen=True, slots=True)
+class RuntimeEventId(Identifier):
+    """Identity of one runtime observability event."""
+
+
 # Pre-1.0 internal compatibility name. The canonical V1 name is
 # TransformationExecutionId.
 ExecutionId = TransformationExecutionId

@@ -295,10 +295,7 @@ def test_telemetry_failure_never_reexecutes_transformation() -> None:
 
     assert result.status is ExecutionStatus.SUCCEEDED
     assert adapter.execute_count == 1
-    assert any(
-        diagnostic.code == "PTK-OBS-001"
-        for diagnostic in result.diagnostics
-    )
+    assert any(diagnostic.code == "PTK-OBS-001" for diagnostic in result.diagnostics)
 
 
 def test_missing_binding_keeps_typed_error_and_adds_failure_evidence() -> None:

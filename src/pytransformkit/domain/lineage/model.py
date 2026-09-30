@@ -135,9 +135,7 @@ class FieldLineageEdge:
         if not isinstance(self.step_id, StepId):
             raise TypeError("FieldLineageEdge step_id must be a StepId.")
         if not isinstance(self.confidence, LineageConfidence):
-            raise TypeError(
-                "FieldLineageEdge confidence must be a LineageConfidence."
-            )
+            raise TypeError("FieldLineageEdge confidence must be a LineageConfidence.")
 
 
 @dataclass(frozen=True, slots=True)
@@ -232,18 +230,10 @@ class TransformationLineage:
         return _named_dataset(self.outputs, name)
 
     def field_sources(self, target: FieldReference) -> tuple[FieldReference, ...]:
-        return tuple(
-            edge.source
-            for edge in self.field_edges
-            if edge.target == target
-        )
+        return tuple(edge.source for edge in self.field_edges if edge.target == target)
 
     def field_targets(self, source: FieldReference) -> tuple[FieldReference, ...]:
-        return tuple(
-            edge.target
-            for edge in self.field_edges
-            if edge.source == source
-        )
+        return tuple(edge.target for edge in self.field_edges if edge.source == source)
 
 
 def _validate_named_datasets(
@@ -260,9 +250,7 @@ def _validate_named_datasets(
             )
         name, reference = item
         if not isinstance(name, str) or not name.strip():
-            raise ValueError(
-                f"TransformationLineage {label} names must not be empty."
-            )
+            raise ValueError(f"TransformationLineage {label} names must not be empty.")
         if not isinstance(reference, DatasetReference):
             raise TypeError(
                 f"TransformationLineage {label} values must be DatasetReference."
@@ -280,9 +268,7 @@ def _validate_tuple_type(
     if not isinstance(values, tuple):
         raise TypeError(f"TransformationLineage {label} must be a tuple.")
     if any(not isinstance(value, expected) for value in values):
-        raise TypeError(
-            f"TransformationLineage {label} contains an invalid value."
-        )
+        raise TypeError(f"TransformationLineage {label} contains an invalid value.")
 
 
 def _named_dataset(

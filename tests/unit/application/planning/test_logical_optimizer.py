@@ -54,9 +54,7 @@ def _optimizable_plan():
         source=narrow,
         where=(col("amount") > (lit(1) + lit(1))) & lit(True),
     )
-    return TransformationCompiler().compile(
-        builder.output("result", filtered).build()
-    )
+    return TransformationCompiler().compile(builder.output("result", filtered).build())
 
 
 def test_optimizer_can_be_disabled_without_changing_plan_identity() -> None:
@@ -161,9 +159,7 @@ def test_common_expression_and_fusion_analysis_emit_diagnostics() -> None:
         source=first,
         where=col("amount") > 10,
     )
-    logical = TransformationCompiler().compile(
-        builder.output("result", second).build()
-    )
+    logical = TransformationCompiler().compile(builder.output("result", second).build())
 
     result = LogicalOptimizer().optimize_with_report(logical)
     codes = {diagnostic.code for diagnostic in result.report.diagnostics}

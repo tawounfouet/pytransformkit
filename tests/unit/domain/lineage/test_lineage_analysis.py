@@ -132,8 +132,7 @@ def test_rename_cast_and_derive_have_exact_field_lineage() -> None:
     assert derived_edge.source.field_path == FieldPath.of("amount")
     assert derived_edge.derivation is FieldDerivationKind.DERIVED
     assert all(
-        edge.confidence is LineageConfidence.EXACT
-        for edge in evidence.field_edges
+        edge.confidence is LineageConfidence.EXACT for edge in evidence.field_edges
     )
 
 
@@ -295,13 +294,13 @@ def test_window_lineage_exposes_value_partition_and_ordering_dependencies() -> N
         edge for edge in evidence.field_edges if edge.target == target
     )
 
-    assert {
-        str(edge.source.field_path)
-        for edge in lineage_edges
-    } == {"amount", "customer_id", "ordered_at"}
+    assert {str(edge.source.field_path) for edge in lineage_edges} == {
+        "amount",
+        "customer_id",
+        "ordered_at",
+    }
     assert all(
-        edge.derivation is FieldDerivationKind.WINDOWED
-        for edge in lineage_edges
+        edge.derivation is FieldDerivationKind.WINDOWED for edge in lineage_edges
     )
 
     dependency_pairs = {
@@ -334,9 +333,7 @@ def test_reshape_lineage_is_static_for_pivot_unpivot_explode_and_flatten() -> No
         categories=("PAID", "OPEN"),
         aggregation=PivotAggregation.SUM,
     )
-    pivot_lineage = lineage.analyze(
-        pivot_builder.output("out", pivoted).build()
-    )
+    pivot_lineage = lineage.analyze(pivot_builder.output("out", pivoted).build())
 
     pivot_output = pivot_lineage.output("out")
     paid_edge = next(
@@ -369,14 +366,11 @@ def test_reshape_lineage_is_static_for_pivot_unpivot_explode_and_flatten() -> No
         variable_name="quarter",
         value_name="revenue",
     )
-    unpivot_lineage = lineage.analyze(
-        unpivot_builder.output("out", unpivoted).build()
-    )
+    unpivot_lineage = lineage.analyze(unpivot_builder.output("out", unpivoted).build())
     revenue_sources = {
         str(edge.source.field_path)
         for edge in unpivot_lineage.field_edges
-        if edge.target
-        == FieldReference.of(unpivot_lineage.output("out"), "revenue")
+        if edge.target == FieldReference.of(unpivot_lineage.output("out"), "revenue")
     }
     assert revenue_sources == {"q1", "q2"}
 
@@ -387,9 +381,7 @@ def test_reshape_lineage_is_static_for_pivot_unpivot_explode_and_flatten() -> No
         source=customers,
         field="tags",
     )
-    explode_lineage = lineage.analyze(
-        explode_builder.output("out", exploded).build()
-    )
+    explode_lineage = lineage.analyze(explode_builder.output("out", exploded).build())
     assert any(
         edge.derivation is FieldDerivationKind.EXPLODED
         and edge.source.field_path == FieldPath.of("tags")
@@ -403,9 +395,7 @@ def test_reshape_lineage_is_static_for_pivot_unpivot_explode_and_flatten() -> No
         source=customers,
         field="profile",
     )
-    flatten_lineage = lineage.analyze(
-        flatten_builder.output("out", flattened).build()
-    )
+    flatten_lineage = lineage.analyze(flatten_builder.output("out", flattened).build())
     assert any(
         edge.derivation is FieldDerivationKind.FLATTENED
         and edge.source.field_path == FieldPath.of("profile.city")

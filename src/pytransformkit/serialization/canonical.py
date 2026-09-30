@@ -63,9 +63,7 @@ def parse_json_strict(
     if max_payload_bytes <= 0:
         raise ValueError("max_payload_bytes must be positive.")
     if len(encoded) > max_payload_bytes:
-        raise PayloadTooLargeError(
-            f"Wire payload exceeds {max_payload_bytes} bytes."
-        )
+        raise PayloadTooLargeError(f"Wire payload exceeds {max_payload_bytes} bytes.")
     if max_nesting_depth <= 0:
         raise ValueError("max_nesting_depth must be positive.")
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass, replace
 
+from pytransformkit.application.extensions.contracts import OptimizerRule
 from pytransformkit.application.planning.expression_optimizer import ExpressionOptimizer
 from pytransformkit.application.planning.fingerprint import logical_plan_fingerprint
 from pytransformkit.domain.data.schema import Schema
@@ -104,6 +105,7 @@ class LogicalOptimizer:
         max_passes: int = 8,
         expression_optimizer: ExpressionOptimizer | None = None,
         schema_resolver: OutputSchemaResolver | None = None,
+        extension_rules: tuple[OptimizerRule, ...] = (),
     ) -> None:
         if not isinstance(enabled, bool):
             raise TypeError("enabled must be a bool.")
@@ -115,7 +117,15 @@ class LogicalOptimizer:
         self._max_passes = max_passes
         self._expressions = expression_optimizer or ExpressionOptimizer()
         self._schemas = schema_resolver or OutputSchemaResolver()
+        if not isinstance(extension_rules, tuple):
+            raise TypeError("extension_rules must be provided as a tuple.")
+        if any(not isinstance(rule, OptimizerRule) for rule in extension_rules):
+            raise TypeError("extension_rules must contain only OptimizerRule values.")
+        rule_ids = tuple(rule.rule_id for rule in extension_rules)
+        if len(set(rule_ids)) != len(rule_ids):
+            raise ValueError("extension optimizer rule ids must be unique.")
         self._dependencies = ExpressionDependencyExtractor()
+        self._extension_rules = extension_rules
 
     def optimize(self, plan: LogicalPlan) -> LogicalPlan:
         """Return an optimized LogicalPlan, or the original plan when disabled."""
@@ -169,6 +179,11 @@ class LogicalOptimizer:
             if pruning_apps:
                 changed = True
                 applications.extend(pruning_apps)
+
+            current, extension_apps = self._apply_extension_rules(current)
+            if extension_apps:
+                changed = True
+                applications.extend(extension_apps)
 
             if not changed:
                 break
@@ -441,6 +456,36 @@ class LogicalOptimizer:
             return rebuilt, (application,)
 
         return plan, ()
+
+    def _apply_extension_rules(
+        self,
+        plan: LogicalPlan,
+    ) -> tuple[LogicalPlan, tuple[OptimizationRuleApplication, ...]]:
+        current = plan
+        applications: list[OptimizationRuleApplication] = []
+
+        for rule in self._extension_rules:
+            before = logical_plan_fingerprint(current)
+            candidate = rule.apply(current)
+            if not isinstance(candidate, LogicalPlan):
+                raise TypeError(
+                    f"Optimizer rule {rule.rule_id!r} must return a LogicalPlan."
+                )
+            after = logical_plan_fingerprint(candidate)
+            if after == before:
+                continue
+            current = candidate
+            applications.append(
+                OptimizationRuleApplication(
+                    rule_id=rule.rule_id,
+                    affected_node_ids=tuple(
+                        str(node.node_id) for node in candidate.nodes
+                    ),
+                    summary=f"Applied extension optimizer rule {rule.rule_id!r}.",
+                )
+            )
+
+        return current, tuple(applications)
 
     def _rebuild(
         self,

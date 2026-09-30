@@ -557,6 +557,8 @@ LOT-16 is closed by the 0.3.0a2 implementation baseline:
 
 **Target milestone:** 0.3.0
 
+**Status:** DONE — implemented and qualified on 2026-09-30
+
 ## Scope
 
 Complete the V1 runtime evidence model:
@@ -592,6 +594,29 @@ Make TransformationRuntime fully conform to the ecosystem execution/failure/obse
 - telemetry failure does not replay computation;
 - unknown write outcomes remain explicit;
 - lazy execution never fabricates step metrics.
+
+## Implementation evidence
+
+LOT-17 is closed by the 0.3.0 runtime-evidence baseline:
+
+- every TransformationRuntime.execute call allocates a TransformationExecutionId before planning or provider execution;
+- CorrelationContext and CorrelationId remain distinct from TransformationExecutionId and propagate into adapter ExecutionContext;
+- trace context preserves an upstream trace ID while allocating a PyTransformKit child span;
+- LogicalPlan has a deterministic SHA-256 semantic fingerprint that excludes random declaration/node/Dataset identities;
+- TransformationExecution records status, timestamps, engine descriptor, plan identity/fingerprint, diagnostics, failure evidence, provider-retry evidence and cancellation metadata;
+- successful TransformationResult carries TransformationExecution, TransformationLineage and ExecutionManifest alongside physical outputs;
+- typed PyTransformKit exceptions retain their original public type and receive FailureEvidence, TransformationExecution, ExecutionManifest and Diagnostic evidence;
+- UNKNOWN_OUTCOME remains distinct from FAILED and is classified as requiring reconciliation before safe retry;
+- timeout, cancellation and engine-contract violations have dedicated execution failure types and stable PTK-EXEC codes;
+- bounded ProviderRetryEvidence is disclosed without adding workload/task retry ownership to TransformationRuntime;
+- CancellationToken provides process-local request signalling while EngineDescriptor declares NONE, COOPERATIVE or PROVIDER cancellation support;
+- runtime lifecycle events cover execution start, plan compilation/validation, engine selection, input binding, engine execution, outputs, success/failure, unknown outcome, cancellation and provider-retry evidence;
+- execution-level counters/histograms avoid execution ID, correlation ID, full URI, raw error and SQL labels by default;
+- completed vendor-neutral trace spans preserve parent trace linkage;
+- TelemetryRedactor removes credential/token/signed-value material before telemetry leaves the runtime;
+- telemetry sink failures become PTK-OBS-001 diagnostics and never replay business computation;
+- lazy execution emits execution-level evidence only and does not fabricate per-step metrics;
+- Python 3.11, 3.12, 3.13 and 3.14 test matrices, Pandas/Polars contracts, cross-engine contracts, Ruff, format, mypy and built-wheel qualification form the LOT-17 release gate.
 
 ---
 
@@ -1086,15 +1111,15 @@ LOT-00 → LOT-28
 29 total lots
 
 Completed implementation
-    LOT-00 → LOT-16
-    17 lots
+    LOT-00 → LOT-17
+    18 lots
 
 Remaining revised roadmap
-    LOT-17 → LOT-28
-    12 lots
+    LOT-18 → LOT-28
+    11 lots
 ~~~
 
-The current completion count is 17 / 29 lots. Future work continues to be judged against the revised V2 acceptance criteria rather than the old roadmap text.
+The current completion count is 18 / 29 lots. Future work continues to be judged against the revised V2 acceptance criteria rather than the old roadmap text.
 
 ---
 

@@ -1099,6 +1099,49 @@ assert optimizer.optimize(logical) is logical
 Every structural rewrite re-resolves logical Schemas. Engine adapters still own physical lowering, and lineage tests verify that optimized outputs preserve the same transitive logical input sources.
 
 
+
+### Explicit plugins and extension registries
+
+LOT-23 separates plugin discovery from activation:
+
+~~~python
+from pytransformkit.plugins import PluginRegistry
+
+plugins = PluginRegistry.discover()
+
+# Discovery only inspects entry-point metadata.
+print(plugins.list())
+
+# Plugin code is imported only here.
+plugins.activate("my-engine-plugin")
+
+# Freeze all owned registries after configuration.
+plugins.freeze()
+~~~
+
+The canonical entry-point group is:
+
+~~~text
+pytransformkit.plugins
+~~~
+
+A plugin declares immutable compatibility metadata through `PluginDescriptor` and `PluginCompatibility`. Compatibility covers both the PyTransformKit framework version range and the plugin protocol version.
+
+Activation receives a `PluginActivationContext` containing explicit registries for engines, Reader/Writer I/O, ResourceResolver implementations, named functions, optimizer rules and telemetry sinks. Duplicate registrations fail by default, and frozen registries reject further mutation.
+
+Optimizer extensions are opt-in:
+
+~~~python
+from pytransformkit.planning import LogicalOptimizer
+
+optimizer = LogicalOptimizer(
+    extension_rules=plugins.context.optimizer_rules.rules(),
+)
+~~~
+
+Plugin descriptors and provider objects are intentionally outside the safe serialization registry. A valid wire payload can describe transformation semantics or portable references, but cannot discover, import or activate plugin code.
+
+
 ## 18. Run the local experimentation script
 
 The repository includes:
@@ -1182,7 +1225,6 @@ The CI matrix currently verifies Python 3.11, 3.12, 3.13 and 3.14 plus dedicated
 
 The revised V1 roadmap continues with:
 
-- **LOT-23** — Plugins / Extension Contracts;
 - **LOT-24** — Cross-Engine Conformance + Customer 360;
 - **LOT-25** — Performance Qualification;
 - **LOT-26** — Public API / Security / Migration Freeze;

@@ -51,7 +51,8 @@ def test_payload_limit_is_enforced_before_json_parsing() -> None:
         ResourceReferenceCodec(max_payload_bytes=32).from_json(encoded)
 
 
-def test_unknown_semantic_type_cannot_trigger_arbitrary_import_or_construction() -> None:
+def test_unknown_semantic_type_cannot_trigger_arbitrary_import(
+) -> None:
     envelope = {
         "contract": "pykit.resource_reference",
         "contract_version": 1,

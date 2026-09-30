@@ -13,13 +13,13 @@ from pytransformkit.domain.data.data_types import (
     StringType,
     TimestampType,
 )
+from pytransformkit.functions import col, lit
 from pytransformkit.infrastructure.engines.duckdb import (
     DuckDBExpressionCompiler,
     DuckDBSchemaInspector,
     DuckDBTypeMapper,
     quote_identifier,
 )
-from pytransformkit.functions import col, lit
 
 
 def test_type_mapper_covers_core_relational_types() -> None:

@@ -55,6 +55,7 @@ from pytransformkit.domain.runtime import (
     FailureCategory,
     FailureEvidence,
     MetricKind,
+    ProviderRetryEvidence,
     NullTelemetrySink,
     RuntimeEventType,
     RuntimeMetric,
@@ -178,7 +179,7 @@ class TransformationResult:
         return self.execution.failure
 
     @property
-    def provider_retries(self):
+    def provider_retries(self) -> tuple[ProviderRetryEvidence, ...]:
         return self.execution.provider_retries
 
     def output(self, name: str) -> TransformationOutput:
@@ -236,7 +237,15 @@ class TransformationRuntime:
         execution_id = TransformationExecutionId.new()
         started_at = _utc_now()
         started_monotonic = perf_counter()
-        upstream_correlation = correlation or CorrelationContext()
+        invalid_correlation = (
+            correlation is not None
+            and not isinstance(correlation, CorrelationContext)
+        )
+        upstream_correlation = (
+            correlation
+            if isinstance(correlation, CorrelationContext)
+            else CorrelationContext()
+        )
         parent_span_id = upstream_correlation.span_id
         trace_id = upstream_correlation.trace_id or uuid4().hex
         span_id = uuid4().hex[:16]
@@ -251,7 +260,7 @@ class TransformationRuntime:
         plan_fingerprint: Fingerprint | None = None
         descriptor: EngineDescriptor | None = None
         lineage: TransformationLineage | None = None
-        provider_retries = ()
+        provider_retries: tuple[ProviderRetryEvidence, ...] = ()
         runtime_diagnostics: list[Diagnostic] = []
         compile_duration = 0.0
         engine_started = False
@@ -268,10 +277,7 @@ class TransformationRuntime:
                 raise ValueError("engine must not be empty.")
             if not isinstance(mode, ExecutionMode):
                 raise TypeError("mode must be an ExecutionMode.")
-            if correlation is not None and not isinstance(
-                correlation,
-                CorrelationContext,
-            ):
+            if invalid_correlation:
                 raise TypeError("correlation must be a CorrelationContext.")
             if cancellation is not None and not isinstance(
                 cancellation,
@@ -319,8 +325,8 @@ class TransformationRuntime:
                 ),
             )
 
-            descriptor = self._engines.get(engine).descriptor
             adapter = self._engines.get(engine)
+            descriptor = adapter.descriptor
             self._compatibility.validate(
                 logical_plan,
                 descriptor,
@@ -529,6 +535,7 @@ class TransformationRuntime:
             )
             runtime_diagnostics.extend(telemetry.diagnostics)
 
+            assert lineage is not None
             execution = TransformationExecution(
                 execution_id=execution_id,
                 status=ExecutionStatus.SUCCEEDED,

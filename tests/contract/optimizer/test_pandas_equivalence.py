@@ -45,9 +45,7 @@ def _logical_plan():
         source=selected,
         where=(col("amount") > (lit(5) + lit(5))) & lit(True),
     )
-    return TransformationCompiler().compile(
-        builder.output("result", filtered).build()
-    )
+    return TransformationCompiler().compile(builder.output("result", filtered).build())
 
 
 def _runtime() -> TransformationRuntime:

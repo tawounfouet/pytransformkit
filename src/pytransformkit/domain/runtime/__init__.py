@@ -28,6 +28,7 @@ from pytransformkit.domain.runtime.observability import (
     TelemetryRedactor,
     TelemetrySink,
 )
+from pytransformkit.domain.runtime.references import TransformationExecutionReference
 
 __all__ = [
     "CorrelationContext",
@@ -50,4 +51,5 @@ __all__ = [
     "TelemetryRedactor",
     "TelemetrySink",
     "TransformationExecution",
+    "TransformationExecutionReference",
 ]

@@ -992,6 +992,60 @@ Telemetry delivery is best-effort. If the telemetry backend fails, PyTransformKi
 
 ---
 
+
+### Versioned serialization and canonical wire contracts
+
+LOT-21 adds a side-effect-free serialization boundary for portable logical state:
+
+~~~python
+from pytransformkit.serialization import (
+    LogicalPlanCodec,
+    TransformationPlanCodec,
+)
+
+plan_codec = TransformationPlanCodec()
+
+payload = plan_codec.to_json(plan)
+same_plan = plan_codec.from_json(payload)
+
+logical = TransformationCompiler().compile(plan)
+
+logical_codec = LogicalPlanCodec()
+
+canonical_bytes = logical_codec.to_bytes(logical)
+fingerprint = logical_codec.fingerprint(logical)
+~~~
+
+Every top-level wire value uses an explicit envelope:
+
+~~~json
+{
+  "contract": "pytransformkit.transformation_plan",
+  "contract_version": 1,
+  "payload": {}
+}
+~~~
+
+The wire version is deliberately independent from the PyTransformKit package version. Decoding is strict: duplicate JSON keys, unknown semantic type tags, unknown fields, unsupported future versions, oversized/deep payloads and non-standard numeric values fail explicitly.
+
+The decoder uses a closed semantic registry and never imports a Python module or reconstructs an arbitrary class based on payload text. Callbacks, closures and other executable Python state fail with `NonPortableValueError`; pickle/cloudpickle/dill are not supported durable formats.
+
+Shared boundaries can use the minimal execution reference instead of serializing a full runtime object:
+
+~~~python
+from pytransformkit.runtime import TransformationExecutionReference
+from pytransformkit.serialization import TransformationExecutionReferenceCodec
+
+reference = TransformationExecutionReference.from_execution(
+    result.execution,
+)
+
+wire = TransformationExecutionReferenceCodec().to_json(reference)
+~~~
+
+Golden fixtures under `tests/fixtures/wire/` freeze representative v1 canonical bytes for compatibility testing.
+
+
 ## 18. Run the local experimentation script
 
 The repository includes:

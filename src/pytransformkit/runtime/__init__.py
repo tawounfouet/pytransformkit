@@ -40,6 +40,7 @@ from pytransformkit.domain.runtime import (
     TelemetryRedactor,
     TelemetrySink,
     TransformationExecution,
+    TransformationExecutionReference,
 )
 from pytransformkit.domain.shared.identifiers import (
     CorrelationId,
@@ -78,6 +79,7 @@ __all__ = [
     "TelemetryRedactor",
     "TelemetrySink",
     "TransformationExecution",
+    "TransformationExecutionReference",
     "TransformationExecutionId",
     "TransformationOutput",
     "TransformationResult",

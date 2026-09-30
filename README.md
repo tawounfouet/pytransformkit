@@ -41,8 +41,9 @@ The implementation baseline now covers:
 - **LOT-20 — Physical I/O & Resource Boundary**
 - **LOT-21 — Versioned Serialization & Canonical IR**
 - **LOT-22 — Logical Optimizer**
+- **LOT-23 — Extension and Plugin Architecture**
 
-The current development line is **0.5.0a2**.
+The current development line is **0.5.0**.
 
 ### Canonical V1 model
 
@@ -128,6 +129,8 @@ LOT-21 introduces versioned, safe, deterministic wire contracts. `pytransformkit
 
 LOT-22 adds an engine-neutral `LogicalOptimizer` while preserving the public `LogicalPlan → LogicalPlan` contract. Stable rewrites cover constant folding, boolean simplification, safe predicate pushdown, projection pruning and dead-node elimination. Common-expression analysis, safe-fusion hints and materialization-boundary analysis produce explicit diagnostics rather than physical plans. Every rewrite carries rule provenance, optimization can be disabled, output Schemas are re-resolved after rewrites, lineage equivalence is regression-tested, and Pandas plus Hypothesis contracts prove representative semantic equivalence. No public `OptimizedLogicalPlan` is introduced.
 
+LOT-23 closes the `0.5.x` extension line with the qualified `pytransformkit.plugins` surface. `PluginRegistry.discover()` enumerates entry-point metadata only; plugin modules are imported exclusively by explicit `activate(plugin_id)`. `PluginCompatibility` declares machine-checkable framework/protocol ranges, while EngineAdapter, Reader/Writer, ResourceResolver, FunctionExtension, OptimizerRule and TelemetrySink form the public extension contracts. Registries reject duplicates by default, can be frozen after configuration, and plugin metadata remains outside the safe wire semantic registry so deserialization cannot activate code.
+
 ### Runtime and engines
 
 Runtime input is expressed through `InputBinding`, separating logical Dataset values from physical native values. The runtime resolves one explicitly requested engine from `EngineRegistry`; there is no implicit engine fallback. Runtime identity and correlation are distinct: a `TransformationExecutionId` identifies one semantic execution, while `CorrelationId` can connect that execution to surrounding PyKit or external work.
@@ -148,6 +151,7 @@ pytransformkit.serialization
 pytransformkit.planning
 pytransformkit.runtime
 pytransformkit.diagnostics
+pytransformkit.plugins
 ~~~
 
 ## Quick example
@@ -215,9 +219,9 @@ The historical `docs/ROADMAP_LOT_11_TO_1_0.md` remains useful as project history
 Current count:
 
 - Total roadmap: **29 lots** (`LOT-00` → `LOT-28`)
-- Completed after LOT-22: **23 lots** (`LOT-00` → `LOT-22`)
-- Remaining: **6 lots** (`LOT-23` → `LOT-28`)
-- Next lot: **LOT-23 — Extension and Plugin Architecture**
+- Completed after LOT-23: **24 lots** (`LOT-00` → `LOT-23`)
+- Remaining: **5 lots** (`LOT-24` → `LOT-28`)
+- Next lot: **LOT-24 — Cross-Engine Conformance and Customer 360 Transformation Gate**
 - Final lot: **LOT-28 — PyTransformKit 1.0.0 Stable Release**
 
 ## Development

@@ -37,6 +37,14 @@ from pytransformkit.errors.pipeline import (
     PipelineError,
     PipelineNodeNotFoundError,
 )
+from pytransformkit.errors.plugin import (
+    PluginActivationError,
+    PluginCompatibilityError,
+    PluginConflictError,
+    PluginError,
+    PluginNotFoundError,
+    RegistryFrozenError,
+)
 from pytransformkit.errors.quality import (
     InvalidValidationError,
     QualityError,
@@ -89,12 +97,18 @@ __all__ = [
     "MigrationError",
     "NonPortableValueError",
     "PipelineCycleError",
+    "PluginActivationError",
+    "PluginCompatibilityError",
+    "PluginConflictError",
+    "PluginError",
+    "PluginNotFoundError",
     "PipelineError",
     "PayloadTooLargeError",
     "PipelineNodeNotFoundError",
     "PyTransformKitError",
     "QualityError",
     "QualityGateError",
+    "RegistryFrozenError",
     "ResourceIOError",
     "ResourcePathViolationError",
     "ResourceReadError",

@@ -3,6 +3,7 @@
 from pytransformkit.application.ports.engines import EngineAdapter
 from pytransformkit.domain.engines import EngineCapability
 from pytransformkit.errors.engine import AdapterError, EngineNotFoundError
+from pytransformkit.errors.plugin import RegistryFrozenError
 
 
 class EngineRegistry:
@@ -10,6 +11,12 @@ class EngineRegistry:
 
     def __init__(self) -> None:
         self._adapters: dict[str, EngineAdapter] = {}
+        self._frozen = False
+
+    @property
+    def frozen(self) -> bool:
+        """Return whether registration mutations are disabled."""
+        return self._frozen
 
     def register(
         self,
@@ -18,6 +25,7 @@ class EngineRegistry:
         replace: bool = False,
     ) -> None:
         """Register one adapter by explicit engine id."""
+        self._ensure_mutable()
         engine_id = adapter.descriptor.id
         if engine_id in self._adapters and not replace:
             raise AdapterError(
@@ -28,6 +36,7 @@ class EngineRegistry:
 
     def unregister(self, engine_id: str) -> None:
         """Remove one explicitly named adapter."""
+        self._ensure_mutable()
         if engine_id not in self._adapters:
             raise EngineNotFoundError(engine_id)
         del self._adapters[engine_id]
@@ -57,3 +66,11 @@ class EngineRegistry:
     def capabilities(self, engine_id: str) -> frozenset[EngineCapability]:
         """Return the immutable capability set for one engine."""
         return self.get(engine_id).descriptor.capabilities
+
+    def freeze(self) -> None:
+        """Prevent further adapter registration or removal."""
+        self._frozen = True
+
+    def _ensure_mutable(self) -> None:
+        if self._frozen:
+            raise RegistryFrozenError("EngineRegistry is frozen.")

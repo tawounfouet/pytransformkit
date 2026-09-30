@@ -67,7 +67,9 @@ class LocalFilePathResolver:
 
     def resolve(self, locator: str) -> Path:
         if not locator or not locator.strip():
-            raise ResourcePathViolationError("Local resource locator must not be empty.")
+            raise ResourcePathViolationError(
+                "Local resource locator must not be empty."
+            )
 
         raw = Path(locator).expanduser()
         candidate = raw if raw.is_absolute() else self._root / raw
@@ -248,7 +250,10 @@ class LocalFileWriter:
             raise ResourceWriteError(
                 "LocalFileWriter requires an Arrow-exportable PhysicalHandle."
             )
-        if request.mode is WriteMode.APPEND and request.retry_safety is RetrySafety.SAFE:
+        if (
+            request.mode is WriteMode.APPEND
+            and request.retry_safety is RetrySafety.SAFE
+        ):
             raise ResourceWriteError(
                 "APPEND cannot be declared retry-safe without stronger idempotency."
             )
@@ -279,11 +284,13 @@ class LocalFileWriter:
         resource_format: ResourceFormat,
         request: WriteRequest,
     ) -> WriteResult:
-        if request.mode in {WriteMode.CREATE_NEW, WriteMode.FAIL_IF_EXISTS}:
-            if path.exists():
-                raise ResourceWriteError(
-                    f"Target resource already exists: {request.resource.locator!r}."
-                )
+        if (
+            request.mode in {WriteMode.CREATE_NEW, WriteMode.FAIL_IF_EXISTS}
+            and path.exists()
+        ):
+            raise ResourceWriteError(
+                f"Target resource already exists: {request.resource.locator!r}."
+            )
 
         fd, temp_name = tempfile.mkstemp(
             prefix=f".{path.name}.",
@@ -390,9 +397,11 @@ class LocalFileWriter:
             pq.write_table(table, path)
             return
         if resource_format is ResourceFormat.ARROW_IPC:
-            with pa.OSFile(str(path), "wb") as sink:
-                with pa_ipc.new_file(sink, table.schema) as writer:
-                    writer.write_table(table)
+            with (
+                pa.OSFile(str(path), "wb") as sink,
+                pa_ipc.new_file(sink, table.schema) as writer,
+            ):
+                writer.write_table(table)
             return
         raise UnsupportedResourceFormatError(
             f"Unsupported local write format {resource_format.value!r}."

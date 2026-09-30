@@ -7,8 +7,6 @@ from importlib.metadata import PackageNotFoundError, version
 from typing import Any
 
 import pyarrow as pa
-import pyarrow.compute as pc
-
 from pytransformkit.application.execution.compatibility import (
     EngineCompatibilityService,
 )

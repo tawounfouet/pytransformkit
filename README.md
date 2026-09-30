@@ -33,8 +33,9 @@ The implementation baseline now covers:
 - **LOT-12 — Aggregation & Grouping**
 - **LOT-13 — Window & Analytical Semantics**
 - **LOT-14 — Reshaping, Temporal & Nested Semantics**
+- **LOT-15 — Data Quality & Validation**
 
-The current development line targets **0.2.0**.
+The current development line targets **0.3.0a1**.
 
 ### Canonical V1 model
 
@@ -65,7 +66,8 @@ The package root promotes:
 - `OutputBinding`;
 - `ResourceReference`;
 - `Dataset`, `Schema`, `Field`, `DataType`;
-- `Expression`, `col()`, `lit()`.
+- `Expression`, `col()`, `lit()`;
+- `quality` as the public data-quality authoring namespace.
 
 The former `Pipeline` / `RunPipelineService` path is retained only as a pre-V1 compatibility surface and is no longer the canonical API.
 
@@ -101,11 +103,13 @@ LOT-13 adds immutable window specifications, explicit partition/order semantics,
 
 LOT-14 closes the 0.2.x transformation vocabulary with deterministic reshape semantics, logical `ListType`, `StructType`, `MapType` and `DurationType`, nested Struct paths, portable temporal functions, and explicit engine capabilities for reshape, nested and temporal execution.
 
+LOT-15 introduces transformation-owned data quality through `ValidationSpec`, typed validation rules, `QualityGate`, threshold policies and structured `ValidationResult` evidence. Quality gates preserve rows and Schema; blocking violations raise `QualityGateError`, while technical adapter/execution failures remain distinct.
+
 ### Runtime and engines
 
 Runtime input is expressed through `InputBinding`, separating logical Dataset values from physical native values. The runtime resolves one explicitly requested engine from `EngineRegistry`; there is no implicit engine fallback.
 
-Pandas and Polars are optional extras. Both implement the relational, aggregation, analytical-window, reshape, nested-Struct and temporal contracts. Dedicated cross-engine tests verify semantic equivalence for joins, set operations, grouped/global aggregates, ranking, offsets, cumulative and moving windows, pivot/unpivot/explode/flatten, nested field access, timezone-aware temporal operations, durations, NULL handling and capability failures. Polars also supports qualified lazy execution.
+Pandas and Polars are optional extras. Both implement the relational, aggregation, analytical-window, reshape, nested-Struct, temporal and quality contracts. Dedicated cross-engine tests verify semantic equivalence for joins, set operations, grouped/global aggregates, ranking, offsets, cumulative and moving windows, pivot/unpivot/explode/flatten, nested field access, timezone-aware temporal operations, durations, quality evidence, NULL handling and capability failures. Polars also supports qualified lazy execution.
 
 Public engine namespaces are available under:
 
@@ -182,9 +186,9 @@ The historical `docs/ROADMAP_LOT_11_TO_1_0.md` remains useful as project history
 Current count:
 
 - Total roadmap: **29 lots** (`LOT-00` → `LOT-28`)
-- Completed after LOT-14: **15 lots** (`LOT-00` → `LOT-14`)
-- Remaining: **14 lots** (`LOT-15` → `LOT-28`)
-- Next lot: **LOT-15 — Data Quality and Validation**
+- Completed after LOT-15: **16 lots** (`LOT-00` → `LOT-15`)
+- Remaining: **13 lots** (`LOT-16` → `LOT-28`)
+- Next lot: **LOT-16 — Logical and Field Lineage**
 - Final lot: **LOT-28 — PyTransformKit 1.0.0 Stable Release**
 
 ## Development

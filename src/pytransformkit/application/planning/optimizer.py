@@ -7,6 +7,7 @@ from dataclasses import dataclass, replace
 
 from pytransformkit.application.planning.expression_optimizer import ExpressionOptimizer
 from pytransformkit.application.planning.fingerprint import logical_plan_fingerprint
+from pytransformkit.domain.expressions.aggregate import AggregateExpression
 from pytransformkit.domain.expressions.base import Expression
 from pytransformkit.domain.expressions.dependencies import ExpressionDependencyExtractor
 from pytransformkit.domain.expressions.fingerprint import expression_fingerprint
@@ -15,7 +16,6 @@ from pytransformkit.domain.pipelines.plan import LogicalPlan, LogicalPlanNode
 from pytransformkit.domain.quality.rules import ExpressionValidation
 from pytransformkit.domain.shared.fingerprint import Fingerprint
 from pytransformkit.domain.shared.identifiers import NodeId
-from pytransformkit.domain.expressions.aggregate import AggregateExpression
 from pytransformkit.domain.transformations.aggregation import (
     AggregateMetric,
     AggregateTransformation,
@@ -465,7 +465,9 @@ class LogicalOptimizer:
             elif node.kind is PipelineNodeKind.TRANSFORMATION:
                 transformation = node.transformation
                 if transformation is None:
-                    raise ValueError("Transformation node is missing its transformation.")
+                    raise ValueError(
+                        "Transformation node is missing its transformation."
+                    )
                 output_schema = self._schemas.resolve_many(
                     transformation,
                     predecessor_schemas,
@@ -561,7 +563,9 @@ class LogicalOptimizer:
                 continue
             if len(consumers[parent.node_id]) != 1:
                 continue
-            if _is_materialization_boundary(parent) or _is_materialization_boundary(node):
+            if _is_materialization_boundary(
+                parent
+            ) or _is_materialization_boundary(node):
                 continue
             if not _pure_deterministic(parent) or not _pure_deterministic(node):
                 continue
@@ -569,7 +573,9 @@ class LogicalOptimizer:
             diagnostics.append(
                 OptimizerDiagnostic(
                     code="PTK-OPT-HINT-001",
-                    summary="Adjacent pure deterministic transformations are fusion-safe.",
+                    summary=(
+                        "Adjacent pure deterministic transformations are fusion-safe."
+                    ),
                     rule_id="safe-fusion-hints",
                     node_ids=(str(parent.node_id), str(node.node_id)),
                 )

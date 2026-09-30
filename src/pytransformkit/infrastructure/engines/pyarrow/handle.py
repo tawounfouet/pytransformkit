@@ -28,3 +28,7 @@ class PyArrowDatasetHandle:
         if isinstance(self.value, pa.Table):
             return self.value
         return pa.Table.from_batches([self.value])
+
+    def to_arrow_table(self) -> pa.Table:
+        """Expose this handle through the common Arrow I/O boundary."""
+        return self.table

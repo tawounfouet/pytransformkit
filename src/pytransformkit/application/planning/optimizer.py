@@ -11,11 +11,12 @@ from pytransformkit.domain.expressions.aggregate import AggregateExpression
 from pytransformkit.domain.expressions.base import Expression
 from pytransformkit.domain.expressions.dependencies import ExpressionDependencyExtractor
 from pytransformkit.domain.expressions.fingerprint import expression_fingerprint
+from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
 from pytransformkit.domain.pipelines.plan import LogicalPlan, LogicalPlanNode
-from pytransformkit.domain.quality.rules import ExpressionValidation
+from pytransformkit.domain.quality.rules import ExpressionValidation, ValidationRule
 from pytransformkit.domain.shared.fingerprint import Fingerprint
-from pytransformkit.domain.shared.identifiers import NodeId
+from pytransformkit.domain.shared.identifiers import DatasetId, NodeId
 from pytransformkit.domain.transformations.aggregation import (
     AggregateMetric,
     AggregateTransformation,
@@ -276,12 +277,12 @@ class LogicalOptimizer:
             )
 
         if isinstance(transformation, AggregateTransformation):
-            rules: tuple[str, ...] = ()
+            aggregate_rules: tuple[str, ...] = ()
             group_by: list[Expression] = []
             for expression in transformation.group_by:
                 optimized = self._expressions.optimize(expression)
                 group_by.append(optimized.expression)
-                rules += optimized.applied_rules
+                aggregate_rules += optimized.applied_rules
 
             metrics: list[AggregateMetric] = []
             for metric in transformation.metrics:
@@ -290,7 +291,7 @@ class LogicalOptimizer:
                 if not isinstance(expression, AggregateExpression):
                     expression = metric.expression
                 metrics.append(replace(metric, expression=expression))
-                rules += optimized.applied_rules
+                aggregate_rules += optimized.applied_rules
 
             return (
                 replace(
@@ -298,29 +299,29 @@ class LogicalOptimizer:
                     group_by=tuple(group_by),
                     metrics=tuple(metrics),
                 ),
-                _dedupe(rules),
+                _dedupe(aggregate_rules),
             )
 
         if isinstance(transformation, QualityGate):
-            rules: tuple[str, ...] = ()
-            rewritten_rules = []
+            quality_rules: tuple[str, ...] = ()
+            rewritten_rules: list[ValidationRule] = []
             for rule in transformation.spec.rules:
                 if isinstance(rule, ExpressionValidation):
                     optimized = self._expressions.optimize(rule.expression)
                     rewritten_rules.append(
                         replace(rule, expression=optimized.expression)
                     )
-                    rules += optimized.applied_rules
+                    aggregate_rules += optimized.applied_rules
                 else:
                     rewritten_rules.append(rule)
 
-            if not rules:
+            if not quality_rules:
                 return transformation, ()
             spec = replace(
                 transformation.spec,
                 rules=tuple(rewritten_rules),
             )
-            return replace(transformation, spec=spec), _dedupe(rules)
+            return replace(transformation, spec=spec), _dedupe(quality_rules)
 
         return transformation, ()
 
@@ -446,8 +447,8 @@ class LogicalOptimizer:
         original: LogicalPlan,
         nodes: tuple[LogicalPlanNode, ...],
     ) -> LogicalPlan:
-        output_schema_by_node = {}
-        dataset_id_by_node = {}
+        output_schema_by_node: dict[NodeId, Schema] = {}
+        dataset_id_by_node: dict[NodeId, DatasetId] = {}
         rebuilt: list[LogicalPlanNode] = []
 
         for node in nodes:

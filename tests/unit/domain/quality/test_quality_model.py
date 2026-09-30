@@ -37,11 +37,7 @@ def schema() -> Schema:
             Field("score", FloatType(), nullable=True),
             Field(
                 "profile",
-                StructType(
-                    fields=(
-                        StructField("city", StringType(), nullable=False),
-                    )
-                ),
+                StructType(fields=(StructField("city", StringType(), nullable=False),)),
                 nullable=True,
             ),
         )

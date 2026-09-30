@@ -61,7 +61,9 @@ class RuntimeEventType(StrEnum):
     EXECUTION_UNKNOWN_OUTCOME = "pytransformkit.execution.unknown_outcome"
     CANCELLATION_REQUESTED = "pytransformkit.cancellation.requested"
     CANCELLATION_UNSUPPORTED = "pytransformkit.cancellation.unsupported"
+    CANCELLATION_UNCONFIRMED = "pytransformkit.cancellation.unconfirmed"
     CANCELLATION_CONFIRMED = "pytransformkit.cancellation.confirmed"
+    PROVIDER_RETRY_RECORDED = "pytransformkit.provider_retry.recorded"
 
 
 class MetricKind(StrEnum):

@@ -82,6 +82,15 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 - Pandas and Polars reshape, nested-Struct, and temporal execution with cross-engine conformance tests.
 - Explicit `PIVOT`, `UNPIVOT`, `EXPLODE`, `FLATTEN`, `NESTED`, `TEMPORAL`, and `DURATION` engine capabilities.
 - Completion of LOT-14 and the PyTransformKit 0.2.x transformation-semantics line.
+- Engine-neutral `ValidationRule`, `ValidationSpec`, `ValidationPolicy`, `ValidationThreshold`, `ValidationRuleResult`, and `ValidationResult` contracts.
+- Built-in `NotNull`, `Unique`, `Range`, `AllowedValues`, `Regex`, `SchemaValidation`, `RowCount`, and expression-based validation rules.
+- `QualityGate` as a row- and Schema-preserving transformation checkpoint.
+- Public `pytransformkit.quality` authoring DSL and `TransformationPlanBuilder.validate()`.
+- Structured `QualityGateError` for blocking data-quality violations, distinct from technical execution failures.
+- `FAIL_FAST`, `FAIL_AT_END`, `WARN_ONLY`, and `IGNORE` validation policies with count/rate thresholds.
+- Quality evidence propagated through `EngineExecutionResult` and `TransformationResult`.
+- Pandas and Polars quality evaluators with cross-engine conformance, including Polars lazy quality evaluation.
+- Explicit `QUALITY` engine capability and nested-path capability propagation for quality rules.
 
 ### Changed
 

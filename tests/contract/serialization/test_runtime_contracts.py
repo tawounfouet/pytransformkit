@@ -27,22 +27,16 @@ from pytransformkit.serialization import (
 
 
 def _execution_id() -> TransformationExecutionId:
-    return TransformationExecutionId.parse(
-        "11111111-1111-1111-1111-111111111111"
-    )
+    return TransformationExecutionId.parse("11111111-1111-1111-1111-111111111111")
 
 
 def _plan_id() -> TransformationPlanId:
-    return TransformationPlanId.parse(
-        "22222222-2222-2222-2222-222222222222"
-    )
+    return TransformationPlanId.parse("22222222-2222-2222-2222-222222222222")
 
 
 def _correlation() -> CorrelationContext:
     return CorrelationContext(
-        correlation_id=CorrelationId.parse(
-            "33333333-3333-3333-3333-333333333333"
-        ),
+        correlation_id=CorrelationId.parse("33333333-3333-3333-3333-333333333333"),
         workflow_run_id="workflow-42",
         task_attempt_id="attempt-3",
     )

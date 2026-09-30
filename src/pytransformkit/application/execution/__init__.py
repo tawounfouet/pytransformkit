@@ -26,6 +26,7 @@ from pytransformkit.application.execution.runtime import (
     TransformationResult,
     TransformationRuntime,
 )
+from pytransformkit.application.io import ResourceIORegistry, WriteResult
 from pytransformkit.application.execution.service import (
     PipelineExecutionResult,
     RunPipelineService,
@@ -69,9 +70,11 @@ __all__ = [
     "ProviderRetryEvidence",
     "RetryDecision",
     "Retryability",
+    "ResourceIORegistry",
     "RunPipelineService",
     "TransformationExecution",
     "TransformationOutput",
     "TransformationResult",
     "TransformationRuntime",
+    "WriteResult",
 ]

@@ -5,7 +5,13 @@ from __future__ import annotations
 from pytransformkit.domain.data.field_path import FieldPath
 from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.expressions.base import Expression
-from pytransformkit.domain.quality import (
+from pytransformkit.domain.quality.results import (
+    ValidationPolicy,
+    ValidationResult,
+    ValidationRuleResult,
+    ValidationThreshold,
+)
+from pytransformkit.domain.quality.rules import (
     AllowedValues,
     ExpressionValidation,
     NotNull,
@@ -14,20 +20,18 @@ from pytransformkit.domain.quality import (
     RowCount,
     SchemaValidation,
     Unique,
-    ValidationPolicy,
-    ValidationResult,
     ValidationRule,
-    ValidationRuleResult,
     ValidationSpec,
-    ValidationThreshold,
 )
+
+_STRICT_THRESHOLD = ValidationThreshold()
 
 
 def not_null(
     field: str,
     *,
     name: str | None = None,
-    threshold: ValidationThreshold = ValidationThreshold(),
+    threshold: ValidationThreshold = _STRICT_THRESHOLD,
 ) -> NotNull:
     return NotNull(
         name=name or f"{field}.not_null",
@@ -39,7 +43,7 @@ def not_null(
 def unique(
     *fields: str,
     name: str | None = None,
-    threshold: ValidationThreshold = ValidationThreshold(),
+    threshold: ValidationThreshold = _STRICT_THRESHOLD,
 ) -> Unique:
     if not fields:
         raise ValueError("quality.unique requires at least one field.")
@@ -59,7 +63,7 @@ def range_(
     include_minimum: bool = True,
     include_maximum: bool = True,
     name: str | None = None,
-    threshold: ValidationThreshold = ValidationThreshold(),
+    threshold: ValidationThreshold = _STRICT_THRESHOLD,
 ) -> Range:
     return Range(
         name=name or f"{field}.range",
@@ -77,7 +81,7 @@ def allowed_values(
     values: tuple[object, ...],
     *,
     name: str | None = None,
-    threshold: ValidationThreshold = ValidationThreshold(),
+    threshold: ValidationThreshold = _STRICT_THRESHOLD,
 ) -> AllowedValues:
     return AllowedValues(
         name=name or f"{field}.allowed_values",
@@ -92,7 +96,7 @@ def regex(
     pattern: str,
     *,
     name: str | None = None,
-    threshold: ValidationThreshold = ValidationThreshold(),
+    threshold: ValidationThreshold = _STRICT_THRESHOLD,
 ) -> Regex:
     return Regex(
         name=name or f"{field}.regex",
@@ -107,7 +111,7 @@ def schema(
     *,
     exact: bool = True,
     name: str = "schema",
-    threshold: ValidationThreshold = ValidationThreshold(),
+    threshold: ValidationThreshold = _STRICT_THRESHOLD,
 ) -> SchemaValidation:
     return SchemaValidation(
         name=name,
@@ -122,7 +126,7 @@ def row_count(
     minimum: int | None = None,
     maximum: int | None = None,
     name: str = "row_count",
-    threshold: ValidationThreshold = ValidationThreshold(),
+    threshold: ValidationThreshold = _STRICT_THRESHOLD,
 ) -> RowCount:
     return RowCount(
         name=name,
@@ -136,7 +140,7 @@ def expression(
     condition: Expression,
     *,
     name: str,
-    threshold: ValidationThreshold = ValidationThreshold(),
+    threshold: ValidationThreshold = _STRICT_THRESHOLD,
 ) -> ExpressionValidation:
     return ExpressionValidation(
         name=name,

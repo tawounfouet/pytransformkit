@@ -38,8 +38,9 @@ The implementation baseline now covers:
 - **LOT-17 — Runtime Identity, Diagnostics & Observability**
 - **LOT-18 — PyArrow Adapter & Interchange**
 - **LOT-19 — DuckDB Adapter & SQL Lowering**
+- **LOT-20 — Physical I/O & Resource Boundary**
 
-The current development line targets **0.4.0a2**.
+The current implementation baseline is **0.4.0**.
 
 ### Canonical V1 model
 
@@ -119,6 +120,8 @@ LOT-18 introduces the optional PyArrow backend without changing the canonical Do
 
 LOT-19 adds DuckDB as the first relational SQL execution backend. `DuckDBPlanCompiler` lowers the engine-neutral `LogicalPlan` to parameterized CTE-backed SQL, values remain separate from SQL text, identifiers are quoted safely, and join/aggregate/window semantics are qualified against the existing Pandas contract. `DuckDBAdapter` distinguishes framework-owned from caller-owned connections, never commits implicitly, supports Arrow binding, eager and lazy relational execution, and exposes native `EXPLAIN` without introducing SQL into the Domain model.
 
+LOT-20 closes the `0.4.x` physical-data line with explicit Reader/Writer ports around portable `ResourceReference` values. The local reference profile supports CSV, JSONL, Parquet and Arrow IPC; Parquet scans can push projection/predicate work to the source and prune Hive partitions, while non-Parquet post-scan work is reported explicitly. `TransformationRuntime` can resolve resource-backed inputs and materialize bound outputs without moving I/O into `TransformationPlan` or `LogicalPlan`. `CredentialReference` contains identifiers only, write modes remain physical storage semantics, and uncertain side effects preserve `UNKNOWN_OUTCOME` / reconciliation-required evidence.
+
 ### Runtime and engines
 
 Runtime input is expressed through `InputBinding`, separating logical Dataset values from physical native values. The runtime resolves one explicitly requested engine from `EngineRegistry`; there is no implicit engine fallback. Runtime identity and correlation are distinct: a `TransformationExecutionId` identifies one semantic execution, while `CorrelationId` can connect that execution to surrounding PyKit or external work.
@@ -133,6 +136,8 @@ pytransformkit.adapters.pandas
 pytransformkit.adapters.polars
 pytransformkit.adapters.pyarrow
 pytransformkit.adapters.duckdb
+pytransformkit.readers
+pytransformkit.writers
 pytransformkit.planning
 pytransformkit.runtime
 pytransformkit.diagnostics
@@ -203,9 +208,9 @@ The historical `docs/ROADMAP_LOT_11_TO_1_0.md` remains useful as project history
 Current count:
 
 - Total roadmap: **29 lots** (`LOT-00` → `LOT-28`)
-- Completed after LOT-19: **20 lots** (`LOT-00` → `LOT-19`)
-- Remaining: **9 lots** (`LOT-20` → `LOT-28`)
-- Next lot: **LOT-20 — Physical I/O and Resource Boundary**
+- Completed after LOT-20: **21 lots** (`LOT-00` → `LOT-20`)
+- Remaining: **8 lots** (`LOT-21` → `LOT-28`)
+- Next lot: **LOT-21 — Versioned Serialization and Canonical IR**
 - Final lot: **LOT-28 — PyTransformKit 1.0.0 Stable Release**
 
 ## Development

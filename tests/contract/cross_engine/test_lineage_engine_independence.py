@@ -98,10 +98,6 @@ def test_logical_lineage_is_identical_after_pandas_and_polars_execution() -> Non
 
     assert pandas_lineage == polars_lineage
     assert pandas_lineage.output("out") == polars_lineage.output("out")
-    assert {
-        dependency.kind
-        for dependency in pandas_lineage.dependencies
-    } == {
-        dependency.kind
-        for dependency in polars_lineage.dependencies
+    assert {dependency.kind for dependency in pandas_lineage.dependencies} == {
+        dependency.kind for dependency in polars_lineage.dependencies
     }

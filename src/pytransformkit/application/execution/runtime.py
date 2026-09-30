@@ -124,9 +124,7 @@ class TransformationResult:
                 "TransformationResult engine must match TransformationExecution."
             )
         if not isinstance(self.logical_plan, LogicalPlan):
-            raise TypeError(
-                "TransformationResult logical_plan must be a LogicalPlan."
-            )
+            raise TypeError("TransformationResult logical_plan must be a LogicalPlan.")
         if not self.outputs:
             raise ValueError("TransformationResult requires at least one output.")
         if not isinstance(self.lineage, TransformationLineage):
@@ -236,9 +234,8 @@ class TransformationRuntime:
         execution_id = TransformationExecutionId.new()
         started_at = _utc_now()
         started_monotonic = perf_counter()
-        invalid_correlation = (
-            correlation is not None
-            and not isinstance(correlation, CorrelationContext)
+        invalid_correlation = correlation is not None and not isinstance(
+            correlation, CorrelationContext
         )
         upstream_correlation = (
             correlation
@@ -432,9 +429,7 @@ class TransformationRuntime:
                         f"Engine {engine!r} does not implement multi-input execution."
                     )
             except TimeoutError as error:
-                raise ExecutionTimeoutError(
-                    "Engine execution timed out."
-                ) from error
+                raise ExecutionTimeoutError("Engine execution timed out.") from error
             except PyTransformKitError:
                 raise
             except Exception as error:
@@ -859,9 +854,7 @@ class TransformationRuntime:
             ("status", status.value),
         )
         if failure_category is not None:
-            span_attributes += (
-                ("failure_category", failure_category.value),
-            )
+            span_attributes += (("failure_category", failure_category.value),)
         telemetry.record_span(
             RuntimeTraceSpan(
                 name="pytransformkit.transformation.execute",
@@ -934,9 +927,7 @@ def _manifest(
             else (requested_engine if requested_engine.strip() else None)
         ),
         adapter_version=(
-            execution.engine.adapter_version
-            if execution.engine is not None
-            else None
+            execution.engine.adapter_version if execution.engine is not None else None
         ),
     )
 

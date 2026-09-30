@@ -69,7 +69,9 @@ class TransformationExecution:
                 "a TransformationExecutionId."
             )
         if not isinstance(self.status, ExecutionStatus):
-            raise TypeError("TransformationExecution status must be an ExecutionStatus.")
+            raise TypeError(
+                "TransformationExecution status must be an ExecutionStatus."
+            )
         if not isinstance(self.correlation, CorrelationContext):
             raise TypeError(
                 "TransformationExecution correlation must be a CorrelationContext."
@@ -78,7 +80,9 @@ class TransformationExecution:
         if self.ended_at is not None:
             _validate_aware_datetime(self.ended_at, "ended_at")
             if self.ended_at < self.started_at:
-                raise ValueError("TransformationExecution ended_at precedes started_at.")
+                raise ValueError(
+                    "TransformationExecution ended_at precedes started_at."
+                )
         if self.plan_id is not None and not isinstance(
             self.plan_id,
             TransformationPlanId,

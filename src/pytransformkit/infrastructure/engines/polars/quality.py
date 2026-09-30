@@ -225,9 +225,11 @@ class PolarsQualityEvaluator:
             ColumnReference(path),
             frame,
         )
-        return frame.select(
-            expression.alias("__pytransformkit_quality_value__")
-        ).to_series().to_list()
+        return (
+            frame.select(expression.alias("__pytransformkit_quality_value__"))
+            .to_series()
+            .to_list()
+        )
 
 
 def _result(
@@ -268,20 +270,12 @@ def _schema_matches(
 
 
 def _is_missing(value: object) -> bool:
-    return value is None or (
-        isinstance(value, float)
-        and math.isnan(value)
-    )
+    return value is None or (isinstance(value, float) and math.isnan(value))
 
 
 def _hashable(value: object) -> object:
     if isinstance(value, dict):
-        return tuple(
-            sorted(
-                (key, _hashable(item))
-                for key, item in value.items()
-            )
-        )
+        return tuple(sorted((key, _hashable(item)) for key, item in value.items()))
     if isinstance(value, list):
         return tuple(_hashable(item) for item in value)
     if isinstance(value, float) and math.isnan(value):

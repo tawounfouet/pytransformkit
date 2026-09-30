@@ -809,6 +809,8 @@ targeting **`0.5.0a1`**.
 
 # 15. LOT-21 — Versioned Serialization and Canonical IR
 
+**Status:** DONE — `0.5.0a1`
+
 **Target milestone:** 0.5.0a1
 
 ## Scope
@@ -850,6 +852,28 @@ no pickle/cloudpickle/dill fallback
 - non-portable UDF/callback constructs fail explicitly;
 - wire versions are independent from package version;
 - golden fixtures are committed and compatibility-tested.
+
+## Implementation closure
+
+LOT-21 establishes the first durable PyTransformKit wire-contract layer with:
+
+- a public `pytransformkit.serialization` namespace;
+- explicit v1 contract IDs independent from Python module paths and package version;
+- deterministic canonical JSON using UTF-8, NFC normalization, sorted object keys and compact separators;
+- a closed semantic type registry that only reconstructs pre-registered PyTransformKit domain types;
+- strict duplicate-key, envelope, field, enum, UUID, timestamp, size and nesting validation;
+- explicit typed collection markers so tuple/list/set/frozenset/map semantics survive round-trip;
+- exact portable handling for Decimal, UUID, date/time/datetime and bytes;
+- codecs for DataType, Field, Schema, Expression, TransformationPlan, LogicalPlan, ResourceReference, TransformationExecutionReference, TransformationLineage, Diagnostic and ExecutionManifest;
+- identity-independent semantic fingerprints for Expression, TransformationPlan and LogicalPlan;
+- explicit contiguous migration hooks with no silent fallback between wire versions;
+- a minimal portable `TransformationExecutionReference` contract for inter-framework boundaries;
+- committed golden v1 byte fixtures and compatibility tests;
+- negative tests proving arbitrary semantic tags, duplicate JSON keys, oversized payloads, future versions, callbacks and pickle-like object graphs fail closed;
+- no pickle, cloudpickle, dill, eval or exec deserialization fallback.
+
+The next implementation lot is **LOT-22 — Logical Optimizer**,
+targeting **`0.5.0a2`**.
 
 ---
 

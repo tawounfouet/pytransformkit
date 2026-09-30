@@ -6,4 +6,4 @@ from pytransformkit.domain.engines.capabilities import (
 )
 from pytransformkit.domain.engines.descriptor import EngineDescriptor
 
-__all__ = ["EngineCapability", "EngineDescriptor"]
+__all__ = ["CancellationSupport", "EngineCapability", "EngineDescriptor"]

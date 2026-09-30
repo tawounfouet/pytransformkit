@@ -46,7 +46,7 @@ class CorrelationContext:
         *,
         trace_id: str,
         span_id: str | None = None,
-    ) -> "CorrelationContext":
+    ) -> CorrelationContext:
         """Return a copy carrying explicit trace context."""
         return CorrelationContext(
             correlation_id=self.correlation_id,

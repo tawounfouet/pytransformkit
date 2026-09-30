@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Hashable, Iterable, Mapping
+from typing import TypeVar
 
 from pytransformkit.domain.data.data_types import StructType
 from pytransformkit.domain.data.field_path import FieldPath
 from pytransformkit.domain.data.references import DatasetReference
+from pytransformkit.domain.expressions.base import Expression
 from pytransformkit.domain.expressions.dependencies import (
     ExpressionDependencyExtractor,
 )
@@ -38,6 +40,7 @@ from pytransformkit.domain.quality.rules import (
     ValidationRule,
 )
 from pytransformkit.domain.resources import ResourceReference
+from pytransformkit.domain.shared.identifiers import StepId
 from pytransformkit.domain.transformations.aggregation import (
     AggregateTransformation,
     group_output_name,
@@ -734,18 +737,13 @@ class LineageAnalyzer:
 
     def _expression_dependencies(
         self,
-        expression: object,
+        expression: Expression,
         source_ref: DatasetReference,
         target_ref: DatasetReference,
-        step_id: object,
+        step_id: StepId,
     ) -> tuple[FieldDependency, ...]:
         if not isinstance(expression, WindowExpression):
             return ()
-
-        from pytransformkit.domain.shared.identifiers import StepId
-
-        if not isinstance(step_id, StepId):
-            raise TypeError("Window lineage step_id must be a StepId.")
 
         dependencies: list[FieldDependency] = []
         if expression.argument is not None:
@@ -793,13 +791,8 @@ class LineageAnalyzer:
         rule: ValidationRule,
         source_ref: DatasetReference,
         target_ref: DatasetReference,
-        step_id: object,
+        step_id: StepId,
     ) -> tuple[FieldDependency, ...]:
-        from pytransformkit.domain.shared.identifiers import StepId
-
-        if not isinstance(step_id, StepId):
-            raise TypeError("Quality lineage step_id must be a StepId.")
-
         if isinstance(rule, (NotNull, Range, AllowedValues, Regex)):
             paths = (rule.field,)
         elif isinstance(rule, Unique):
@@ -825,17 +818,12 @@ class LineageAnalyzer:
 
     @staticmethod
     def _path_dependencies(
-        paths: object,
+        paths: Iterable[FieldPath],
         source_ref: DatasetReference,
         target_ref: DatasetReference,
         kind: FieldDependencyKind,
-        step_id: object,
+        step_id: StepId,
     ) -> tuple[FieldDependency, ...]:
-        from pytransformkit.domain.shared.identifiers import StepId
-
-        if not isinstance(step_id, StepId):
-            raise TypeError("Lineage dependency step_id must be a StepId.")
-
         return tuple(
             _dependency(
                 source_ref,
@@ -899,13 +887,8 @@ def _field_edge(
     target_dataset: DatasetReference,
     target_path: FieldPath,
     derivation: FieldDerivationKind,
-    step_id: object,
+    step_id: StepId,
 ) -> FieldLineageEdge:
-    from pytransformkit.domain.shared.identifiers import StepId
-
-    if not isinstance(step_id, StepId):
-        raise TypeError("Field lineage step_id must be a StepId.")
-
     return FieldLineageEdge(
         source=FieldReference(source_dataset, source_path),
         target=FieldReference(target_dataset, target_path),
@@ -920,13 +903,8 @@ def _dependency(
     source_path: FieldPath,
     target_dataset: DatasetReference,
     kind: FieldDependencyKind,
-    step_id: object,
+    step_id: StepId,
 ) -> FieldDependency:
-    from pytransformkit.domain.shared.identifiers import StepId
-
-    if not isinstance(step_id, StepId):
-        raise TypeError("Field dependency step_id must be a StepId.")
-
     return FieldDependency(
         field=FieldReference(source_dataset, source_path),
         target_dataset=target_dataset,
@@ -940,7 +918,7 @@ def _direct_edges(
     source_ref: DatasetReference,
     target_ref: DatasetReference,
     field_names: tuple[str, ...],
-    step_id: object,
+    step_id: StepId,
 ) -> tuple[FieldLineageEdge, ...]:
     return tuple(
         _field_edge(
@@ -975,5 +953,8 @@ def _binary(
     return values[0], values[1]
 
 
-def _dedupe(values: list | tuple) -> tuple:
+_T = TypeVar("_T", bound=Hashable)
+
+
+def _dedupe(values: Iterable[_T]) -> tuple[_T, ...]:
     return tuple(dict.fromkeys(values))

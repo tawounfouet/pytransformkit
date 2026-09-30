@@ -80,9 +80,7 @@ class RuntimeEvent:
     execution_id: TransformationExecutionId
     correlation: CorrelationContext
     payload: tuple[tuple[str, str], ...] = ()
-    occurred_at: datetime = field(
-        default_factory=lambda: datetime.now(UTC)
-    )
+    occurred_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     event_id: RuntimeEventId = field(default_factory=RuntimeEventId.new)
     event_version: str = "1"
 

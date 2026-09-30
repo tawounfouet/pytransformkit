@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
+from pytransformkit.domain.shared.fingerprint import Fingerprint
 from pytransformkit.domain.shared.identifiers import (
     DatasetId,
     NodeId,
@@ -85,3 +86,11 @@ class LogicalPlan:
             if output_name == name:
                 return schema
         raise KeyError(name)
+
+    def fingerprint(self) -> Fingerprint:
+        """Return a deterministic semantic fingerprint for this LogicalPlan."""
+        from pytransformkit.application.planning.fingerprint import (
+            logical_plan_fingerprint,
+        )
+
+        return logical_plan_fingerprint(self)

@@ -35,8 +35,9 @@ The implementation baseline now covers:
 - **LOT-14 — Reshaping, Temporal & Nested Semantics**
 - **LOT-15 — Data Quality & Validation**
 - **LOT-16 — Logical & Field Lineage**
+- **LOT-17 — Runtime Identity, Diagnostics & Observability**
 
-The current development line targets **0.3.0a2**.
+The current development line targets **0.3.0**.
 
 ### Canonical V1 model
 
@@ -69,7 +70,8 @@ The package root promotes:
 - `Dataset`, `Schema`, `Field`, `DataType`;
 - `Expression`, `col()`, `lit()`;
 - `quality` as the public data-quality authoring namespace;
-- `lineage` as the public logical and field-lineage namespace.
+- `lineage` as the public logical and field-lineage namespace;
+- `diagnostics` as the public runtime observability namespace.
 
 The former `Pipeline` / `RunPipelineService` path is retained only as a pre-V1 compatibility surface and is no longer the canonical API.
 
@@ -109,9 +111,11 @@ LOT-15 introduces transformation-owned data quality through `ValidationSpec`, ty
 
 LOT-16 makes logical derivation inspectable without executing data. `TransformationLineage` records logical Dataset derivation, exact field ancestry for built-in transformations, and operational field dependencies such as filtering, grouping, joining, ordering, window partition/order, deduplication and quality checks. `ResourceReference` linkage remains declarative, while `LineageImpactAnalyzer` provides transitive upstream/downstream impact traversal.
 
+LOT-17 makes runtime evidence first-class. Every `TransformationRuntime.execute()` allocates a distinct `TransformationExecutionId`, propagates an independent `CorrelationContext`, fingerprints the compiled `LogicalPlan`, records a `TransformationExecution`, and produces an `ExecutionManifest`. Structured `FailureEvidence`, `Diagnostic`, bounded provider-retry evidence, explicit `UNKNOWN_OUTCOME`, cancellation semantics, lifecycle events, low-cardinality metrics and trace spans are available without parsing logs. Telemetry remains best-effort: sink failures become diagnostics and never cause transformation replay.
+
 ### Runtime and engines
 
-Runtime input is expressed through `InputBinding`, separating logical Dataset values from physical native values. The runtime resolves one explicitly requested engine from `EngineRegistry`; there is no implicit engine fallback.
+Runtime input is expressed through `InputBinding`, separating logical Dataset values from physical native values. The runtime resolves one explicitly requested engine from `EngineRegistry`; there is no implicit engine fallback. Runtime identity and correlation are distinct: a `TransformationExecutionId` identifies one semantic execution, while `CorrelationId` can connect that execution to surrounding PyKit or external work.
 
 Pandas and Polars are optional extras. Both implement the relational, aggregation, analytical-window, reshape, nested-Struct, temporal and quality contracts. Dedicated cross-engine tests verify semantic equivalence for joins, set operations, grouped/global aggregates, ranking, offsets, cumulative and moving windows, pivot/unpivot/explode/flatten, nested field access, timezone-aware temporal operations, durations, quality evidence, NULL handling and capability failures. Logical lineage is derived from the engine-neutral plan and is explicitly tested to remain identical after Pandas or Polars execution. Polars also supports qualified lazy execution.
 
@@ -123,6 +127,7 @@ pytransformkit.adapters.pandas
 pytransformkit.adapters.polars
 pytransformkit.planning
 pytransformkit.runtime
+pytransformkit.diagnostics
 ~~~
 
 ## Quick example
@@ -190,9 +195,9 @@ The historical `docs/ROADMAP_LOT_11_TO_1_0.md` remains useful as project history
 Current count:
 
 - Total roadmap: **29 lots** (`LOT-00` → `LOT-28`)
-- Completed after LOT-16: **17 lots** (`LOT-00` → `LOT-16`)
-- Remaining: **12 lots** (`LOT-17` → `LOT-28`)
-- Next lot: **LOT-17 — Runtime Identity, Diagnostics and Observability**
+- Completed after LOT-17: **18 lots** (`LOT-00` → `LOT-17`)
+- Remaining: **11 lots** (`LOT-18` → `LOT-28`)
+- Next lot: **LOT-18 — PyArrow Adapter and Interchange**
 - Final lot: **LOT-28 — PyTransformKit 1.0.0 Stable Release**
 
 ## Development

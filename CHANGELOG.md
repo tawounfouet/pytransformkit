@@ -102,6 +102,20 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 - Public `pytransformkit.lineage` namespace and `lineage.analyze()` convenience entry point.
 - `LineageError` / `UnsupportedLineageError` hierarchy preventing fabricated lineage for unsupported semantics.
 - Cross-engine conformance proving Pandas and Polars execution do not alter logical lineage.
+- First-class `TransformationExecution` records with terminal `ExecutionStatus`, timestamps, engine descriptor, diagnostics, failure evidence, retry evidence and cancellation metadata.
+- `CorrelationContext` / `CorrelationId` propagation kept distinct from native `TransformationExecutionId` identity.
+- Deterministic SHA-256 `LogicalPlan` fingerprints excluding random execution, node, step and Dataset identities while preserving transformation semantics.
+- Structured `FailureEvidence` with stable failure categories, retryability and uncertainty, including reconciliation-required `UNKNOWN_OUTCOME`.
+- Typed runtime failures for timeout, confirmed cancellation, unknown outcome and adapter contract violations, with structured execution evidence attached to public PyTransformKit exceptions.
+- Immutable `ExecutionManifest` containing portable execution evidence without active handles or raw secrets.
+- Vendor-neutral runtime lifecycle events, low-cardinality metrics, completed trace spans and a `TelemetrySink` protocol.
+- Conservative telemetry redaction and explicit rejection of execution/correlation IDs as default metric labels.
+- Best-effort telemetry isolation: sink failures emit diagnostics and never replay transformation computation.
+- `ProviderRetryEvidence` propagation for bounded engine/provider retries without adding workflow-level retry ownership to PyTransformKit.
+- Process-local `CancellationToken` plus `CancellationSupport` capability metadata distinguishing requests, unsupported cancellation and confirmed cancellation.
+- `TransformationResult` now carries runtime execution evidence, logical lineage, plan fingerprint and execution manifest.
+- Public `pytransformkit.diagnostics` namespace and expanded `pytransformkit.runtime` evidence surface.
+- Completion of LOT-17 and the PyTransformKit 0.3.x runtime-evidence line.
 
 ### Changed
 

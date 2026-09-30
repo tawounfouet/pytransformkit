@@ -62,3 +62,33 @@ class ExecutionError(PyTransformKitError):
     """Base class for logical-to-physical execution failures."""
 
     error_code: ClassVar[ErrorCode] = ErrorCode("PTK-EXEC-000")
+
+
+class TransformationExecutionError(ExecutionError):
+    """Raised when engine execution fails without a more specific contract."""
+
+    error_code: ClassVar[ErrorCode] = ErrorCode("PTK-EXEC-001")
+
+
+class ExecutionTimeoutError(ExecutionError):
+    """Raised when the transformation execution deadline expires."""
+
+    error_code: ClassVar[ErrorCode] = ErrorCode("PTK-EXEC-002")
+
+
+class ExecutionCancelledError(ExecutionError):
+    """Raised when transformation cancellation is confirmed."""
+
+    error_code: ClassVar[ErrorCode] = ErrorCode("PTK-EXEC-003")
+
+
+class UnknownOutcomeExecutionError(ExecutionError):
+    """Raised when a side effect may have happened but cannot be proven."""
+
+    error_code: ClassVar[ErrorCode] = ErrorCode("PTK-EXEC-004")
+
+
+class EngineContractViolationError(ExecutionError):
+    """Raised when an adapter violates the EngineExecutionResult contract."""
+
+    error_code: ClassVar[ErrorCode] = ErrorCode("PTK-EXEC-005")

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pytransformkit.application.ports.engines import PhysicalHandle
 from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.quality.results import ValidationResult
+from pytransformkit.domain.runtime import Diagnostic, ProviderRetryEvidence
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,6 +31,8 @@ class EngineExecutionResult:
     output_schema: Schema
     named_outputs: tuple[NamedEngineOutput, ...] = ()
     validations: tuple[ValidationResult, ...] = ()
+    diagnostics: tuple[Diagnostic, ...] = ()
+    provider_retries: tuple[ProviderRetryEvidence, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.output_schema, Schema):
@@ -47,6 +50,19 @@ class EngineExecutionResult:
         if any(not isinstance(result, ValidationResult) for result in self.validations):
             raise TypeError(
                 "Execution result validations must contain ValidationResult."
+            )
+        if not isinstance(self.diagnostics, tuple):
+            raise TypeError("Execution result diagnostics must be a tuple.")
+        if any(not isinstance(item, Diagnostic) for item in self.diagnostics):
+            raise TypeError("Execution result diagnostics must contain Diagnostic.")
+        if not isinstance(self.provider_retries, tuple):
+            raise TypeError("Execution result provider_retries must be a tuple.")
+        if any(
+            not isinstance(item, ProviderRetryEvidence)
+            for item in self.provider_retries
+        ):
+            raise TypeError(
+                "Execution result provider_retries must contain ProviderRetryEvidence."
             )
 
     def output(self, name: str) -> NamedEngineOutput:

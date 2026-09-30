@@ -23,12 +23,12 @@ from pytransformkit.domain.resources import ResourceReference
 from pytransformkit.domain.shared.identifiers import TransformationExecutionId
 from pytransformkit.functions import col, lit
 
-from . import lineage, quality, window
+from . import diagnostics, lineage, quality, window
 
 try:
     __version__ = version("pytransformkit")
 except PackageNotFoundError:
-    __version__ = "0.3.0a2"
+    __version__ = "0.3.0"
 
 __all__ = [
     "DataType",
@@ -46,6 +46,7 @@ __all__ = [
     "TransformationRuntime",
     "__version__",
     "col",
+    "diagnostics",
     "lit",
     "lineage",
     "quality",

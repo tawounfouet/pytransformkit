@@ -824,7 +824,126 @@ Because lineage is derived from the logical plan, running the same plan through 
 
 ---
 
-## 17. Run the local experimentation script
+## 17. Runtime identity, evidence and observability
+
+LOT-17 makes each call to `TransformationRuntime.execute()` an explicitly identifiable semantic execution.
+
+~~~python
+from pytransformkit.runtime import CorrelationContext, CorrelationId
+
+correlation = CorrelationContext(
+    correlation_id=CorrelationId.new(),
+    workflow_run_id="workflow-42",
+    task_attempt_id="attempt-3",
+)
+
+result = runtime.execute(
+    plan,
+    engine="pandas",
+    inputs=bindings,
+    correlation=correlation,
+)
+~~~
+
+Execution identity and correlation identity are deliberately different:
+
+~~~text
+CorrelationId
+    groups related work across boundaries
+          │
+          └──► TransformationExecutionId
+                 identifies exactly one PyTransformKit execution
+~~~
+
+A successful result now exposes structured runtime evidence:
+
+~~~python
+print(result.execution_id)
+print(result.status)
+print(result.correlation.correlation_id)
+print(result.plan_fingerprint)
+print(result.execution.engine)
+print(result.diagnostics)
+print(result.lineage)
+print(result.manifest)
+~~~
+
+The execution manifest is portable evidence. It records the execution identity, correlation context, terminal status, timestamps, plan identity/fingerprint, engine/adapter identity, input/output names, diagnostic codes and bounded provider-retry evidence. It does not serialize active engine handles or raw credentials.
+
+### Structured failures
+
+Expected PyTransformKit failures retain their typed exception while receiving structured evidence:
+
+~~~python
+from pytransformkit.errors import PyTransformKitError
+
+try:
+    runtime.execute(
+        plan,
+        engine="pandas",
+        inputs=bindings,
+    )
+except PyTransformKitError as error:
+    print(error.failure_evidence)
+    print(error.execution)
+    print(error.execution_manifest)
+    print(error.diagnostics)
+~~~
+
+`UNKNOWN_OUTCOME` is not flattened into ordinary failure. When PyTransformKit cannot establish whether an external side effect happened, the evidence marks reconciliation as required rather than encouraging an unsafe blind retry.
+
+### Provider retries versus workflow retries
+
+PyTransformKit may record bounded engine/provider retry evidence, but `TransformationRuntime` does not become a workflow retry engine:
+
+~~~text
+engine/provider retry
+        └── PyTransformKit may own and disclose
+
+workload/task retry
+        └── outside PyTransformKit ownership
+~~~
+
+This keeps retry scope explicit and avoids accidental retry stacking with PyWorkflowKit or another orchestrator.
+
+### Cancellation
+
+A process-local `CancellationToken` can signal cancellation:
+
+~~~python
+from pytransformkit.runtime import CancellationToken
+
+token = CancellationToken()
+token.request()
+
+runtime.execute(
+    plan,
+    engine="pandas",
+    inputs=bindings,
+    cancellation=token,
+)
+~~~
+
+A cancellation request and a confirmed cancellation are separate facts. `EngineDescriptor.cancellation_support` declares whether an engine advertises no in-flight support, cooperative support, or provider-native support.
+
+### Telemetry
+
+A runtime may receive a vendor-neutral telemetry sink:
+
+~~~python
+runtime = TransformationRuntime(
+    engines=registry,
+    telemetry=my_sink,
+)
+~~~
+
+Lifecycle events, metrics and trace spans are emitted through the sink. Default metric labels remain low-cardinality: execution IDs, correlation IDs, full URIs and raw error messages are not default metric labels.
+
+Telemetry delivery is best-effort. If the telemetry backend fails, PyTransformKit records a warning diagnostic and does not replay the transformation.
+
+---
+
+## 18. Run the local experimentation script
 
 The repository includes:
 
@@ -851,7 +970,7 @@ It demonstrates:
 
 ---
 
-## 18. Run the notebook
+## 19. Run the notebook
 
 An interactive equivalent is available at:
 
@@ -864,7 +983,7 @@ Start your preferred Jupyter frontend and open the notebook from the repository 
 
 ---
 
-## 19. Run the test suites
+## 20. Run the test suites
 
 ### Complete default suite
 
@@ -903,11 +1022,10 @@ The CI matrix currently verifies Python 3.11, 3.12, 3.13 and 3.14 plus dedicated
 
 ---
 
-## 20. What comes next
+## 21. What comes next
 
 The revised V1 roadmap continues with:
 
-- **LOT-17** — Runtime Evidence / Identity / Observability;
 - **LOT-18** — PyArrow;
 - **LOT-19** — DuckDB;
 - **LOT-20** — Physical I/O Boundary;
@@ -928,7 +1046,7 @@ docs/specifications/PYTRANSFORMKIT_V1_REVISED_IMPLEMENTATION_ROADMAP.md
 
 ---
 
-## 21. Recommended experimentation workflow
+## 22. Recommended experimentation workflow
 
 While PyTransformKit is pre-1.0:
 

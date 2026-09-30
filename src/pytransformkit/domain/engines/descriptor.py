@@ -2,7 +2,10 @@
 
 from dataclasses import dataclass
 
-from pytransformkit.domain.engines.capabilities import EngineCapability
+from pytransformkit.domain.engines.capabilities import (
+    CancellationSupport,
+    EngineCapability,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -13,6 +16,7 @@ class EngineDescriptor:
     name: str
     adapter_version: str
     capabilities: frozenset[EngineCapability]
+    cancellation_support: CancellationSupport = CancellationSupport.NONE
 
     def __post_init__(self) -> None:
         if not self.id or not self.id.strip():
@@ -29,6 +33,10 @@ class EngineDescriptor:
         ):
             raise TypeError(
                 "Engine capabilities must contain only EngineCapability values."
+            )
+        if not isinstance(self.cancellation_support, CancellationSupport):
+            raise TypeError(
+                "Engine cancellation_support must be a CancellationSupport."
             )
 
     def supports(self, capability: EngineCapability) -> bool:

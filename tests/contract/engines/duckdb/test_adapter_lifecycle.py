@@ -14,6 +14,7 @@ from pytransformkit.domain.data.field import Field
 from pytransformkit.domain.data.schema import Schema
 from pytransformkit.engines import EngineRegistry
 from pytransformkit.functions import col, lower
+from pytransformkit.planning import TransformationCompiler
 from pytransformkit.runtime import ExecutionMode
 
 
@@ -126,7 +127,7 @@ def test_native_explain_is_available_without_exposing_sql_to_domain() -> None:
     adapter = DuckDBEngineAdapter()
     handle = adapter.bind_native(_table())
 
-    plan = _plan().compile()
+    plan = TransformationCompiler().compile(_plan())
     explanations = adapter.explain(
         plan,
         {"customers": handle},

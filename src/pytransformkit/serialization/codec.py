@@ -152,6 +152,12 @@ def _encode_value(
     value: object,
     registry: SemanticTypeRegistry,
 ) -> object:
+    if isinstance(value, Enum):
+        return {
+            "$enum": registry.type_id_for(value),
+            "value": _encode_value(value.value, registry),
+        }
+
     if value is None or isinstance(value, (bool, int, str)):
         return value
 
@@ -192,12 +198,6 @@ def _encode_value(
         return {
             "$bytes": base64.b64encode(value).decode("ascii"),
             "encoding": "base64",
-        }
-
-    if isinstance(value, Enum):
-        return {
-            "$enum": registry.type_id_for(value),
-            "value": _encode_value(value.value, registry),
         }
 
     if is_dataclass(value) and not isinstance(value, type):
@@ -256,7 +256,8 @@ def _decode_value(
         return value
     if isinstance(value, list):
         raise InvalidWirePayloadError(
-            "Raw arrays are not valid typed values; an explicit collection tag is required."
+            "Raw arrays are not valid typed values; "
+            "an explicit collection tag is required."
         )
     if not isinstance(value, dict):
         raise InvalidWirePayloadError(

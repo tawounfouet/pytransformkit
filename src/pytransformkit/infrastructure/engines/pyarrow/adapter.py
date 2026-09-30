@@ -63,9 +63,7 @@ class PyArrowAdapter:
         self,
         expression_compiler: PyArrowExpressionCompiler | None = None,
     ) -> None:
-        self._expression_compiler = (
-            expression_compiler or PyArrowExpressionCompiler()
-        )
+        self._expression_compiler = expression_compiler or PyArrowExpressionCompiler()
         self._compatibility = EngineCompatibilityService()
 
     @property
@@ -186,14 +184,10 @@ class PyArrowAdapter:
             return table.select([str(field) for field in transformation.fields])
 
         if isinstance(transformation, DropTransformation):
-            return table.drop_columns(
-                [str(field) for field in transformation.fields]
-            )
+            return table.drop_columns([str(field) for field in transformation.fields])
 
         if isinstance(transformation, RenameTransformation):
-            mapping = {
-                str(item.source): item.target for item in transformation.renames
-            }
+            mapping = {str(item.source): item.target for item in transformation.renames}
             return table.rename_columns(
                 [mapping.get(name, name) for name in table.column_names]
             )

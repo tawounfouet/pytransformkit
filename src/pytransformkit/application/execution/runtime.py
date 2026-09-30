@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from importlib.metadata import PackageNotFoundError, version
 from time import perf_counter
 from uuid import uuid4
@@ -55,8 +55,8 @@ from pytransformkit.domain.runtime import (
     FailureCategory,
     FailureEvidence,
     MetricKind,
-    ProviderRetryEvidence,
     NullTelemetrySink,
+    ProviderRetryEvidence,
     RuntimeEventType,
     RuntimeMetric,
     RuntimeTraceSpan,
@@ -77,7 +77,6 @@ from pytransformkit.errors.engine import (
     ExecutionTimeoutError,
     ResourceResolutionError,
     TransformationExecutionError,
-    UnknownOutcomeExecutionError,
     UnsupportedEngineCapabilityError,
 )
 
@@ -943,7 +942,7 @@ def _manifest(
 
 
 def _utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _safe_mode_value(mode: object) -> str:

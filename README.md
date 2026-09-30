@@ -40,8 +40,9 @@ The implementation baseline now covers:
 - **LOT-19 — DuckDB Adapter & SQL Lowering**
 - **LOT-20 — Physical I/O & Resource Boundary**
 - **LOT-21 — Versioned Serialization & Canonical IR**
+- **LOT-22 — Logical Optimizer**
 
-The current development line is **0.5.0a1**.
+The current development line is **0.5.0a2**.
 
 ### Canonical V1 model
 
@@ -124,6 +125,8 @@ LOT-19 adds DuckDB as the first relational SQL execution backend. `DuckDBPlanCom
 LOT-20 closes the `0.4.x` physical-data line with explicit Reader/Writer ports around portable `ResourceReference` values. The local reference profile supports CSV, JSONL, Parquet and Arrow IPC; Parquet scans can push projection/predicate work to the source and prune Hive partitions, while non-Parquet post-scan work is reported explicitly. `TransformationRuntime` can resolve resource-backed inputs and materialize bound outputs without moving I/O into `TransformationPlan` or `LogicalPlan`. `CredentialReference` contains identifiers only, write modes remain physical storage semantics, and uncertain side effects preserve `UNKNOWN_OUTCOME` / reconciliation-required evidence.
 
 LOT-21 introduces versioned, safe, deterministic wire contracts. `pytransformkit.serialization` provides explicit codecs for DataType, Field, Schema, Expression, TransformationPlan, LogicalPlan, ResourceReference, TransformationExecutionReference, lineage, diagnostics and execution manifests. Canonical JSON uses UTF-8/NFC text, deterministic key ordering and explicit type tags from a closed semantic registry; decoders reject duplicate keys, unknown semantic tags, unsupported versions, non-standard numbers, oversized/deep payloads and arbitrary Python object reconstruction. Plan/expression fingerprints remain semantic rather than identity-based, migrations are explicit, and golden fixtures freeze representative v1 bytes.
+
+LOT-22 adds an engine-neutral `LogicalOptimizer` while preserving the public `LogicalPlan → LogicalPlan` contract. Stable rewrites cover constant folding, boolean simplification, safe predicate pushdown, projection pruning and dead-node elimination. Common-expression analysis, safe-fusion hints and materialization-boundary analysis produce explicit diagnostics rather than physical plans. Every rewrite carries rule provenance, optimization can be disabled, output Schemas are re-resolved after rewrites, lineage equivalence is regression-tested, and Pandas plus Hypothesis contracts prove representative semantic equivalence. No public `OptimizedLogicalPlan` is introduced.
 
 ### Runtime and engines
 
@@ -212,9 +215,9 @@ The historical `docs/ROADMAP_LOT_11_TO_1_0.md` remains useful as project history
 Current count:
 
 - Total roadmap: **29 lots** (`LOT-00` → `LOT-28`)
-- Completed after LOT-21: **22 lots** (`LOT-00` → `LOT-21`)
-- Remaining: **7 lots** (`LOT-22` → `LOT-28`)
-- Next lot: **LOT-22 — Logical Optimizer**
+- Completed after LOT-22: **23 lots** (`LOT-00` → `LOT-22`)
+- Remaining: **6 lots** (`LOT-23` → `LOT-28`)
+- Next lot: **LOT-23 — Extension and Plugin Architecture**
 - Final lot: **LOT-28 — PyTransformKit 1.0.0 Stable Release**
 
 ## Development

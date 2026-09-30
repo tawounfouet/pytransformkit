@@ -847,9 +847,7 @@ class TransformationRuntime:
                     f"{binding.resource.scheme}:{binding.resource.locator}."
                 )
             if result.status is WriteStatus.FAILED:
-                raise ResourceWriteError(
-                    f"Physical output write failed for {name!r}."
-                )
+                raise ResourceWriteError(f"Physical output write failed for {name!r}.")
 
             resources[name] = result.resource
 

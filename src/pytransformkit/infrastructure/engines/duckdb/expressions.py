@@ -159,17 +159,13 @@ class DuckDBExpressionCompiler:
             function_sql = "DENSE_RANK()"
         elif expression.function in {WindowFunction.LAG, WindowFunction.LEAD}:
             if argument is None:
-                raise AdapterError(
-                    f"{expression.function.value} requires an argument."
-                )
+                raise AdapterError(f"{expression.function.value} requires an argument.")
             params.extend(argument.params)
             args = [argument.sql, str(expression.offset)]
             if default is not None:
                 args.append(default.sql)
                 params.extend(default.params)
-            function_sql = (
-                f"{expression.function.value.upper()}({', '.join(args)})"
-            )
+            function_sql = f"{expression.function.value.upper()}({', '.join(args)})"
         elif expression.function in {
             WindowFunction.COUNT,
             WindowFunction.SUM,
@@ -267,9 +263,7 @@ class DuckDBExpressionCompiler:
     ) -> DuckDBSQLFragment:
         name = expression.function.value
         arguments = tuple(self.compile(item) for item in expression.arguments)
-        params = tuple(
-            value for argument in arguments for value in argument.params
-        )
+        params = tuple(value for argument in arguments for value in argument.params)
 
         if name == "core.lower":
             return DuckDBSQLFragment(f"LOWER({arguments[0].sql})", params)

@@ -11,6 +11,7 @@ from pytransformkit.application.execution.compatibility import (
     EngineCompatibilityService,
 )
 from pytransformkit.application.execution.context import (
+    CancellationToken,
     ExecutionContext,
     ExecutionMode,
 )
@@ -25,26 +26,51 @@ from pytransformkit.application.execution.runtime import (
     TransformationResult,
     TransformationRuntime,
 )
+from pytransformkit.domain.runtime import (
+    CorrelationContext,
+    Diagnostic,
+    DiagnosticSeverity,
+    ExecutionManifest,
+    FailureCategory,
+    FailureEvidence,
+    OutcomeUncertainty,
+    ProviderRetryEvidence,
+    RetryDecision,
+    Retryability,
+    TransformationExecution,
+)
 from pytransformkit.application.execution.service import (
     PipelineExecutionResult,
     RunPipelineService,
 )
 
 __all__ = [
+    "CancellationToken",
+    "CorrelationContext",
+    "Diagnostic",
+    "DiagnosticSeverity",
     "EngineCapabilityAnalyzer",
     "EngineCompatibilityService",
     "EngineExecutionResult",
     "EngineRegistry",
     "ExecutionContext",
+    "ExecutionManifest",
     "ExecutionMode",
     "ExecutionStatus",
+    "FailureCategory",
+    "FailureEvidence",
     "InputBinding",
     "InputBindingKind",
     "NamedEngineOutput",
     "OutputBinding",
+    "OutcomeUncertainty",
     "OutputMode",
+    "ProviderRetryEvidence",
     "PipelineExecutionResult",
+    "RetryDecision",
+    "Retryability",
     "RunPipelineService",
+    "TransformationExecution",
     "TransformationOutput",
     "TransformationResult",
     "TransformationRuntime",

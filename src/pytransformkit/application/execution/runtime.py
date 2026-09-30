@@ -29,6 +29,7 @@ from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.engines import EngineCapability, EngineDescriptor
 from pytransformkit.domain.pipelines.plan import LogicalPlan
 from pytransformkit.domain.plans import TransformationPlan
+from pytransformkit.domain.quality.results import ValidationResult
 from pytransformkit.domain.shared.identifiers import TransformationExecutionId
 from pytransformkit.errors.engine import (
     AdapterError,
@@ -67,6 +68,7 @@ class TransformationResult:
     engine: EngineDescriptor
     logical_plan: LogicalPlan
     outputs: tuple[TransformationOutput, ...]
+    validations: tuple[ValidationResult, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.execution_id, TransformationExecutionId):
@@ -77,12 +79,25 @@ class TransformationResult:
             raise TypeError("TransformationResult status must be an ExecutionStatus.")
         if not self.outputs:
             raise ValueError("TransformationResult requires at least one output.")
+        if not isinstance(self.validations, tuple):
+            raise TypeError("TransformationResult validations must be a tuple.")
+        if any(not isinstance(result, ValidationResult) for result in self.validations):
+            raise TypeError(
+                "TransformationResult validations must contain ValidationResult."
+            )
 
     def output(self, name: str) -> TransformationOutput:
         for output in self.outputs:
             if output.name == name:
                 return output
         raise KeyError(name)
+
+    def validation(self, gate_name: str) -> ValidationResult:
+        """Return one QualityGate result by name."""
+        for result in self.validations:
+            if result.gate_name == gate_name:
+                return result
+        raise KeyError(gate_name)
 
     @property
     def output_handle(self) -> PhysicalHandle:
@@ -197,6 +212,7 @@ class TransformationRuntime:
             engine=adapter.descriptor,
             logical_plan=logical_plan,
             outputs=result_outputs,
+            validations=engine_result.validations,
         )
 
     @staticmethod

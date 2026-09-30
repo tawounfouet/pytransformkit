@@ -23,6 +23,11 @@ from pytransformkit.errors.pipeline import (
     PipelineError,
     PipelineNodeNotFoundError,
 )
+from pytransformkit.errors.quality import (
+    InvalidValidationError,
+    QualityError,
+    QualityGateError,
+)
 from pytransformkit.errors.schema import (
     DuplicateFieldError,
     FieldCollisionError,
@@ -51,10 +56,13 @@ __all__ = [
     "InvalidBooleanUsageError",
     "InvalidPipelineError",
     "InvalidTransformationError",
+    "InvalidValidationError",
     "PipelineCycleError",
     "PipelineError",
     "PipelineNodeNotFoundError",
     "PyTransformKitError",
+    "QualityError",
+    "QualityGateError",
     "ResourceResolutionError",
     "SchemaError",
     "TransformationError",

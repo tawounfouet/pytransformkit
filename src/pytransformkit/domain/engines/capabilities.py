@@ -42,6 +42,7 @@ class EngineCapability(StrEnum):
     NESTED = "nested"
     TEMPORAL = "temporal"
     DURATION = "duration"
+    QUALITY = "quality"
 
     LAZY = "lazy"
     STREAMING = "streaming"

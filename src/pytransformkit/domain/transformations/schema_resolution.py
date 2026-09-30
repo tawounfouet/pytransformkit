@@ -19,6 +19,16 @@ from pytransformkit.domain.expressions.typing import (
     WindowExpressionTypeResolver,
 )
 from pytransformkit.domain.expressions.window import WindowExpression
+from pytransformkit.domain.quality.rules import (
+    AllowedValues,
+    ExpressionValidation,
+    NotNull,
+    Range,
+    Regex,
+    RowCount,
+    SchemaValidation,
+    Unique,
+)
 from pytransformkit.domain.transformations.aggregation import (
     AggregateTransformation,
     group_output_name,
@@ -44,6 +54,7 @@ from pytransformkit.domain.transformations.projection import (
     RenameTransformation,
     SelectTransformation,
 )
+from pytransformkit.domain.transformations.quality import QualityGate
 from pytransformkit.domain.transformations.relational import (
     ExceptTransformation,
     IntersectTransformation,
@@ -185,6 +196,13 @@ class OutputSchemaResolver:
         if isinstance(transformation, FlattenTransformation):
             return self._resolve_flatten(transformation, input_schema)
 
+        if isinstance(transformation, QualityGate):
+            self._validate_quality_gate(
+                transformation,
+                input_schema,
+            )
+            return input_schema
+
         if isinstance(transformation, SortTransformation):
             for key in transformation.keys:
                 input_schema.field(str(key.field))
@@ -198,6 +216,58 @@ class OutputSchemaResolver:
         raise UnsupportedTransformationError(
             f"No output Schema resolver exists for {type(transformation).__name__!r}."
         )
+
+    def _validate_quality_gate(
+        self,
+        transformation: QualityGate,
+        input_schema: Schema,
+    ) -> None:
+        for rule in transformation.spec.rules:
+            if isinstance(rule, NotNull):
+                input_schema.resolve_path(rule.field)
+                continue
+
+            if isinstance(rule, Unique):
+                for field_path in rule.fields:
+                    input_schema.resolve_path(field_path)
+                continue
+
+            if isinstance(rule, Range):
+                input_schema.resolve_path(rule.field)
+                continue
+
+            if isinstance(rule, AllowedValues):
+                input_schema.resolve_path(rule.field)
+                continue
+
+            if isinstance(rule, Regex):
+                regex_field = input_schema.resolve_path(rule.field)
+                if not isinstance(regex_field.data_type, StringType):
+                    raise InvalidTransformationError(
+                        "Regex validation requires a StringType field."
+                    )
+                continue
+
+            if isinstance(rule, SchemaValidation):
+                continue
+
+            if isinstance(rule, RowCount):
+                continue
+
+            if isinstance(rule, ExpressionValidation):
+                expression_type = self._expression_type_resolver.resolve(
+                    rule.expression,
+                    input_schema,
+                )
+                if not isinstance(expression_type.data_type, BooleanType):
+                    raise ExpressionTypeError(
+                        "ExpressionValidation condition must resolve to BooleanType."
+                    )
+                continue
+
+            raise InvalidTransformationError(
+                f"Unsupported ValidationRule {type(rule).__name__!r}."
+            )
 
     def resolve_many(
         self,

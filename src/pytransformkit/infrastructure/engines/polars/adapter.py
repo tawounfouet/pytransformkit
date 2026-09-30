@@ -29,6 +29,7 @@ from pytransformkit.domain.expressions.aggregate import (
 from pytransformkit.domain.expressions.window import WindowExpression
 from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
 from pytransformkit.domain.pipelines.plan import LogicalPlan
+from pytransformkit.domain.quality.results import ValidationResult
 from pytransformkit.domain.transformations.aggregation import (
     AggregateTransformation,
     group_output_name,
@@ -52,6 +53,7 @@ from pytransformkit.domain.transformations.projection import (
     RenameTransformation,
     SelectTransformation,
 )
+from pytransformkit.domain.transformations.quality import QualityGate
 from pytransformkit.domain.transformations.relational import (
     ExceptTransformation,
     IntersectTransformation,
@@ -75,6 +77,7 @@ from pytransformkit.infrastructure.engines.polars.expressions import (
 from pytransformkit.infrastructure.engines.polars.handle import (
     PolarsDatasetHandle,
 )
+from pytransformkit.infrastructure.engines.polars.quality import PolarsQualityEvaluator
 from pytransformkit.infrastructure.engines.polars.types import PolarsTypeMapper
 from pytransformkit.infrastructure.engines.polars.windows import PolarsWindowCompiler
 
@@ -101,6 +104,7 @@ _POLARS_CAPABILITIES = frozenset(
         EngineCapability.NESTED,
         EngineCapability.TEMPORAL,
         EngineCapability.DURATION,
+        EngineCapability.QUALITY,
         EngineCapability.JOIN_INNER,
         EngineCapability.JOIN_LEFT,
         EngineCapability.JOIN_RIGHT,
@@ -126,6 +130,7 @@ class PolarsAdapter:
     ) -> None:
         self._expression_compiler = expression_compiler or PolarsExpressionCompiler()
         self._window_compiler = PolarsWindowCompiler(self._expression_compiler)
+        self._quality_evaluator = PolarsQualityEvaluator(self._expression_compiler)
         self._type_mapper = type_mapper or PolarsTypeMapper()
         self._compatibility = EngineCompatibilityService()
 
@@ -169,6 +174,7 @@ class PolarsAdapter:
         """Execute a named-input LogicalPlan using Polars."""
         self._compatibility.validate(plan, self.descriptor)
         values: dict[object, Any] = {}
+        validations: list[ValidationResult] = []
 
         for node in plan.nodes:
             if node.kind is PipelineNodeKind.INPUT:
@@ -193,7 +199,19 @@ class PolarsAdapter:
                     raise AdapterError(
                         "Transformation LogicalPlan node is missing its specification."
                     )
-                if len(inputs) == 1:
+                if isinstance(node.transformation, QualityGate):
+                    if len(inputs) != 1 or node.input_schema is None:
+                        raise AdapterError(
+                            "QualityGate requires one resolved input Schema."
+                        )
+                    validation = self._quality_evaluator.evaluate(
+                        node.transformation.spec,
+                        inputs[0],
+                        node.input_schema,
+                    )
+                    validations.append(validation)
+                    values[node.node_id] = inputs[0]
+                elif len(inputs) == 1:
                     values[node.node_id] = self._execute_transformation(
                         inputs[0],
                         node.transformation,
@@ -245,6 +263,7 @@ class PolarsAdapter:
             output_handle=first.output_handle,
             output_schema=first.output_schema,
             named_outputs=tuple(named_outputs),
+            validations=tuple(validations),
         )
 
     @staticmethod
@@ -756,4 +775,4 @@ def _package_version() -> str:
     try:
         return version("pytransformkit")
     except PackageNotFoundError:
-        return "0.2.0"
+        return "0.3.0a1"

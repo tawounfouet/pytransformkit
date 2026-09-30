@@ -1,5 +1,6 @@
 """Logical capability analysis and engine compatibility checks."""
 
+from pytransformkit.domain.data.field_path import FieldPath
 from pytransformkit.domain.engines.capabilities import EngineCapability
 from pytransformkit.domain.engines.descriptor import EngineDescriptor
 from pytransformkit.domain.expressions.aggregate import AggregateExpression
@@ -17,6 +18,15 @@ from pytransformkit.domain.expressions.window import (
     WindowFrameKind,
 )
 from pytransformkit.domain.pipelines.plan import LogicalPlan
+from pytransformkit.domain.quality.rules import (
+    AllowedValues,
+    ExpressionValidation,
+    NotNull,
+    Range,
+    Regex,
+    Unique,
+    ValidationRule,
+)
 from pytransformkit.domain.transformations.aggregation import AggregateTransformation
 from pytransformkit.domain.transformations.base import TransformationSpec
 from pytransformkit.domain.transformations.casting import CastTransformation
@@ -34,6 +44,7 @@ from pytransformkit.domain.transformations.projection import (
     RenameTransformation,
     SelectTransformation,
 )
+from pytransformkit.domain.transformations.quality import QualityGate
 from pytransformkit.domain.transformations.relational import (
     ExceptTransformation,
     IntersectTransformation,
@@ -70,6 +81,7 @@ _CAPABILITY_BY_TRANSFORMATION: tuple[
     (UnpivotTransformation, EngineCapability.UNPIVOT),
     (ExplodeTransformation, EngineCapability.EXPLODE),
     (FlattenTransformation, EngineCapability.FLATTEN),
+    (QualityGate, EngineCapability.QUALITY),
     (UnionTransformation, EngineCapability.UNION),
     (IntersectTransformation, EngineCapability.INTERSECT),
     (ExceptTransformation, EngineCapability.EXCEPT),
@@ -112,6 +124,11 @@ class EngineCapabilityAnalyzer:
                             required.add(EngineCapability.TEMPORAL)
                         if function_name == "core.temporal.duration_between":
                             required.add(EngineCapability.DURATION)
+
+            if isinstance(transformation, QualityGate):
+                for rule in transformation.spec.rules:
+                    if any(len(path.parts) > 1 for path in _quality_rule_paths(rule)):
+                        required.add(EngineCapability.NESTED)
 
             if isinstance(transformation, DeriveTransformation) and isinstance(
                 transformation.expression, WindowExpression
@@ -182,6 +199,12 @@ def _transformation_expressions(
         return transformation.group_by + tuple(
             metric.expression for metric in transformation.metrics
         )
+    if isinstance(transformation, QualityGate):
+        return tuple(
+            rule.expression
+            for rule in transformation.spec.rules
+            if isinstance(rule, ExpressionValidation)
+        )
     return ()
 
 
@@ -209,6 +232,16 @@ def _walk_expression(expression: Expression) -> tuple[Expression, ...]:
             values.extend(_walk_expression(expression.default))
 
     return tuple(values)
+
+
+def _quality_rule_paths(
+    rule: ValidationRule,
+) -> tuple[FieldPath, ...]:
+    if isinstance(rule, (NotNull, Range, AllowedValues, Regex)):
+        return (rule.field,)
+    if isinstance(rule, Unique):
+        return rule.fields
+    return ()
 
 
 def _window_frame_capability(

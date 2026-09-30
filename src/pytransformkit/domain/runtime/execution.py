@@ -175,8 +175,8 @@ class ExecutionManifest:
         _validate_aware_datetime(self.ended_at, "ended_at")
         if self.ended_at < self.started_at:
             raise ValueError("ExecutionManifest ended_at precedes started_at.")
-        _validate_names(self.input_names, "input_names")
-        _validate_names(self.output_names, "output_names")
+        _validate_names(self.input_names, "input_names", allow_empty=True)
+        _validate_names(self.output_names, "output_names", allow_empty=True)
         _validate_names(self.diagnostic_codes, "diagnostic_codes", allow_empty=True)
         if not isinstance(self.provider_retries, tuple):
             raise TypeError("ExecutionManifest provider_retries must be a tuple.")

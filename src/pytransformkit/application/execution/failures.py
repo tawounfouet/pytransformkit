@@ -36,9 +36,7 @@ def failure_evidence_from_exception(
     """Map one exception to stable PyTransformKit failure semantics."""
     category, retryability, uncertainty = _classification(error)
     error_code = (
-        str(error.code)
-        if isinstance(error, PyTransformKitError)
-        else "PTK-EXEC-500"
+        str(error.code) if isinstance(error, PyTransformKitError) else "PTK-EXEC-500"
     )
     provider_code = getattr(error, "provider_code", None)
     if provider_code is not None and not isinstance(provider_code, str):

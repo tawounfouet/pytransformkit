@@ -2,7 +2,7 @@
 
 PyTransformKit lets you define engine-neutral transformation semantics once, compile them into a LogicalPlan, and execute them explicitly through supported physical engines.
 
-The current development line targets **0.2.0** and includes LOT-14: reshaping, nested-data and temporal semantics on top of the V1 public model, relational, aggregation and analytical-window layers.
+The current development line targets **0.3.0a1** and includes LOT-15: transformation-owned data quality and validation on top of the V1 transformation-semantics baseline.
 
 The canonical path is:
 
@@ -583,7 +583,93 @@ Pandas and Polars pass the same LOT-14 cross-engine suite, and the supported res
 
 ---
 
-## 13. InputBinding, ResourceReference and OutputBinding
+## 13. Data quality and validation
+
+LOT-15 introduces transformation-owned quality checkpoints through the public `pytransformkit.quality` namespace.
+
+~~~python
+from pytransformkit import quality
+from pytransformkit.domain.quality import ValidationPolicy, ValidationSpec
+from pytransformkit.functions import col
+
+quality_spec = ValidationSpec(
+    name="customers_quality",
+    policy=ValidationPolicy.WARN_ONLY,
+    rules=(
+        quality.not_null("customer_id"),
+        quality.unique("customer_id"),
+        quality.regex("email", r"[^@]+@[^@]+\\.[^@]+"),
+        quality.allowed_values(
+            "status",
+            ("ACTIVE", "INACTIVE"),
+        ),
+        quality.range_(
+            "score",
+            minimum=0.0,
+            maximum=100.0,
+        ),
+        quality.row_count(minimum=1),
+        quality.expression(
+            col("score") >= 0,
+            name="score_non_negative",
+        ),
+    ),
+)
+
+validated = builder.validate(
+    "validate_customers",
+    source=customers,
+    spec=quality_spec,
+)
+~~~
+
+A QualityGate preserves the logical rows and Schema. It produces structured validation evidence rather than silently filtering invalid records.
+
+The supported policies are:
+
+~~~text
+FAIL_FAST
+    first rejected rule raises QualityGateError
+
+FAIL_AT_END
+    all rules are evaluated before a blocking QualityGateError
+
+WARN_ONLY
+    execution continues and ValidationResult records failed rules
+
+IGNORE
+    rules are skipped and an ignored, non-blocking ValidationResult is emitted
+~~~
+
+Rules use a strict zero-violation threshold by default. `ValidationThreshold` can also declare an absolute violation budget, a violation-rate budget, or a rate-only budget.
+
+Successful or non-blocking execution exposes evidence on `TransformationResult`:
+
+~~~python
+result = runtime.execute(...)
+
+quality_result = result.validation("customers_quality")
+
+print(quality_result.passed)
+print(quality_result.failed_rule_count)
+
+for rule_result in quality_result.rule_results:
+    print(
+        rule_result.rule_name,
+        rule_result.violation_count,
+        rule_result.violation_rate,
+    )
+~~~
+
+Data-quality rejection is represented by `QualityGateError`; adapter and execution failures remain separate technical failures.
+
+SchemaValidation compares the logical transformation Schema at the gate. It does not replace PyIngestKit source-decoding or ingestion-publication contracts.
+
+On Polars LazyFrame inputs, LOT-15 materializes data when quality evidence requires physical evaluation, while preserving a lazy output handle for continued execution.
+
+---
+
+## 14. InputBinding, ResourceReference and OutputBinding
 
 InputBinding separates the logical Dataset model from physical data supplied at runtime.
 
@@ -603,7 +689,7 @@ This distinction prevents PyTransformKit from accidentally taking ownership of i
 
 ---
 
-## 14. Transformations currently available
+## 15. Transformations currently available
 
 Current portable Transformation semantics include:
 
@@ -626,7 +712,8 @@ Current portable Transformation semantics include:
 - pivot;
 - unpivot;
 - explode;
-- flatten.
+- flatten;
+- quality gates.
 
 The Expression DSL currently includes:
 
@@ -657,7 +744,7 @@ The Expression DSL currently includes:
 
 ---
 
-## 15. Run the local experimentation script
+## 16. Run the local experimentation script
 
 The repository includes:
 
@@ -684,7 +771,7 @@ It demonstrates:
 
 ---
 
-## 16. Run the notebook
+## 17. Run the notebook
 
 An interactive equivalent is available at:
 
@@ -697,7 +784,7 @@ Start your preferred Jupyter frontend and open the notebook from the repository 
 
 ---
 
-## 17. Run the test suites
+## 18. Run the test suites
 
 ### Complete default suite
 
@@ -736,11 +823,10 @@ The CI matrix currently verifies Python 3.11, 3.12, 3.13 and 3.14 plus dedicated
 
 ---
 
-## 18. What comes next
+## 19. What comes next
 
 The revised V1 roadmap continues with:
 
-- **LOT-15** — Data Quality;
 - **LOT-16** — Logical and Field Lineage;
 - **LOT-17** — Runtime Evidence / Identity / Observability;
 - **LOT-18** — PyArrow;
@@ -763,7 +849,7 @@ docs/specifications/PYTRANSFORMKIT_V1_REVISED_IMPLEMENTATION_ROADMAP.md
 
 ---
 
-## 19. Recommended experimentation workflow
+## 20. Recommended experimentation workflow
 
 While PyTransformKit is pre-1.0:
 

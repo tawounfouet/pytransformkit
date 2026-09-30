@@ -13,7 +13,7 @@ from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.engines import EngineCapability
 from pytransformkit.domain.pipelines import Pipeline, PipelinePlanner
 from pytransformkit.domain.transformations.filtering import DistinctTransformation
-from pytransformkit.errors import UnsupportedEngineCapabilityError
+from pytransformkit.errors import AdapterError, UnsupportedEngineCapabilityError
 from pytransformkit.functions import col, lower, trim
 from pytransformkit.infrastructure.engines.pyarrow import (
     PyArrowAdapter,
@@ -129,7 +129,7 @@ def test_arrow_adapter_rejects_lazy_mode_explicitly() -> None:
         }
     )
 
-    with pytest.raises(Exception, match="EAGER"):
+    with pytest.raises(AdapterError, match="EAGER"):
         PyArrowAdapter().execute(
             plan,
             PyArrowDatasetHandle(table),

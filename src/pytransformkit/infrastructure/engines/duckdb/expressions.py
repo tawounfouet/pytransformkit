@@ -26,7 +26,6 @@ from pytransformkit.domain.expressions.unary import UnaryExpression
 from pytransformkit.domain.expressions.window import (
     WindowBoundaryKind,
     WindowExpression,
-    WindowFrameMode,
     WindowFunction,
 )
 from pytransformkit.errors.engine import AdapterError

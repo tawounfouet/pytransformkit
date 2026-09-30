@@ -8,6 +8,14 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 
 ### Added
 
+- LOT-18 PyArrow adapter and interchange line targeting `0.4.0a1`.
+- Optional `pytransformkit[pyarrow]` dependency with `PyArrowDatasetHandle` for `Table` and `RecordBatch`.
+- Arrow logical/native type mapping and Schema inspection covering nested, decimal, temporal, duration, binary, list, struct, and map types.
+- Eager PyArrow execution for the explicitly qualified select/drop/rename/filter/limit/derive/sort capability subset.
+- Chunk-preserving Arrow execution with no implicit `combine_chunks()`.
+- Strict-by-default Pandas ↔ Arrow and Polars ↔ Arrow interchange with structured conversion-lossiness diagnostics.
+- Dedicated PyArrow and Arrow-interchange contract jobs in CI.
+
 - Repository bootstrap.
 - Python package skeleton using a `src/` layout.
 - Static quality, test, build, and CI configuration.

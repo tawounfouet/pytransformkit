@@ -267,12 +267,7 @@ def _as_column(value: Any, row_count: int) -> Any:
                 "Arrow derived expression produced a list with invalid length."
             )
         return pa.array(value)
-    try:
-        scalar = pa.scalar(value)
-    except (ArrowInvalid, ArrowTypeError) as error:  # type: ignore[name-defined]
-        raise AdapterError(
-            "Arrow derived expression produced an unsupported scalar value."
-        ) from error
+    scalar = pa.scalar(value)
     return pa.array([scalar.as_py()] * row_count, type=scalar.type)
 
 

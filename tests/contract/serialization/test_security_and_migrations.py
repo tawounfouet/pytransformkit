@@ -51,8 +51,7 @@ def test_payload_limit_is_enforced_before_json_parsing() -> None:
         ResourceReferenceCodec(max_payload_bytes=32).from_json(encoded)
 
 
-def test_unknown_semantic_type_cannot_trigger_arbitrary_import(
-) -> None:
+def test_unknown_semantic_type_cannot_trigger_arbitrary_import() -> None:
     envelope = {
         "contract": "pykit.resource_reference",
         "contract_version": 1,
@@ -118,8 +117,7 @@ def test_pickle_payload_is_not_treated_as_a_python_object_graph() -> None:
 def test_serialization_package_has_no_pickle_eval_or_exec_decoder_fallback() -> None:
     root = Path(__file__).parents[3] / "src" / "pytransformkit" / "serialization"
     source = "\n".join(
-        path.read_text(encoding="utf-8")
-        for path in sorted(root.glob("*.py"))
+        path.read_text(encoding="utf-8") for path in sorted(root.glob("*.py"))
     )
 
     assert "import pickle" not in source

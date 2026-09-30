@@ -37,6 +37,7 @@ from pytransformkit.domain.expressions.references import ColumnReference
 from pytransformkit.domain.expressions.unary import UnaryExpression
 from pytransformkit.domain.resources import (
     ResourceFormat,
+    ResourceReference,
     RetrySafety,
     WriteMode,
     WriteStatus,
@@ -65,7 +66,20 @@ class LocalFilePathResolver:
     def root(self) -> Path:
         return self._root
 
-    def resolve(self, locator: str) -> Path:
+    @property
+    def schemes(self) -> frozenset[str]:
+        return frozenset({"file"})
+
+    def resolve(self, reference: ResourceReference | str) -> Path:
+        if isinstance(reference, ResourceReference):
+            if reference.scheme.lower() != "file":
+                raise ResourcePathViolationError(
+                    "LocalFilePathResolver only supports file resources."
+                )
+            locator = reference.locator
+        else:
+            locator = reference
+
         if not locator or not locator.strip():
             raise ResourcePathViolationError(
                 "Local resource locator must not be empty."

@@ -113,8 +113,8 @@ class PolarsQualityEvaluator:
             columns = [self._field_values(frame, field) for field in rule.fields]
             seen: set[tuple[object, ...]] = set()
             duplicates = 0
-            for values in zip(*columns, strict=True):
-                key = tuple(_hashable(value) for value in values)
+            for row_values in zip(*columns, strict=True):
+                key = tuple(_hashable(value) for value in row_values)
                 if key in seen:
                     duplicates += 1
                 else:
@@ -220,7 +220,7 @@ class PolarsQualityEvaluator:
         self,
         frame: pl.DataFrame,
         path: FieldPath,
-    ) -> list[object]:
+    ) -> list[Any]:
         expression = self._expression_compiler.compile(
             ColumnReference(path),
             frame,

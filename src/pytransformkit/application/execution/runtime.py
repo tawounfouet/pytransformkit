@@ -81,10 +81,7 @@ class TransformationResult:
             raise ValueError("TransformationResult requires at least one output.")
         if not isinstance(self.validations, tuple):
             raise TypeError("TransformationResult validations must be a tuple.")
-        if any(
-            not isinstance(result, ValidationResult)
-            for result in self.validations
-        ):
+        if any(not isinstance(result, ValidationResult) for result in self.validations):
             raise TypeError(
                 "TransformationResult validations must contain ValidationResult."
             )

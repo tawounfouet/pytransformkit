@@ -1,8 +1,8 @@
 """Public runtime surface."""
 
 from pytransformkit.application.execution import (
+    CancellationToken,
     ExecutionMode,
-    ExecutionStatus,
     InputBinding,
     OutputBinding,
     OutputMode,
@@ -11,17 +11,65 @@ from pytransformkit.application.execution import (
     TransformationRuntime,
 )
 from pytransformkit.application.ports import PhysicalHandle
+from pytransformkit.domain.engines import CancellationSupport
 from pytransformkit.domain.resources import ResourceReference
-from pytransformkit.domain.shared.identifiers import TransformationExecutionId
+from pytransformkit.domain.runtime import (
+    CorrelationContext,
+    Diagnostic,
+    DiagnosticSeverity,
+    ExecutionManifest,
+    ExecutionStatus,
+    FailureCategory,
+    FailureEvidence,
+    MetricKind,
+    NullTelemetrySink,
+    OutcomeUncertainty,
+    ProviderRetryEvidence,
+    RetryDecision,
+    Retryability,
+    RuntimeEvent,
+    RuntimeEventType,
+    RuntimeMetric,
+    RuntimeTraceSpan,
+    TelemetryRedactor,
+    TelemetrySink,
+    TransformationExecution,
+)
+from pytransformkit.domain.shared.identifiers import (
+    CorrelationId,
+    TransformationExecutionId,
+)
 
 __all__ = [
+    "CancellationSupport",
+    "CancellationToken",
+    "CorrelationContext",
+    "CorrelationId",
+    "Diagnostic",
+    "DiagnosticSeverity",
+    "ExecutionManifest",
     "ExecutionMode",
     "ExecutionStatus",
+    "FailureCategory",
+    "FailureEvidence",
     "InputBinding",
+    "MetricKind",
+    "NullTelemetrySink",
+    "OutcomeUncertainty",
     "OutputBinding",
     "OutputMode",
     "PhysicalHandle",
+    "ProviderRetryEvidence",
     "ResourceReference",
+    "RetryDecision",
+    "Retryability",
+    "RuntimeEvent",
+    "RuntimeEventType",
+    "RuntimeMetric",
+    "RuntimeTraceSpan",
+    "TelemetryRedactor",
+    "TelemetrySink",
+    "TransformationExecution",
     "TransformationExecutionId",
     "TransformationOutput",
     "TransformationResult",

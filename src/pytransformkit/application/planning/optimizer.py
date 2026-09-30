@@ -311,7 +311,7 @@ class LogicalOptimizer:
                     rewritten_rules.append(
                         replace(rule, expression=optimized.expression)
                     )
-                    aggregate_rules += optimized.applied_rules
+                    quality_rules += optimized.applied_rules
                 else:
                     rewritten_rules.append(rule)
 

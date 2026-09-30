@@ -199,7 +199,9 @@ class TransformationLineage:
 
     def __post_init__(self) -> None:
         if not isinstance(self.plan_id, TransformationPlanId):
-            raise TypeError("TransformationLineage plan_id must be a TransformationPlanId.")
+            raise TypeError(
+                "TransformationLineage plan_id must be a TransformationPlanId."
+            )
         _validate_named_datasets(self.inputs, "inputs")
         _validate_named_datasets(self.outputs, "outputs")
         _validate_tuple_type(
@@ -270,7 +272,11 @@ def _validate_named_datasets(
         raise ValueError(f"TransformationLineage {label} names must be unique.")
 
 
-def _validate_tuple_type(values: tuple[object, ...], expected: type, label: str) -> None:
+def _validate_tuple_type(
+    values: tuple[object, ...],
+    expected: type,
+    label: str,
+) -> None:
     if not isinstance(values, tuple):
         raise TypeError(f"TransformationLineage {label} must be a tuple.")
     if any(not isinstance(value, expected) for value in values):

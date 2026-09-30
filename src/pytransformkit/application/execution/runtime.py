@@ -562,10 +562,10 @@ class TransformationRuntime:
             )
 
         except Exception as raw_error:
-            error = _normalize_runtime_error(raw_error)
+            normalized_error = _normalize_runtime_error(raw_error)
             ended_at = _utc_now()
             failure = failure_evidence_from_exception(
-                error,
+                normalized_error,
                 execution_id=execution_id,
                 correlation=execution_correlation,
                 source_component=(
@@ -652,15 +652,15 @@ class TransformationRuntime:
                 logical_plan=logical_plan,
                 requested_engine=engine,
             )
-            error.attach_runtime_evidence(
+            normalized_error.attach_runtime_evidence(
                 execution=execution,
                 failure_evidence=failure,
                 manifest=manifest,
                 diagnostics=tuple(runtime_diagnostics),
             )
-            if error is raw_error:
+            if normalized_error is raw_error:
                 raise
-            raise error from raw_error
+            raise normalized_error from raw_error
 
     @staticmethod
     def _bind_inputs(

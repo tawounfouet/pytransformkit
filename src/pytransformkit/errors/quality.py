@@ -29,9 +29,7 @@ class QualityGateError(QualityError):
             raise TypeError("QualityGateError result must be a ValidationResult.")
         self.result = result
         failed = ", ".join(
-            item.rule_name
-            for item in result.rule_results
-            if not item.passed
+            item.rule_name for item in result.rule_results if not item.passed
         )
         super().__init__(
             f"QualityGate {result.gate_name!r} failed"

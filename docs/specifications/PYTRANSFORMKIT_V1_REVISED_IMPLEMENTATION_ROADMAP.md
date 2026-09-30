@@ -675,6 +675,8 @@ The next implementation lot is **LOT-19 — DuckDB Adapter and Relational SQL Ba
 
 # 13. LOT-19 — DuckDB Adapter and SQL Lowering
 
+**Status:** DONE — `0.4.0a2`
+
 **Target milestone:** 0.4.0a2
 
 ## Scope
@@ -701,6 +703,29 @@ native explain diagnostics
 - user-owned connections are not closed/committed unexpectedly;
 - supported relational/analytical semantics pass conformance;
 - unsupported semantics fail explicitly.
+
+## Implementation closure
+
+LOT-19 closes the first SQL-backed execution proof with:
+
+- `DuckDBEngineAdapter` and opaque `DuckDBDatasetHandle` relations;
+- explicit framework-owned versus caller-owned connection semantics;
+- no implicit commit and no closing of caller-owned connections;
+- logical-to-DuckDB type mapping and conservative relation Schema inspection;
+- safe identifier quoting and parameterized runtime values;
+- CTE-backed physical lowering while SQL remains outside the Domain;
+- qualified inner/left/right/full/semi/anti/cross join semantics;
+- explicit MATCH versus NEVER_MATCH NULL join lowering;
+- UNION / UNION ALL / INTERSECT / EXCEPT support;
+- grouped/global aggregate lowering;
+- analytical window lowering with partition/order and ROWS/RANGE frames;
+- Arrow binding and materialization paths;
+- eager execution plus DuckDB lazy relation execution;
+- native `EXPLAIN`;
+- dedicated DuckDB and DuckDB/Pandas cross-engine contract suites.
+
+The next implementation lot is **LOT-20 — Physical I/O and Resource Boundary**,
+targeting **`0.4.0`**.
 
 ---
 

@@ -79,6 +79,10 @@ class PyArrowAdapter:
         """Wrap an Arrow Table or RecordBatch without copying buffers."""
         return PyArrowDatasetHandle(value)
 
+    def bind_arrow(self, value: object) -> PhysicalHandle:
+        """Bind an Arrow interchange value without copying buffers."""
+        return self.bind_native(value)
+
     def execute(
         self,
         plan: LogicalPlan,

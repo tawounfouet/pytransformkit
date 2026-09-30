@@ -23,6 +23,12 @@ from pytransformkit.errors.engine import (
     UnknownOutcomeExecutionError,
     UnsupportedEngineCapabilityError,
 )
+from pytransformkit.errors.io import (
+    ResourceReadError,
+    ResourceWriteError,
+    UnsupportedResourceFormatError,
+    UnsupportedResourceSchemeError,
+)
 from pytransformkit.errors.quality import QualityGateError
 
 
@@ -94,6 +100,27 @@ def _classification(
         return (
             FailureCategory.NOT_FOUND,
             Retryability.UNKNOWN,
+            OutcomeUncertainty.KNOWN,
+        )
+    if isinstance(error, ResourceReadError):
+        return (
+            FailureCategory.EXTERNAL_PROVIDER,
+            Retryability.UNKNOWN,
+            OutcomeUncertainty.KNOWN,
+        )
+    if isinstance(error, ResourceWriteError):
+        return (
+            FailureCategory.SIDE_EFFECT_FAILED,
+            Retryability.UNKNOWN,
+            OutcomeUncertainty.KNOWN,
+        )
+    if isinstance(
+        error,
+        (UnsupportedResourceFormatError, UnsupportedResourceSchemeError),
+    ):
+        return (
+            FailureCategory.CAPABILITY,
+            Retryability.NON_RETRYABLE,
             OutcomeUncertainty.KNOWN,
         )
     if isinstance(error, (EngineNotFoundError, BindingError)):

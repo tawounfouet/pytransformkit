@@ -154,6 +154,15 @@ class PandasAdapter:
         """Wrap a native pandas DataFrame in a physical handle."""
         return PandasDatasetHandle(value)
 
+    def bind_arrow(self, value: object) -> PhysicalHandle:
+        """Bind an Arrow Table/RecordBatch into a Pandas handle."""
+        import pyarrow as pa
+
+        if not isinstance(value, (pa.Table, pa.RecordBatch)):
+            raise TypeError("PandasAdapter.bind_arrow requires Arrow tabular data.")
+        table = value if isinstance(value, pa.Table) else pa.Table.from_batches([value])
+        return PandasDatasetHandle(table.to_pandas())
+
     def execute(
         self,
         plan: LogicalPlan,

@@ -22,6 +22,14 @@ from pytransformkit.errors.expression import (
     FunctionNotFoundError,
     InvalidBooleanUsageError,
 )
+from pytransformkit.errors.io import (
+    ResourceIOError,
+    ResourcePathViolationError,
+    ResourceReadError,
+    ResourceWriteError,
+    UnsupportedResourceFormatError,
+    UnsupportedResourceSchemeError,
+)
 from pytransformkit.errors.lineage import LineageError, UnsupportedLineageError
 from pytransformkit.errors.pipeline import (
     InvalidPipelineError,
@@ -73,12 +81,18 @@ __all__ = [
     "PyTransformKitError",
     "QualityError",
     "QualityGateError",
+    "ResourceIOError",
+    "ResourcePathViolationError",
+    "ResourceReadError",
     "ResourceResolutionError",
+    "ResourceWriteError",
     "SchemaError",
     "TransformationError",
     "TransformationExecutionError",
     "UnknownOutcomeExecutionError",
     "UnsupportedEngineCapabilityError",
+    "UnsupportedResourceFormatError",
+    "UnsupportedResourceSchemeError",
     "UnsupportedLineageError",
     "UnsupportedTransformationError",
 ]

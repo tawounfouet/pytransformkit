@@ -673,7 +673,7 @@ On Polars LazyFrame inputs, LOT-15 materializes data when quality evidence requi
 
 InputBinding separates the logical Dataset model from physical data supplied at runtime.
 
-The current LOT-11 execution path supports native in-memory bindings:
+Native in-memory bindings remain supported:
 
 ~~~python
 binding = InputBinding.from_native(
@@ -683,9 +683,58 @@ binding = InputBinding.from_native(
 )
 ~~~
 
-Portable ResourceReference and OutputBinding contracts are already part of the V1 public model, but their physical resolution/materialization semantics belong to **LOT-20 — Physical I/O Boundary**.
+LOT-20 also supports explicit resource-backed bindings through a configured Reader/Writer registry:
 
-This distinction prevents PyTransformKit from accidentally taking ownership of ingestion lifecycle or publication semantics.
+~~~python
+from pytransformkit import (
+    InputBinding,
+    OutputBinding,
+    ResourceReference,
+    RetrySafety,
+    WriteMode,
+)
+from pytransformkit.application.io import ResourceIORegistry
+from pytransformkit.readers import LocalFileReader
+from pytransformkit.writers import LocalFileWriter
+
+resources = ResourceIORegistry()
+resources.register_reader(LocalFileReader("./data"))
+resources.register_writer(LocalFileWriter("./data"))
+
+runtime = TransformationRuntime(
+    engines=registry,
+    resources=resources,
+)
+
+result = runtime.execute(
+    plan,
+    engine="pandas",
+    inputs={
+        "customers": InputBinding.from_resource(
+            "customers",
+            ResourceReference(
+                scheme="file",
+                locator="customers.csv",
+                media_type="text/csv",
+            ),
+        )
+    },
+    outputs={
+        "result": OutputBinding.to_resource(
+            "result",
+            ResourceReference(
+                scheme="file",
+                locator="active_customers.parquet",
+                media_type="application/vnd.apache.parquet",
+            ),
+            mode=WriteMode.CREATE_NEW,
+            retry_safety=RetrySafety.SAFE,
+        )
+    },
+)
+~~~
+
+The local reference profile supports CSV, JSONL, Parquet and Arrow IPC. Resource resolution remains an explicit runtime concern: `TransformationPlan` and `LogicalPlan` stay side-effect free, a `ResourceReference` remains distinct from a process-local `PhysicalHandle`, and physical writes never imply governed publication. Uncertain writes preserve `UNKNOWN_OUTCOME` so callers reconcile before retrying.
 
 ---
 

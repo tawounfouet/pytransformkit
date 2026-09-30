@@ -26,3 +26,8 @@ class PolarsDatasetHandle:
     @property
     def is_lazy(self) -> bool:
         return isinstance(self.frame, pl.LazyFrame)
+
+    def to_arrow_table(self) -> Any:
+        """Materialize this frame as an Arrow Table for explicit I/O."""
+        frame = self.frame.collect() if self.is_lazy else self.frame
+        return frame.to_arrow()

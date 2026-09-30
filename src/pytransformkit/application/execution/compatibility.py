@@ -127,10 +127,7 @@ class EngineCapabilityAnalyzer:
 
             if isinstance(transformation, QualityGate):
                 for rule in transformation.spec.rules:
-                    if any(
-                        len(path.parts) > 1
-                        for path in _quality_rule_paths(rule)
-                    ):
+                    if any(len(path.parts) > 1 for path in _quality_rule_paths(rule)):
                         required.add(EngineCapability.NESTED)
 
             if isinstance(transformation, DeriveTransformation) and isinstance(

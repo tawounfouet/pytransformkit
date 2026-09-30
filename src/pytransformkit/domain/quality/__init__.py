@@ -1,4 +1,13 @@
-"""Engine-neutral data-quality contracts."""
+"""Engine-neutral data-quality contracts.
+
+Result types are imported eagerly because they are dependency-light. Rule types are
+resolved lazily to avoid circular imports while Schema itself imports the public
+error package.
+"""
+
+from __future__ import annotations
+
+from typing import Any
 
 from pytransformkit.domain.quality.results import (
     ValidationPolicy,
@@ -6,18 +15,19 @@ from pytransformkit.domain.quality.results import (
     ValidationRuleResult,
     ValidationThreshold,
 )
-from pytransformkit.domain.quality.rules import (
-    AllowedValues,
-    ExpressionValidation,
-    NotNull,
-    Range,
-    Regex,
-    RowCount,
-    SchemaValidation,
-    Unique,
-    ValidationRule,
-    ValidationSpec,
-)
+
+_RULE_EXPORTS = {
+    "AllowedValues",
+    "ExpressionValidation",
+    "NotNull",
+    "Range",
+    "Regex",
+    "RowCount",
+    "SchemaValidation",
+    "Unique",
+    "ValidationRule",
+    "ValidationSpec",
+}
 
 __all__ = [
     "AllowedValues",
@@ -35,3 +45,13 @@ __all__ = [
     "ValidationSpec",
     "ValidationThreshold",
 ]
+
+
+def __getattr__(name: str) -> Any:
+    if name in _RULE_EXPORTS:
+        from pytransformkit.domain.quality import rules
+
+        return getattr(rules, name)
+    raise AttributeError(
+        f"module 'pytransformkit.domain.quality' has no attribute {name!r}"
+    )

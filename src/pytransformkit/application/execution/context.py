@@ -49,9 +49,7 @@ class ExecutionContext:
 
     def __post_init__(self) -> None:
         if not isinstance(self.execution_id, TransformationExecutionId):
-            raise TypeError(
-                "Execution context id must be a TransformationExecutionId."
-            )
+            raise TypeError("Execution context id must be a TransformationExecutionId.")
         if not isinstance(self.mode, ExecutionMode):
             raise TypeError("Execution context mode must be an ExecutionMode.")
         if not isinstance(self.correlation, CorrelationContext):

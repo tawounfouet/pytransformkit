@@ -7,11 +7,11 @@ from dataclasses import dataclass, replace
 
 from pytransformkit.application.planning.expression_optimizer import ExpressionOptimizer
 from pytransformkit.application.planning.fingerprint import logical_plan_fingerprint
+from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.expressions.aggregate import AggregateExpression
 from pytransformkit.domain.expressions.base import Expression
 from pytransformkit.domain.expressions.dependencies import ExpressionDependencyExtractor
 from pytransformkit.domain.expressions.fingerprint import expression_fingerprint
-from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
 from pytransformkit.domain.pipelines.plan import LogicalPlan, LogicalPlanNode
 from pytransformkit.domain.quality.rules import ExpressionValidation, ValidationRule

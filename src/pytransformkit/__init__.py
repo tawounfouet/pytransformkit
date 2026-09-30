@@ -28,7 +28,7 @@ from . import diagnostics, lineage, quality, window
 try:
     __version__ = version("pytransformkit")
 except PackageNotFoundError:
-    __version__ = "0.3.0"
+    __version__ = "0.4.0a1"
 
 __all__ = [
     "DataType",

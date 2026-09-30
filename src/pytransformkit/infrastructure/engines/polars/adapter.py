@@ -147,6 +147,14 @@ class PolarsAdapter:
         """Wrap a native Polars DataFrame/LazyFrame in a physical handle."""
         return PolarsDatasetHandle(value)
 
+    def bind_arrow(self, value: object) -> PhysicalHandle:
+        """Bind an Arrow Table/RecordBatch into a Polars handle."""
+        import pyarrow as pa
+
+        if not isinstance(value, (pa.Table, pa.RecordBatch)):
+            raise TypeError("PolarsAdapter.bind_arrow requires Arrow tabular data.")
+        return PolarsDatasetHandle(pl.from_arrow(value))
+
     def execute(
         self,
         plan: LogicalPlan,

@@ -28,13 +28,10 @@ class TransformationExecutionReference:
             raise TypeError(
                 "transformation_execution_id must be a TransformationExecutionId."
             )
-        if (
-            self.transformation_plan_fingerprint is not None
-            and not isinstance(self.transformation_plan_fingerprint, Fingerprint)
+        if self.transformation_plan_fingerprint is not None and not isinstance(
+            self.transformation_plan_fingerprint, Fingerprint
         ):
-            raise TypeError(
-                "transformation_plan_fingerprint must be a Fingerprint."
-            )
+            raise TypeError("transformation_plan_fingerprint must be a Fingerprint.")
         if self.engine_id is not None and not self.engine_id.strip():
             raise ValueError("engine_id must not be blank.")
         if self.output_reference is not None and not isinstance(

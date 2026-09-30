@@ -12,7 +12,13 @@ from pytransformkit.application.execution import (
 )
 from pytransformkit.application.ports import PhysicalHandle
 from pytransformkit.domain.engines import CancellationSupport
-from pytransformkit.domain.resources import ResourceReference
+from pytransformkit.domain.resources import (
+    CredentialReference,
+    ResourceReference,
+    RetrySafety,
+    WriteMode,
+    WriteStatus,
+)
 from pytransformkit.domain.runtime import (
     CorrelationContext,
     Diagnostic,
@@ -42,6 +48,7 @@ from pytransformkit.domain.shared.identifiers import (
 
 __all__ = [
     "CancellationSupport",
+    "CredentialReference",
     "CancellationToken",
     "CorrelationContext",
     "CorrelationId",
@@ -61,6 +68,7 @@ __all__ = [
     "PhysicalHandle",
     "ProviderRetryEvidence",
     "ResourceReference",
+    "RetrySafety",
     "RetryDecision",
     "Retryability",
     "RuntimeEvent",
@@ -74,4 +82,6 @@ __all__ = [
     "TransformationOutput",
     "TransformationResult",
     "TransformationRuntime",
+    "WriteMode",
+    "WriteStatus",
 ]

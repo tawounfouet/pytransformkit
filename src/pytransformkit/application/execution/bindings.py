@@ -5,7 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 
-from pytransformkit.domain.resources import ResourceReference
+from pytransformkit.domain.resources import (
+    CredentialReference,
+    ResourceReference,
+    RetrySafety,
+    WriteMode,
+)
 
 
 class InputBindingKind(StrEnum):
@@ -13,11 +18,8 @@ class InputBindingKind(StrEnum):
     RESOURCE = "resource"
 
 
-class OutputMode(StrEnum):
-    CREATE_NEW = "create_new"
-    FAIL_IF_EXISTS = "fail_if_exists"
-    REPLACE = "replace"
-    APPEND = "append"
+# Pre-1.0 compatibility name retained while LOT-20 promotes WriteMode.
+OutputMode = WriteMode
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,6 +31,7 @@ class InputBinding:
     native_value: object | None = None
     engine_id: str | None = None
     resource: ResourceReference | None = None
+    credential: CredentialReference | None = None
 
     def __post_init__(self) -> None:
         if not self.input_name or not self.input_name.strip():
@@ -45,6 +48,10 @@ class InputBinding:
                 raise ValueError(
                     "Native InputBinding must not also contain a ResourceReference."
                 )
+            if self.credential is not None:
+                raise ValueError(
+                    "Native InputBinding must not contain CredentialReference."
+                )
             return
 
         if self.resource is None:
@@ -53,6 +60,11 @@ class InputBinding:
             raise ValueError(
                 "Resource InputBinding must not contain native runtime values."
             )
+        if self.credential is not None and not isinstance(
+            self.credential,
+            CredentialReference,
+        ):
+            raise TypeError("InputBinding credential must be CredentialReference.")
 
     @classmethod
     def from_native(
@@ -74,11 +86,14 @@ class InputBinding:
         cls,
         input_name: str,
         resource: ResourceReference,
+        *,
+        credential: CredentialReference | None = None,
     ) -> InputBinding:
         return cls(
             input_name=input_name,
             kind=InputBindingKind.RESOURCE,
             resource=resource,
+            credential=credential,
         )
 
     @property
@@ -92,15 +107,24 @@ class OutputBinding:
 
     output_name: str
     resource: ResourceReference
-    mode: OutputMode = OutputMode.CREATE_NEW
+    mode: WriteMode = WriteMode.CREATE_NEW
+    credential: CredentialReference | None = None
+    retry_safety: RetrySafety = RetrySafety.UNKNOWN
 
     def __post_init__(self) -> None:
         if not self.output_name or not self.output_name.strip():
             raise ValueError("OutputBinding output_name must not be empty.")
         if not isinstance(self.resource, ResourceReference):
             raise TypeError("OutputBinding resource must be a ResourceReference.")
-        if not isinstance(self.mode, OutputMode):
-            raise TypeError("OutputBinding mode must be an OutputMode.")
+        if not isinstance(self.mode, WriteMode):
+            raise TypeError("OutputBinding mode must be a WriteMode.")
+        if self.credential is not None and not isinstance(
+            self.credential,
+            CredentialReference,
+        ):
+            raise TypeError("OutputBinding credential must be CredentialReference.")
+        if not isinstance(self.retry_safety, RetrySafety):
+            raise TypeError("OutputBinding retry_safety must be RetrySafety.")
 
     @classmethod
     def to_resource(
@@ -108,10 +132,14 @@ class OutputBinding:
         output_name: str,
         resource: ResourceReference,
         *,
-        mode: OutputMode | str = OutputMode.CREATE_NEW,
+        mode: WriteMode | str = WriteMode.CREATE_NEW,
+        credential: CredentialReference | None = None,
+        retry_safety: RetrySafety = RetrySafety.UNKNOWN,
     ) -> OutputBinding:
         return cls(
             output_name=output_name,
             resource=resource,
-            mode=mode if isinstance(mode, OutputMode) else OutputMode(mode),
+            mode=mode if isinstance(mode, WriteMode) else WriteMode(mode),
+            credential=credential,
+            retry_safety=retry_safety,
         )

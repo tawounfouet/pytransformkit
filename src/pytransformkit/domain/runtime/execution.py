@@ -102,9 +102,7 @@ class TransformationExecution:
                 "TransformationExecution engine must be an EngineDescriptor."
             )
         if self.failure is not None and not isinstance(self.failure, FailureEvidence):
-            raise TypeError(
-                "TransformationExecution failure must be FailureEvidence."
-            )
+            raise TypeError("TransformationExecution failure must be FailureEvidence.")
         if not isinstance(self.diagnostics, tuple):
             raise TypeError("TransformationExecution diagnostics must be a tuple.")
         if any(not isinstance(item, Diagnostic) for item in self.diagnostics):
@@ -112,9 +110,7 @@ class TransformationExecution:
                 "TransformationExecution diagnostics must contain Diagnostic."
             )
         if not isinstance(self.provider_retries, tuple):
-            raise TypeError(
-                "TransformationExecution provider_retries must be a tuple."
-            )
+            raise TypeError("TransformationExecution provider_retries must be a tuple.")
         if any(
             not isinstance(item, ProviderRetryEvidence)
             for item in self.provider_retries

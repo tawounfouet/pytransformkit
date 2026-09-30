@@ -170,9 +170,7 @@ def _encode_value(
 
     if isinstance(value, Decimal):
         if not value.is_finite():
-            raise NonPortableValueError(
-                "Non-finite Decimal values are not portable."
-            )
+            raise NonPortableValueError("Non-finite Decimal values are not portable.")
         return {"$decimal": str(value)}
 
     if isinstance(value, datetime):
@@ -338,9 +336,7 @@ def _decode_value(
             raise InvalidWirePayloadError("$enum must be a semantic type ID string.")
         cls = registry.type_for(type_id)
         if not issubclass(cls, Enum):
-            raise InvalidWirePayloadError(
-                f"Semantic type {type_id!r} is not an enum."
-            )
+            raise InvalidWirePayloadError(f"Semantic type {type_id!r} is not an enum.")
         enum_value = _decode_value(value["value"], registry)
         try:
             return cls(enum_value)
@@ -380,10 +376,7 @@ def _decode_value(
                 f"missing={missing!r}, unknown={unknown!r}."
             )
 
-        kwargs = {
-            name: _decode_value(raw_fields[name], registry)
-            for name in supplied
-        }
+        kwargs = {name: _decode_value(raw_fields[name], registry) for name in supplied}
         try:
             return cls(**kwargs)
         except Exception as error:

@@ -8,6 +8,16 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 
 ### Added
 
+- LOT-22 engine-neutral Logical Optimizer targeting `0.5.0a2`.
+- Public `LogicalOptimizer`, `OptimizationResult`, `OptimizationReport`, rule-application provenance, optimizer diagnostics, and `ExpressionOptimizer` planning APIs without introducing a public `OptimizedLogicalPlan`.
+- Conservative fixed-point rewrites for constant folding, boolean simplification, predicate pushdown through safe unbranched Select/Sort boundaries, projection pruning for successive selections, and dead-node elimination.
+- Deterministic post-rewrite Schema resolution so every optimized LogicalPlan remains statically valid before physical lowering.
+- Common-expression fingerprint analysis, safe-fusion hints, and explicit materialization-boundary diagnostics for multi-input, aggregate, quality, cardinality and reshape boundaries.
+- Explicit optimizer disable mode preserving the original LogicalPlan and fingerprint.
+- Hypothesis property tests for constant/boolean simplification, lineage-preservation regression tests, and Pandas execution-equivalence contracts for optimized versus original plans.
+- Dedicated optimizer CI contract gate; optimizer implementation imports no physical engine libraries and leaves engine-specific lowering to adapters.
+
+
 - LOT-21 versioned serialization and canonical IR targeting `0.5.0a1`.
 - Public `pytransformkit.serialization` namespace with codecs for DataType, Field, Schema, Expression, TransformationPlan, LogicalPlan, ResourceReference, TransformationExecutionReference, TransformationLineage, Diagnostic, and ExecutionManifest.
 - Canonical JSON with UTF-8, Unicode NFC normalization, deterministic key ordering, compact separators, strict finite-number handling, typed collections, and exact durable representations for UUID/Decimal/date/time/datetime/bytes.

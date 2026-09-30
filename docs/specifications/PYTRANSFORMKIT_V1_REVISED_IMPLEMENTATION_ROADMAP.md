@@ -879,6 +879,8 @@ targeting **`0.5.0a2`**.
 
 # 16. LOT-22 — Logical Optimizer
 
+**Status:** DONE — `0.5.0a2`
+
 **Target milestone:** 0.5.0a2
 
 ## Scope
@@ -915,6 +917,33 @@ No public OptimizedLogicalPlan is introduced.
 - lineage remains correct after optimization;
 - rules are engine-neutral;
 - physical lowering remains adapter-owned.
+
+## Implementation closure
+
+LOT-22 establishes an engine-neutral optimization layer with:
+
+- public `LogicalOptimizer.optimize(LogicalPlan) -> LogicalPlan` semantics;
+- optional `optimize_with_report()` evidence without introducing a public OptimizedLogicalPlan type;
+- an explicit disable switch that returns the original plan unchanged;
+- bounded fixed-point passes to avoid unbounded optimizer loops;
+- constant folding over safe literal arithmetic/comparison expressions;
+- three-valued-logic-safe boolean simplification for AND/OR/NOT patterns;
+- predicate pushdown through unbranched Select and Sort transformations only when dependencies remain valid;
+- projection pruning across successive Select transformations;
+- dead-node elimination for LogicalPlan nodes unreachable from declared outputs;
+- deterministic Schema re-resolution after every structural rewrite;
+- common-expression analysis based on existing semantic expression fingerprints;
+- safe-fusion hints for adjacent pure deterministic transformations;
+- explicit materialization-boundary diagnostics for multi-input, aggregate, quality, cardinality and reshape semantics;
+- rule-level provenance through OptimizationRuleApplication;
+- optimizer diagnostics and before/after semantic fingerprints;
+- Hypothesis property tests for stable expression rules;
+- Pandas end-to-end equivalence tests proving original and optimized plans return the same physical result for representative rewrites;
+- lineage regression tests proving optimized output fields retain the same transitive logical input sources;
+- no engine-specific imports or physical lowering logic inside the optimizer.
+
+The next implementation lot is **LOT-23 — Extension and Plugin Architecture**,
+targeting **`0.5.0`**.
 
 ---
 

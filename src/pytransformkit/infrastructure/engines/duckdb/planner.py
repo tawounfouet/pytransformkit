@@ -206,14 +206,10 @@ class DuckDBPlanCompiler:
 
         if isinstance(transformation, DropTransformation):
             columns = _schema_projection(output_schema)
-            return DuckDBSQLFragment(
-                f"SELECT {columns} FROM {source_sql}"
-            )
+            return DuckDBSQLFragment(f"SELECT {columns} FROM {source_sql}")
 
         if isinstance(transformation, RenameTransformation):
-            mapping = {
-                str(item.source): item.target for item in transformation.renames
-            }
+            mapping = {str(item.source): item.target for item in transformation.renames}
             columns = ", ".join(
                 (
                     f"{quote_identifier(field.name)} AS "
@@ -241,9 +237,7 @@ class DuckDBPlanCompiler:
             )
 
         if isinstance(transformation, DistinctTransformation):
-            return DuckDBSQLFragment(
-                f"SELECT DISTINCT * FROM {source_sql}"
-            )
+            return DuckDBSQLFragment(f"SELECT DISTINCT * FROM {source_sql}")
 
         if isinstance(transformation, CastTransformation):
             if transformation.policy is CastPolicy.COERCE:
@@ -252,9 +246,7 @@ class DuckDBPlanCompiler:
                 )
             field_name = str(transformation.field)
             cast_function = (
-                "TRY_CAST"
-                if transformation.policy is CastPolicy.NULL
-                else "CAST"
+                "TRY_CAST" if transformation.policy is CastPolicy.NULL else "CAST"
             )
             target = self._types.to_sql(transformation.target_type)
             columns = ", ".join(

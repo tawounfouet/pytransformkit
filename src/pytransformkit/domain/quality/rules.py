@@ -21,6 +21,8 @@ class ValidationRule:
     __slots__ = ()
 
     identifier: ClassVar[str]
+    name: str
+    threshold: ValidationThreshold
 
 
 @dataclass(frozen=True, slots=True)

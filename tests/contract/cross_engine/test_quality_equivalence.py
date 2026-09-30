@@ -165,11 +165,29 @@ def _execute(
 def _normalized_output(result: object) -> list[dict[str, object]]:
     handle = result.output_handle  # type: ignore[attr-defined]
     if hasattr(handle, "dataframe"):
-        return handle.dataframe.to_dict(orient="records")
-    frame = handle.frame
-    if isinstance(frame, pl.LazyFrame):
-        frame = frame.collect()
-    return frame.to_dicts()
+        records = handle.dataframe.to_dict(orient="records")
+    else:
+        frame = handle.frame
+        if isinstance(frame, pl.LazyFrame):
+            frame = frame.collect()
+        records = frame.to_dicts()
+
+    return [
+        {
+            key: None if _is_missing(value) else value
+            for key, value in record.items()
+        }
+        for record in records
+    ]
+
+
+def _is_missing(value: object) -> bool:
+    if value is None:
+        return True
+    try:
+        return bool(pd.isna(value))
+    except (TypeError, ValueError):
+        return False
 
 
 def test_warn_only_quality_evidence_matches_pandas_and_polars() -> None:

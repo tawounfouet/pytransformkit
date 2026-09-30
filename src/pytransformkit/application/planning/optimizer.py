@@ -2,27 +2,25 @@
 
 from __future__ import annotations
 
-from collections import Counter, defaultdict
+from collections import defaultdict
 from dataclasses import dataclass, replace
 
-from pytransformkit.application.planning.expression_optimizer import (
-    BOOLEAN_SIMPLIFICATION_RULE,
-    CONSTANT_FOLDING_RULE,
-    ExpressionOptimizer,
-)
+from pytransformkit.application.planning.expression_optimizer import ExpressionOptimizer
 from pytransformkit.application.planning.fingerprint import logical_plan_fingerprint
 from pytransformkit.domain.expressions.base import Expression
 from pytransformkit.domain.expressions.dependencies import ExpressionDependencyExtractor
 from pytransformkit.domain.expressions.fingerprint import expression_fingerprint
 from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
 from pytransformkit.domain.pipelines.plan import LogicalPlan, LogicalPlanNode
-from pytransformkit.domain.quality.rules import ExpressionValidation, ValidationSpec
+from pytransformkit.domain.quality.rules import ExpressionValidation
 from pytransformkit.domain.shared.fingerprint import Fingerprint
 from pytransformkit.domain.shared.identifiers import NodeId
 from pytransformkit.domain.transformations.aggregation import (
+    AggregateExpression,
     AggregateMetric,
     AggregateTransformation,
 )
+from pytransformkit.domain.transformations.base import TransformationSpec
 from pytransformkit.domain.transformations.derivation import DeriveTransformation
 from pytransformkit.domain.transformations.filtering import (
     DistinctTransformation,
@@ -261,8 +259,8 @@ class LogicalOptimizer:
 
     def _optimize_transformation_expressions(
         self,
-        transformation: object,
-    ) -> tuple[object, tuple[str, ...]]:
+        transformation: TransformationSpec,
+    ) -> tuple[TransformationSpec, tuple[str, ...]]:
         if isinstance(transformation, FilterTransformation):
             optimized = self._expressions.optimize(transformation.condition)
             return (
@@ -289,7 +287,7 @@ class LogicalOptimizer:
             for metric in transformation.metrics:
                 optimized = self._expressions.optimize(metric.expression)
                 expression = optimized.expression
-                if not isinstance(expression, type(metric.expression)):
+                if not isinstance(expression, AggregateExpression):
                     expression = metric.expression
                 metrics.append(replace(metric, expression=expression))
                 rules += optimized.applied_rules

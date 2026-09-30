@@ -255,7 +255,7 @@ class DuckDBAdapter:
                     output.sql,
                     list(output.params),
                 )
-                table = cursor.fetch_arrow_table()
+                table = cursor.to_arrow_table()
                 relation = self._connection.from_arrow(table)
 
             outputs.append(

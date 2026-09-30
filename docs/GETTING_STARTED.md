@@ -1046,6 +1046,59 @@ wire = TransformationExecutionReferenceCodec().to_json(reference)
 Golden fixtures under `tests/fixtures/wire/` freeze representative v1 canonical bytes for compatibility testing.
 
 
+
+### Logical optimization
+
+LOT-22 introduces an explicit engine-neutral optimization step:
+
+~~~python
+from pytransformkit.planning import (
+    LogicalOptimizer,
+    TransformationCompiler,
+)
+
+logical = TransformationCompiler().compile(plan)
+
+optimizer = LogicalOptimizer()
+optimized = optimizer.optimize(logical)
+~~~
+
+The public type does not change:
+
+~~~text
+LogicalPlan
+    ↓ optimize
+LogicalPlan
+~~~
+
+To inspect optimizer evidence:
+
+~~~python
+result = optimizer.optimize_with_report(logical)
+
+print(result.report.original_fingerprint)
+print(result.report.optimized_fingerprint)
+
+for application in result.report.applications:
+    print(application.rule_id, application.affected_node_ids)
+
+for diagnostic in result.report.diagnostics:
+    print(diagnostic.code, diagnostic.summary)
+~~~
+
+Stable rewrite rules currently include constant folding, boolean simplification, predicate pushdown through qualified Select/Sort boundaries, projection pruning across successive selections and dead-node elimination. Common-expression analysis, fusion opportunities and materialization boundaries are reported as diagnostics rather than converted into engine-specific physical instructions.
+
+Optimization can be disabled explicitly:
+
+~~~python
+optimizer = LogicalOptimizer(enabled=False)
+
+assert optimizer.optimize(logical) is logical
+~~~
+
+Every structural rewrite re-resolves logical Schemas. Engine adapters still own physical lowering, and lineage tests verify that optimized outputs preserve the same transitive logical input sources.
+
+
 ## 18. Run the local experimentation script
 
 The repository includes:
@@ -1129,11 +1182,6 @@ The CI matrix currently verifies Python 3.11, 3.12, 3.13 and 3.14 plus dedicated
 
 The revised V1 roadmap continues with:
 
-- **LOT-18** — PyArrow;
-- **LOT-19** — DuckDB;
-- **LOT-20** — Physical I/O Boundary;
-- **LOT-21** — Serialization / Canonical IR;
-- **LOT-22** — Logical Optimizer;
 - **LOT-23** — Plugins / Extension Contracts;
 - **LOT-24** — Cross-Engine Conformance + Customer 360;
 - **LOT-25** — Performance Qualification;

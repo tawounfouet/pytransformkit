@@ -12,7 +12,6 @@ from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.expressions.aggregate import AggregateExpression
 from pytransformkit.domain.expressions.base import Expression
 from pytransformkit.domain.pipelines.dependencies import Dependency
-from pytransformkit.domain.quality.rules import ValidationSpec
 from pytransformkit.domain.pipelines.nodes import (
     InputNode,
     OutputNode,
@@ -20,6 +19,7 @@ from pytransformkit.domain.pipelines.nodes import (
     TransformationNode,
 )
 from pytransformkit.domain.plans.transformation_plan import TransformationPlan
+from pytransformkit.domain.quality.rules import ValidationSpec
 from pytransformkit.domain.shared.identifiers import (
     DatasetId,
     NodeId,

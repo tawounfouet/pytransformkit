@@ -18,7 +18,6 @@ from pytransformkit.domain.runtime.failure import (
     Retryability,
     RetryDecision,
 )
-from pytransformkit.domain.runtime.references import TransformationExecutionReference
 from pytransformkit.domain.runtime.observability import (
     MetricKind,
     NullTelemetrySink,
@@ -29,6 +28,7 @@ from pytransformkit.domain.runtime.observability import (
     TelemetryRedactor,
     TelemetrySink,
 )
+from pytransformkit.domain.runtime.references import TransformationExecutionReference
 
 __all__ = [
     "CorrelationContext",

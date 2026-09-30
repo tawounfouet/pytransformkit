@@ -61,9 +61,7 @@ def _logical_plan() -> LogicalPlan:
     builder = TransformationPlan.builder("extension_rule")
     source = builder.input("input", schema=schema)
     selected = builder.select("selected", source=source, columns=("amount",))
-    return TransformationCompiler().compile(
-        builder.output("output", selected).build()
-    )
+    return TransformationCompiler().compile(builder.output("output", selected).build())
 
 
 def test_official_builtins_satisfy_public_extension_protocols(tmp_path: Path) -> None:
@@ -149,4 +147,6 @@ def test_telemetry_and_existing_io_registries_freeze_explicitly(
     resources.register_writer(LocalFileWriter(tmp_path))
     resources.freeze()
     with pytest.raises(RegistryFrozenError):
-        resources.register_reader(LocalFileReader(tmp_path),)
+        resources.register_reader(
+            LocalFileReader(tmp_path),
+        )

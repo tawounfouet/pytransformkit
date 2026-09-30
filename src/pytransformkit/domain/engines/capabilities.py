@@ -3,6 +3,14 @@
 from enum import StrEnum
 
 
+class CancellationSupport(StrEnum):
+    """How an engine/provider can react to an in-flight cancellation request."""
+
+    NONE = "none"
+    COOPERATIVE = "cooperative"
+    PROVIDER = "provider"
+
+
 class EngineCapability(StrEnum):
     """Logical capabilities an engine adapter can implement."""
 

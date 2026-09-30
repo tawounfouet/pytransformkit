@@ -113,7 +113,10 @@ class PyArrowInterchange:
         diagnostics = tuple(
             _potentially_lossy(
                 "PTK-ARROW-CONV-003",
-                f"Arrow dictionary field {field.name!r} may encode Polars categoricals.",
+                (
+                    f"Arrow dictionary field {field.name!r} may encode "
+                    "Polars categoricals."
+                ),
                 related_field=field.name,
             )
             for field in table.schema

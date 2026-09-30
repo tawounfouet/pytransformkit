@@ -127,12 +127,8 @@ class LineageAnalyzer:
                     "Transformation node is missing transformation lineage metadata."
                 )
 
-            source_nodes = tuple(
-                node_by_id[node_id] for node_id in node.input_node_ids
-            )
-            source_refs = tuple(
-                references[source.node_id] for source in source_nodes
-            )
+            source_nodes = tuple(node_by_id[node_id] for node_id in node.input_node_ids)
+            source_refs = tuple(references[source.node_id] for source in source_nodes)
             target_ref = references[node.node_id]
 
             dataset_edges.extend(
@@ -627,9 +623,7 @@ class LineageAnalyzer:
                             )
                         ),
                         target_ref,
-                        FieldPath.of(
-                            transformation.output_name(nested.name)
-                        ),
+                        FieldPath.of(transformation.output_name(nested.name)),
                         FieldDerivationKind.FLATTENED,
                         step_id,
                     )
@@ -659,8 +653,7 @@ class LineageAnalyzer:
             )
 
         raise UnsupportedLineageError(
-            "No logical lineage resolver exists for "
-            f"{type(transformation).__name__!r}."
+            f"No logical lineage resolver exists for {type(transformation).__name__!r}."
         )
 
     def _join_lineage(
@@ -798,9 +791,7 @@ class LineageAnalyzer:
         elif isinstance(rule, Unique):
             paths = rule.fields
         elif isinstance(rule, ExpressionValidation):
-            paths = tuple(
-                self._dependency_extractor.extract(rule.expression)
-            )
+            paths = tuple(self._dependency_extractor.extract(rule.expression))
         elif isinstance(rule, (SchemaValidation, RowCount)):
             paths = ()
         else:

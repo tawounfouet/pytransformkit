@@ -182,7 +182,7 @@ class LineageAnalyzer:
 
         if isinstance(transformation, SelectTransformation):
             source_ref = _single(source_refs)
-            edges = tuple(
+            select_edges = tuple(
                 _field_edge(
                     source_ref,
                     field,
@@ -193,7 +193,7 @@ class LineageAnalyzer:
                 )
                 for field in transformation.fields
             )
-            return edges, ()
+            return select_edges, ()
 
         if isinstance(transformation, DropTransformation):
             return (
@@ -211,7 +211,7 @@ class LineageAnalyzer:
             source_by_target = {
                 item.target: item.source for item in transformation.renames
             }
-            edges = tuple(
+            rename_edges = tuple(
                 _field_edge(
                     source_ref,
                     source_by_target.get(field.name, FieldPath.of(field.name)),
@@ -226,11 +226,11 @@ class LineageAnalyzer:
                 )
                 for field in node.output_schema.fields
             )
-            return edges, ()
+            return rename_edges, ()
 
         if isinstance(transformation, CastTransformation):
             source_ref = _single(source_refs)
-            edges = tuple(
+            cast_edges = tuple(
                 _field_edge(
                     source_ref,
                     FieldPath.of(field.name),
@@ -245,11 +245,11 @@ class LineageAnalyzer:
                 )
                 for field in node.output_schema.fields
             )
-            return edges, ()
+            return cast_edges, ()
 
         if isinstance(transformation, DeriveTransformation):
             source_ref = _single(source_refs)
-            edges = [
+            derive_edges = [
                 _field_edge(
                     source_ref,
                     FieldPath.of(field.name),
@@ -261,18 +261,18 @@ class LineageAnalyzer:
                 for field in node.output_schema.fields
                 if field.name != transformation.field_name
             ]
-            derivation = (
+            derive_kind = (
                 FieldDerivationKind.WINDOWED
                 if isinstance(transformation.expression, WindowExpression)
                 else FieldDerivationKind.DERIVED
             )
-            edges.extend(
+            derive_edges.extend(
                 _field_edge(
                     source_ref,
                     source_path,
                     target_ref,
                     FieldPath.of(transformation.field_name),
-                    derivation,
+                    derive_kind,
                     step_id,
                 )
                 for source_path in sorted(
@@ -282,13 +282,13 @@ class LineageAnalyzer:
                     key=str,
                 )
             )
-            dependencies = self._expression_dependencies(
+            derive_dependencies = self._expression_dependencies(
                 transformation.expression,
                 source_ref,
                 target_ref,
                 step_id,
             )
-            return tuple(edges), dependencies
+            return tuple(derive_edges), derive_dependencies
 
         if isinstance(transformation, FilterTransformation):
             source_ref = _single(source_refs)
@@ -323,7 +323,9 @@ class LineageAnalyzer:
 
         if isinstance(transformation, DistinctTransformation):
             source_ref = _single(source_refs)
-            paths = tuple(FieldPath.of(name) for name in node.output_schema.names())
+            distinct_paths = tuple(
+                FieldPath.of(name) for name in node.output_schema.names()
+            )
             return (
                 _direct_edges(
                     source_ref,
@@ -332,7 +334,7 @@ class LineageAnalyzer:
                     step_id,
                 ),
                 self._path_dependencies(
-                    paths,
+                    distinct_paths,
                     source_ref,
                     target_ref,
                     FieldDependencyKind.DISTINCT,
@@ -378,31 +380,31 @@ class LineageAnalyzer:
 
         if isinstance(transformation, AggregateTransformation):
             source_ref = _single(source_refs)
-            edges: list[FieldLineageEdge] = []
-            dependencies: list[FieldDependency] = []
+            aggregate_edges: list[FieldLineageEdge] = []
+            aggregate_dependencies: list[FieldDependency] = []
 
             for index, expression in enumerate(transformation.group_by):
                 output_name = group_output_name(expression, index)
-                paths = self._dependency_extractor.extract(expression)
-                derivation = (
+                group_paths = self._dependency_extractor.extract(expression)
+                group_derivation = (
                     FieldDerivationKind.DIRECT
                     if isinstance(expression, ColumnReference)
                     else FieldDerivationKind.DERIVED
                 )
-                edges.extend(
+                aggregate_edges.extend(
                     _field_edge(
                         source_ref,
                         path,
                         target_ref,
                         FieldPath.of(output_name),
-                        derivation,
+                        group_derivation,
                         step_id,
                     )
-                    for path in sorted(paths, key=str)
+                    for path in sorted(group_paths, key=str)
                 )
-                dependencies.extend(
+                aggregate_dependencies.extend(
                     self._path_dependencies(
-                        paths,
+                        group_paths,
                         source_ref,
                         target_ref,
                         FieldDependencyKind.GROUPING,
@@ -411,8 +413,8 @@ class LineageAnalyzer:
                 )
 
             for metric in transformation.metrics:
-                paths = self._dependency_extractor.extract(metric.expression)
-                edges.extend(
+                metric_paths = self._dependency_extractor.extract(metric.expression)
+                aggregate_edges.extend(
                     _field_edge(
                         source_ref,
                         path,
@@ -421,10 +423,10 @@ class LineageAnalyzer:
                         FieldDerivationKind.AGGREGATED,
                         step_id,
                     )
-                    for path in sorted(paths, key=str)
+                    for path in sorted(metric_paths, key=str)
                 )
 
-            return tuple(edges), _dedupe(dependencies)
+            return tuple(aggregate_edges), _dedupe(aggregate_dependencies)
 
         if isinstance(transformation, JoinTransformation):
             return self._join_lineage(
@@ -437,65 +439,65 @@ class LineageAnalyzer:
 
         if isinstance(transformation, UnionTransformation):
             left_ref, right_ref = _binary(source_refs)
-            edges: list[FieldLineageEdge] = []
+            union_edges: list[FieldLineageEdge] = []
             for field in node.output_schema.fields:
-                path = FieldPath.of(field.name)
-                edges.append(
+                union_path = FieldPath.of(field.name)
+                union_edges.append(
                     _field_edge(
                         left_ref,
-                        path,
+                        union_path,
                         target_ref,
-                        path,
+                        union_path,
                         FieldDerivationKind.SET_COMBINED,
                         step_id,
                     )
                 )
-                edges.append(
+                union_edges.append(
                     _field_edge(
                         right_ref,
-                        path,
+                        union_path,
                         target_ref,
-                        path,
+                        union_path,
                         FieldDerivationKind.SET_COMBINED,
                         step_id,
                     )
                 )
-            return tuple(edges), ()
+            return tuple(union_edges), ()
 
         if isinstance(transformation, (IntersectTransformation, ExceptTransformation)):
             left_ref, right_ref = _binary(source_refs)
-            edges = _direct_edges(
+            set_edges = _direct_edges(
                 left_ref,
                 target_ref,
                 node.output_schema.names(),
                 step_id,
             )
-            dependencies: list[FieldDependency] = []
-            for source_ref, source_node in zip(
+            set_dependencies: list[FieldDependency] = []
+            for set_source_ref, set_source_node in zip(
                 (left_ref, right_ref),
                 source_nodes,
                 strict=True,
             ):
-                dependencies.extend(
+                set_dependencies.extend(
                     self._path_dependencies(
                         tuple(
                             FieldPath.of(name)
-                            for name in source_node.output_schema.names()
+                            for name in set_source_node.output_schema.names()
                         ),
-                        source_ref,
+                        set_source_ref,
                         target_ref,
                         FieldDependencyKind.SET_MEMBERSHIP,
                         step_id,
                     )
                 )
-            return edges, _dedupe(dependencies)
+            return set_edges, _dedupe(set_dependencies)
 
         if isinstance(transformation, PivotTransformation):
             source_ref = _single(source_refs)
-            edges: list[FieldLineageEdge] = []
-            dependencies: list[FieldDependency] = []
+            pivot_edges: list[FieldLineageEdge] = []
+            pivot_dependencies: list[FieldDependency] = []
             for path in transformation.index:
-                edges.append(
+                pivot_edges.append(
                     _field_edge(
                         source_ref,
                         path,
@@ -505,7 +507,7 @@ class LineageAnalyzer:
                         step_id,
                     )
                 )
-            dependencies.extend(
+            pivot_dependencies.extend(
                 self._path_dependencies(
                     transformation.index,
                     source_ref,
@@ -514,7 +516,7 @@ class LineageAnalyzer:
                     step_id,
                 )
             )
-            dependencies.extend(
+            pivot_dependencies.extend(
                 self._path_dependencies(
                     (transformation.columns,),
                     source_ref,
@@ -523,7 +525,7 @@ class LineageAnalyzer:
                     step_id,
                 )
             )
-            edges.extend(
+            pivot_edges.extend(
                 _field_edge(
                     source_ref,
                     transformation.values,
@@ -534,11 +536,11 @@ class LineageAnalyzer:
                 )
                 for category in transformation.categories
             )
-            return tuple(edges), _dedupe(dependencies)
+            return tuple(pivot_edges), _dedupe(pivot_dependencies)
 
         if isinstance(transformation, UnpivotTransformation):
             source_ref = _single(source_refs)
-            edges: list[FieldLineageEdge] = [
+            unpivot_edges: list[FieldLineageEdge] = [
                 _field_edge(
                     source_ref,
                     path,
@@ -550,7 +552,7 @@ class LineageAnalyzer:
                 for path in transformation.id_vars
             ]
             for source_path in transformation.value_vars:
-                edges.append(
+                unpivot_edges.append(
                     _field_edge(
                         source_ref,
                         source_path,
@@ -560,7 +562,7 @@ class LineageAnalyzer:
                         step_id,
                     )
                 )
-                edges.append(
+                unpivot_edges.append(
                     _field_edge(
                         source_ref,
                         source_path,
@@ -570,11 +572,11 @@ class LineageAnalyzer:
                         step_id,
                     )
                 )
-            return tuple(edges), ()
+            return tuple(unpivot_edges), ()
 
         if isinstance(transformation, ExplodeTransformation):
             source_ref = _single(source_refs)
-            edges = tuple(
+            explode_edges = tuple(
                 _field_edge(
                     source_ref,
                     FieldPath.of(field.name),
@@ -589,7 +591,7 @@ class LineageAnalyzer:
                 )
                 for field in node.output_schema.fields
             )
-            return edges, ()
+            return explode_edges, ()
 
         if isinstance(transformation, FlattenTransformation):
             source_ref = _single(source_refs)
@@ -599,10 +601,10 @@ class LineageAnalyzer:
                 raise UnsupportedLineageError(
                     "Flatten lineage requires a statically known StructType."
                 )
-            edges: list[FieldLineageEdge] = []
+            flatten_edges: list[FieldLineageEdge] = []
             for field in source_schema.fields:
                 if field.name != transformation.field.name:
-                    edges.append(
+                    flatten_edges.append(
                         _field_edge(
                             source_ref,
                             FieldPath.of(field.name),
@@ -613,7 +615,7 @@ class LineageAnalyzer:
                         )
                     )
             for nested in root.data_type.fields:
-                edges.append(
+                flatten_edges.append(
                     _field_edge(
                         source_ref,
                         FieldPath(
@@ -628,13 +630,13 @@ class LineageAnalyzer:
                         step_id,
                     )
                 )
-            return tuple(edges), ()
+            return tuple(flatten_edges), ()
 
         if isinstance(transformation, QualityGate):
             source_ref = _single(source_refs)
-            dependencies: list[FieldDependency] = []
+            quality_dependencies: list[FieldDependency] = []
             for rule in transformation.spec.rules:
-                dependencies.extend(
+                quality_dependencies.extend(
                     self._quality_dependencies(
                         rule,
                         source_ref,
@@ -649,7 +651,7 @@ class LineageAnalyzer:
                     node.output_schema.names(),
                     step_id,
                 ),
-                _dedupe(dependencies),
+                _dedupe(quality_dependencies),
             )
 
         raise UnsupportedLineageError(
@@ -786,6 +788,7 @@ class LineageAnalyzer:
         target_ref: DatasetReference,
         step_id: StepId,
     ) -> tuple[FieldDependency, ...]:
+        paths: tuple[FieldPath, ...]
         if isinstance(rule, (NotNull, Range, AllowedValues, Regex)):
             paths = (rule.field,)
         elif isinstance(rule, Unique):

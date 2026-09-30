@@ -25,9 +25,9 @@ from pytransformkit.errors import (
     PluginNotFoundError,
     RegistryFrozenError,
 )
+from pytransformkit.errors.serialization import NonPortableValueError
 from pytransformkit.functions import col
 from pytransformkit.serialization import SemanticTypeRegistry
-from pytransformkit.errors.serialization import NonPortableValueError
 
 
 class FakeEntryPoint:

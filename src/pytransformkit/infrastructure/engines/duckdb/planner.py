@@ -260,16 +260,16 @@ class DuckDBPlanCompiler:
 
         if isinstance(transformation, DeriveTransformation):
             expression = self._expressions.compile(transformation.expression)
-            columns = [
+            derived_columns = [
                 quote_identifier(field.name)
                 for field in input_schema.fields
                 if field.name != transformation.field_name
             ]
-            columns.append(
+            derived_columns.append(
                 f"{expression.sql} AS {quote_identifier(transformation.field_name)}"
             )
             return DuckDBSQLFragment(
-                f"SELECT {', '.join(columns)} FROM {source_sql}",
+                f"SELECT {', '.join(derived_columns)} FROM {source_sql}",
                 expression.params,
             )
 

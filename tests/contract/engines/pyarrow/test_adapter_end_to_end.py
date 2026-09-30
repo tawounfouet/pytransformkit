@@ -111,9 +111,7 @@ def test_unsupported_capability_fails_before_arrow_execution() -> None:
             "status": ["ACTIVE", "ACTIVE"],
         }
     )
-    pipeline = Pipeline.create("customers", _schema()).then(
-        DistinctTransformation()
-    )
+    pipeline = Pipeline.create("customers", _schema()).then(DistinctTransformation())
 
     with pytest.raises(UnsupportedEngineCapabilityError):
         _execute(pipeline, table)

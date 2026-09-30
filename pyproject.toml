@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytransformkit"
-version = "0.3.0"
+version = "0.4.0a1"
 description = "Engine-agnostic data transformation framework for Python."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -48,6 +48,9 @@ pandas = [
 ]
 polars = [
   "polars>=1.0,<2",
+]
+pyarrow = [
+  "pyarrow>=20,<26",
 ]
 
 [project.urls]
@@ -97,5 +100,5 @@ show_missing = true
 skip_covered = true
 
 [[tool.mypy.overrides]]
-module = ["pandas", "pandas.*", "polars", "polars.*"]
+module = ["pandas", "pandas.*", "polars", "polars.*", "pyarrow", "pyarrow.*"]
 ignore_missing_imports = true

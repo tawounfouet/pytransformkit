@@ -34,7 +34,7 @@ from . import diagnostics, lineage, quality, window
 try:
     __version__ = version("pytransformkit")
 except PackageNotFoundError:
-    __version__ = "0.5.0a1"
+    __version__ = "0.5.0a2"
 
 __all__ = [
     "CredentialReference",

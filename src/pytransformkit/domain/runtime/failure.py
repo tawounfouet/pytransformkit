@@ -104,9 +104,7 @@ class FailureEvidence:
     source_component: str | None = None
     provider_code: str | None = None
     message_summary: str | None = None
-    occurred_at: datetime = field(
-        default_factory=lambda: datetime.now(UTC)
-    )
+    occurred_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     details: tuple[tuple[str, str], ...] = ()
     contract_version: str = "1"
 

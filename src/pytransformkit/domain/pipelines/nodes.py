@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 from pytransformkit.domain.data.schema import Schema
-from pytransformkit.domain.shared.identifiers import NodeId, StepId
+from pytransformkit.domain.shared.identifiers import DatasetId, NodeId, StepId
 from pytransformkit.domain.transformations.base import TransformationSpec
 
 
@@ -39,6 +39,7 @@ class InputNode(PipelineNode):
 
     name: str
     schema: Schema
+    dataset_id: DatasetId | None = None
 
     def __post_init__(self) -> None:
         super(InputNode, self).__post_init__()
@@ -48,6 +49,11 @@ class InputNode(PipelineNode):
             raise ValueError("Input node name must not be empty.")
         if not isinstance(self.schema, Schema):
             raise TypeError("Input node schema must be a Schema.")
+        if self.dataset_id is not None and not isinstance(
+            self.dataset_id,
+            DatasetId,
+        ):
+            raise TypeError("Input node dataset_id must be a DatasetId.")
 
     @classmethod
     def create(cls, name: str, schema: Schema) -> "InputNode":
@@ -56,6 +62,7 @@ class InputNode(PipelineNode):
             kind=PipelineNodeKind.INPUT,
             name=name,
             schema=schema,
+            dataset_id=DatasetId.new(),
         )
 
 
@@ -66,6 +73,7 @@ class TransformationNode(PipelineNode):
     step_id: StepId
     transformation: TransformationSpec
     name: str | None = None
+    dataset_id: DatasetId | None = None
 
     def __post_init__(self) -> None:
         super(TransformationNode, self).__post_init__()
@@ -81,6 +89,11 @@ class TransformationNode(PipelineNode):
             )
         if self.name is not None and not self.name.strip():
             raise ValueError("Transformation node name must not be blank.")
+        if self.dataset_id is not None and not isinstance(
+            self.dataset_id,
+            DatasetId,
+        ):
+            raise TypeError("Transformation node dataset_id must be a DatasetId.")
 
     @classmethod
     def create(
@@ -95,6 +108,7 @@ class TransformationNode(PipelineNode):
             step_id=StepId.new(),
             transformation=transformation,
             name=name,
+            dataset_id=DatasetId.new(),
         )
 
 

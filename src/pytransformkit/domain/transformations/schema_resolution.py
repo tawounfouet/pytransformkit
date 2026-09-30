@@ -228,8 +228,8 @@ class OutputSchemaResolver:
                 continue
 
             if isinstance(rule, Unique):
-                for field in rule.fields:
-                    input_schema.resolve_path(field)
+                for field_path in rule.fields:
+                    input_schema.resolve_path(field_path)
                 continue
 
             if isinstance(rule, Range):
@@ -241,8 +241,8 @@ class OutputSchemaResolver:
                 continue
 
             if isinstance(rule, Regex):
-                field = input_schema.resolve_path(rule.field)
-                if not isinstance(field.data_type, StringType):
+                regex_field = input_schema.resolve_path(rule.field)
+                if not isinstance(regex_field.data_type, StringType):
                     raise InvalidTransformationError(
                         "Regex validation requires a StringType field."
                     )

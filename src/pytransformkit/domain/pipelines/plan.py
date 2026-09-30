@@ -85,3 +85,11 @@ class LogicalPlan:
             if output_name == name:
                 return schema
         raise KeyError(name)
+
+    def fingerprint(self):
+        """Return a deterministic semantic fingerprint for this LogicalPlan."""
+        from pytransformkit.application.planning.fingerprint import (
+            logical_plan_fingerprint,
+        )
+
+        return logical_plan_fingerprint(self)

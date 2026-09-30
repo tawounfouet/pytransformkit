@@ -624,6 +624,9 @@ LOT-17 is closed by the 0.3.0 runtime-evidence baseline:
 
 # 12. LOT-18 — PyArrow Adapter and Interchange
 
+**Status:** DONE — `0.4.0a1`
+
+
 **Target milestone:** 0.4.0a1
 
 ## Scope
@@ -652,6 +655,21 @@ lossiness policy
 - supported capabilities pass engine conformance;
 - conversion lossiness is explicit;
 - adapter stability is STABLE or explicitly PROVISIONAL.
+
+## Implementation closure
+
+LOT-18 closes with an explicitly **PROVISIONAL** PyArrow adapter surface:
+
+- `PyArrowDatasetHandle` supports both `Table` and `RecordBatch`;
+- Arrow logical/native type mapping qualifies nested, decimal and temporal types;
+- eager execution is chunk-aware and does not force chunk combination;
+- only contract-backed capabilities are advertised;
+- Pandas ↔ Arrow and Polars ↔ Arrow bridges expose strict-by-default lossiness handling;
+- conversion warnings use structured `Diagnostic` evidence;
+- PyArrow remains an optional dependency and the base package imports without it;
+- dedicated CI jobs qualify the Arrow adapter alone and the multi-engine interchange paths.
+
+The next implementation lot is **LOT-19 — DuckDB Adapter and Relational SQL Backend**.
 
 ---
 

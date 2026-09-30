@@ -28,11 +28,19 @@ from pytransformkit.application.execution.failures import (
 from pytransformkit.application.execution.registry import EngineRegistry
 from pytransformkit.application.execution.results import EngineExecutionResult
 from pytransformkit.application.execution.telemetry import RuntimeTelemetry
+from pytransformkit.application.io import (
+    ReadRepresentation,
+    ReadRequest,
+    ResourceIORegistry,
+    WriteRequest,
+    WriteResult,
+)
 from pytransformkit.application.planning import (
     TransformationCompiler,
     logical_plan_fingerprint,
 )
 from pytransformkit.application.ports.engines import (
+    ArrowBindableEngineAdapter,
     MultiInputEngineAdapter,
     PhysicalHandle,
 )
@@ -46,6 +54,7 @@ from pytransformkit.domain.lineage import LineageAnalyzer, TransformationLineage
 from pytransformkit.domain.pipelines.plan import LogicalPlan
 from pytransformkit.domain.plans import TransformationPlan
 from pytransformkit.domain.quality.results import ValidationResult
+from pytransformkit.domain.resources import ResourceReference, WriteStatus
 from pytransformkit.domain.runtime import (
     CorrelationContext,
     Diagnostic,
@@ -77,6 +86,7 @@ from pytransformkit.errors.engine import (
     ExecutionTimeoutError,
     ResourceResolutionError,
     TransformationExecutionError,
+    UnknownOutcomeExecutionError,
     UnsupportedEngineCapabilityError,
 )
 
@@ -107,6 +117,7 @@ class TransformationResult:
     lineage: TransformationLineage
     manifest: ExecutionManifest
     validations: tuple[ValidationResult, ...] = ()
+    writes: tuple[WriteResult, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.execution, TransformationExecution):
@@ -145,6 +156,10 @@ class TransformationResult:
             raise TypeError(
                 "TransformationResult validations must contain ValidationResult."
             )
+        if not isinstance(self.writes, tuple):
+            raise TypeError("TransformationResult writes must be a tuple.")
+        if any(not isinstance(result, WriteResult) for result in self.writes):
+            raise TypeError("TransformationResult writes must contain WriteResult.")
 
     @property
     def execution_id(self) -> TransformationExecutionId:
@@ -213,11 +228,13 @@ class TransformationRuntime:
         compiler: TransformationCompiler | None = None,
         compatibility: EngineCompatibilityService | None = None,
         telemetry: TelemetrySink | None = None,
+        resources: ResourceIORegistry | None = None,
     ) -> None:
         self._engines = engines
         self._compiler = compiler or TransformationCompiler()
         self._compatibility = compatibility or EngineCompatibilityService()
         self._telemetry = telemetry or NullTelemetrySink()
+        self._resources = resources
 
     def execute(
         self,
@@ -257,6 +274,9 @@ class TransformationRuntime:
         descriptor: EngineDescriptor | None = None
         lineage: TransformationLineage | None = None
         provider_retries: tuple[ProviderRetryEvidence, ...] = ()
+        write_results: tuple[WriteResult, ...] = ()
+        input_resources: dict[str, ResourceReference] = {}
+        output_resources: dict[str, ResourceReference] = {}
         runtime_diagnostics: list[Diagnostic] = []
         compile_duration = 0.0
         engine_started = False
@@ -343,12 +363,6 @@ class TransformationRuntime:
                     (EngineCapability.LAZY.value,),
                 )
 
-            if outputs:
-                raise BindingError(
-                    "Physical OutputBinding execution is introduced in LOT-20. "
-                    "LOT-17 supports in-memory/native outputs only."
-                )
-
             runtime_diagnostics.append(
                 Diagnostic(
                     code="PTK-RUNTIME-002",
@@ -384,12 +398,13 @@ class TransformationRuntime:
                     "Cancellation was requested before engine execution."
                 )
 
-            handles = self._bind_inputs(
+            handles, input_resources, read_diagnostics = self._bind_inputs(
                 logical_plan,
                 adapter,
                 inputs,
                 engine,
             )
+            runtime_diagnostics.extend(read_diagnostics)
             telemetry.emit_event(
                 RuntimeEventType.INPUT_BOUND,
                 execution_id=execution_id,
@@ -448,6 +463,17 @@ class TransformationRuntime:
             result_outputs = self._public_outputs(
                 logical_plan,
                 engine_result,
+            )
+            write_results, output_resources, write_diagnostics = self._write_outputs(
+                logical_plan,
+                result_outputs,
+                outputs or {},
+            )
+            runtime_diagnostics.extend(write_diagnostics)
+            lineage = LineageAnalyzer().analyze(
+                logical_plan,
+                input_resources=input_resources,
+                output_resources=output_resources,
             )
 
             if cancellation is not None and cancellation.requested:
@@ -559,6 +585,7 @@ class TransformationRuntime:
                 lineage=lineage,
                 manifest=manifest,
                 validations=engine_result.validations,
+                writes=write_results,
             )
 
         except Exception as raw_error:

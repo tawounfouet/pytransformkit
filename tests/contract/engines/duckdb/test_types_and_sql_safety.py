@@ -35,9 +35,7 @@ def test_type_mapper_covers_core_relational_types() -> None:
 
 def test_schema_inspector_reads_relation_metadata_without_domain_duckdb_types() -> None:
     connection = duckdb.connect()
-    relation = connection.sql(
-        "SELECT 1::BIGINT AS customer_id, 'a'::VARCHAR AS email"
-    )
+    relation = connection.sql("SELECT 1::BIGINT AS customer_id, 'a'::VARCHAR AS email")
 
     schema = DuckDBSchemaInspector().inspect(relation)
 

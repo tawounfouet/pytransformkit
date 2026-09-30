@@ -47,63 +47,74 @@ class ExpressionOptimizer:
         if isinstance(expression, BinaryExpression):
             left, left_rules = self._visit(expression.left)
             right, right_rules = self._visit(expression.right)
-            current = BinaryExpression(left, expression.operator, right)
-            simplified, rule = _simplify_binary(current)
-            rules = left_rules + right_rules
-            if rule is not None:
-                rules += (rule,)
-            return simplified, rules
+            binary_current = BinaryExpression(left, expression.operator, right)
+            simplified, binary_rule = _simplify_binary(binary_current)
+            binary_rules = left_rules + right_rules
+            if binary_rule is not None:
+                binary_rules += (binary_rule,)
+            return simplified, binary_rules
 
         if isinstance(expression, UnaryExpression):
-            operand, rules = self._visit(expression.operand)
-            current = UnaryExpression(expression.operator, operand)
-            simplified, rule = _simplify_unary(current)
-            if rule is not None:
-                rules += (rule,)
-            return simplified, rules
+            operand, unary_rules = self._visit(expression.operand)
+            unary_current = UnaryExpression(expression.operator, operand)
+            simplified, unary_rule = _simplify_unary(unary_current)
+            if unary_rule is not None:
+                unary_rules += (unary_rule,)
+            return simplified, unary_rules
 
         if isinstance(expression, IsNullExpression):
-            operand, rules = self._visit(expression.operand)
-            current = IsNullExpression(operand)
+            operand, null_rules = self._visit(expression.operand)
+            null_current = IsNullExpression(operand)
             if isinstance(operand, Literal):
-                return Literal(operand.value is None), rules + (CONSTANT_FOLDING_RULE,)
-            return current, rules
-
-        if isinstance(expression, IsNotNullExpression):
-            operand, rules = self._visit(expression.operand)
-            current = IsNotNullExpression(operand)
-            if isinstance(operand, Literal):
-                return Literal(operand.value is not None), rules + (
+                return Literal(operand.value is None), null_rules + (
                     CONSTANT_FOLDING_RULE,
                 )
-            return current, rules
+            return null_current, null_rules
+
+        if isinstance(expression, IsNotNullExpression):
+            operand, not_null_rules = self._visit(expression.operand)
+            not_null_current = IsNotNullExpression(operand)
+            if isinstance(operand, Literal):
+                return Literal(operand.value is not None), not_null_rules + (
+                    CONSTANT_FOLDING_RULE,
+                )
+            return not_null_current, not_null_rules
 
         if isinstance(expression, FunctionCall):
             arguments: list[Expression] = []
-            rules: tuple[str, ...] = ()
+            function_rules: tuple[str, ...] = ()
             for argument in expression.arguments:
                 optimized, argument_rules = self._visit(argument)
                 arguments.append(optimized)
-                rules += argument_rules
-            return replace(expression, arguments=tuple(arguments)), rules
+                function_rules += argument_rules
+            return replace(expression, arguments=tuple(arguments)), function_rules
 
         if isinstance(expression, AggregateExpression):
             if expression.argument is None:
                 return expression, ()
-            argument, rules = self._visit(expression.argument)
-            return replace(expression, argument=argument), rules
+            aggregate_argument, aggregate_rules = self._visit(expression.argument)
+            return replace(expression, argument=aggregate_argument), aggregate_rules
 
         if isinstance(expression, WindowExpression):
-            rules: tuple[str, ...] = ()
-            argument = expression.argument
-            default = expression.default
-            if argument is not None:
-                argument, argument_rules = self._visit(argument)
-                rules += argument_rules
-            if default is not None:
-                default, default_rules = self._visit(default)
-                rules += default_rules
-            return replace(expression, argument=argument, default=default), rules
+            window_rules: tuple[str, ...] = ()
+            window_argument: Expression | None = expression.argument
+            window_default: Expression | None = expression.default
+            if window_argument is not None:
+                optimized_argument, argument_rules = self._visit(window_argument)
+                window_argument = optimized_argument
+                window_rules += argument_rules
+            if window_default is not None:
+                optimized_default, default_rules = self._visit(window_default)
+                window_default = optimized_default
+                window_rules += default_rules
+            return (
+                replace(
+                    expression,
+                    argument=window_argument,
+                    default=window_default,
+                ),
+                window_rules,
+            )
 
         return expression, ()
 

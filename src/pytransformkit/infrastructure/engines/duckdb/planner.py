@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from pytransformkit.domain.data.schema import Schema
-from pytransformkit.domain.expressions.aggregate import AggregateFunction
 from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
 from pytransformkit.domain.pipelines.plan import LogicalPlan
 from pytransformkit.domain.transformations.aggregation import (

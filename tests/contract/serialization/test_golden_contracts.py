@@ -60,4 +60,6 @@ def test_expression_v1_matches_exact_golden_bytes() -> None:
 
     decoded = ExpressionCodec().from_json(expected)
     assert decoded.structurally_equals(expression)
-    assert ExpressionCodec().fingerprint(decoded) == expression.fingerprint()
+    assert ExpressionCodec().fingerprint(decoded) == (
+        ExpressionCodec().fingerprint(expression)
+    )

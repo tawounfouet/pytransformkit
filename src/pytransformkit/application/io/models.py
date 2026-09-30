@@ -64,7 +64,9 @@ class ReadRequest:
             raise TypeError("ReadRequest expected_schema must be a Schema.")
         if not isinstance(self.projection, tuple):
             raise TypeError("ReadRequest projection must be a tuple.")
-        if any(not isinstance(name, str) or not name.strip() for name in self.projection):
+        if any(
+            not isinstance(name, str) or not name.strip() for name in self.projection
+        ):
             raise ValueError("ReadRequest projection must contain non-empty names.")
         if len(set(self.projection)) != len(self.projection):
             raise ValueError("ReadRequest projection must not contain duplicates.")

@@ -119,7 +119,9 @@ class RuntimeTelemetry:
             Diagnostic(
                 code="PTK-OBS-001",
                 severity=DiagnosticSeverity.WARNING,
-                summary="Telemetry delivery failed; transformation execution continued.",
+                summary=(
+                    "Telemetry delivery failed; transformation execution continued."
+                ),
                 source_component="runtime.telemetry",
                 execution_id=execution_id,
                 correlation_id=correlation.correlation_id,

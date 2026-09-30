@@ -148,16 +148,18 @@ class DuckDBPlanCompiler:
         )
         params = tuple(value for _, fragment in ctes for value in fragment.params)
 
-        return DuckDBCompiledPlan(
-            outputs=tuple(
+        outputs: list[DuckDBCompiledQuery] = []
+        for name, alias in output_aliases:
+            final_sql = "WITH " + cte_sql + "\nSELECT * FROM " + quote_identifier(alias)
+            outputs.append(
                 DuckDBCompiledQuery(
                     name=name,
-                    sql=("WITH " + cte_sql + "\nSELECT * FROM " + quote_identifier(alias)),
+                    sql=final_sql,
                     params=params,
                 )
-                for name, alias in output_aliases
             )
-        )
+
+        return DuckDBCompiledPlan(outputs=tuple(outputs))
 
     def _compile_transformation(
         self,

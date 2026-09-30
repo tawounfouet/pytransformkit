@@ -39,7 +39,7 @@ class PyTransformKitError(Exception):
         failure_evidence: FailureEvidence,
         manifest: ExecutionManifest,
         diagnostics: tuple[Diagnostic, ...],
-    ) -> "PyTransformKitError":
+    ) -> PyTransformKitError:
         """Attach structured execution evidence without changing error identity."""
         self.execution = execution
         self.failure_evidence = failure_evidence

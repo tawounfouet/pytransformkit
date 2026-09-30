@@ -152,6 +152,21 @@ jobs:
       - name: Run DuckDB cross-engine contracts
         run: pytest tests/contract/cross_engine/test_duckdb_equivalence.py -ra
 
+  io-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install physical I/O dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,io,pandas]"
+      - name: Run physical I/O contracts
+        run: pytest tests/contract/io -ra
+
   build:
     runs-on: ubuntu-latest
     steps:

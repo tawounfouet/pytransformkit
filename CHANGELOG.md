@@ -8,6 +8,16 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 
 ### Added
 
+- LOT-19 DuckDB relational SQL backend targeting `0.4.0a2`.
+- Optional `pytransformkit[duckdb]` dependency with Arrow-backed relation binding.
+- `DuckDBDatasetHandle`, logical/native type mapping, conservative relation Schema inspection, and safe SQL identifier quoting.
+- Parameterized logical-expression lowering that keeps runtime values outside generated SQL text.
+- CTE-backed lowering for projections, filters, limits, distinct, casts, derivations, sorting, joins, set operations, grouped/global aggregates, and analytical windows.
+- Explicit SQL NULL join lowering using `IS NOT DISTINCT FROM` for MATCH and ordinary equality for NEVER_MATCH.
+- Explicit caller-owned versus framework-owned connection lifecycle with no implicit commit and no closing of user-owned connections.
+- Eager materialized and lazy relational execution paths, Arrow interchange, and native DuckDB `EXPLAIN`.
+- Dedicated DuckDB adapter and DuckDB/Pandas cross-engine conformance jobs in CI.
+
 - LOT-18 PyArrow adapter and interchange line targeting `0.4.0a1`.
 - Optional `pytransformkit[pyarrow]` dependency with `PyArrowDatasetHandle` for `Table` and `RecordBatch`.
 - Arrow logical/native type mapping and Schema inspection covering nested, decimal, temporal, duration, binary, list, struct, and map types.

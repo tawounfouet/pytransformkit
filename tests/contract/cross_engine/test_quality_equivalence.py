@@ -173,10 +173,7 @@ def _normalized_output(result: object) -> list[dict[str, object]]:
         records = frame.to_dicts()
 
     return [
-        {
-            key: None if _is_missing(value) else value
-            for key, value in record.items()
-        }
+        {key: None if _is_missing(value) else value for key, value in record.items()}
         for record in records
     ]
 

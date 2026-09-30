@@ -38,9 +38,7 @@ class PandasQualityEvaluator:
         self,
         expression_compiler: PandasExpressionCompiler | None = None,
     ) -> None:
-        self._expression_compiler = (
-            expression_compiler or PandasExpressionCompiler()
-        )
+        self._expression_compiler = expression_compiler or PandasExpressionCompiler()
 
     def evaluate(
         self,
@@ -69,10 +67,7 @@ class PandasQualityEvaluator:
             )
             rule_results.append(result)
 
-            if (
-                spec.policy is ValidationPolicy.FAIL_FAST
-                and not result.passed
-            ):
+            if spec.policy is ValidationPolicy.FAIL_FAST and not result.passed:
                 validation = ValidationResult(
                     gate_name=spec.name,
                     policy=spec.policy,
@@ -88,10 +83,7 @@ class PandasQualityEvaluator:
             rule_results=tuple(rule_results),
         )
 
-        if (
-            spec.policy is ValidationPolicy.FAIL_AT_END
-            and not validation.passed
-        ):
+        if spec.policy is ValidationPolicy.FAIL_AT_END and not validation.passed:
             raise QualityGateError(validation)
 
         return validation
@@ -179,9 +171,8 @@ class PandasQualityEvaluator:
 
         if isinstance(rule, RowCount):
             count = len(dataframe)
-            valid = (
-                (rule.minimum is None or count >= rule.minimum)
-                and (rule.maximum is None or count <= rule.maximum)
+            valid = (rule.minimum is None or count >= rule.minimum) and (
+                rule.maximum is None or count <= rule.maximum
             )
             return _result(
                 rule,

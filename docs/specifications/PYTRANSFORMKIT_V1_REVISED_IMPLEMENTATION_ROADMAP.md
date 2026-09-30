@@ -731,6 +731,8 @@ targeting **`0.4.0`**.
 
 # 14. LOT-20 — Physical I/O and Resource Boundary
 
+**Status:** DONE — `0.4.0`
+
 **Target milestone:** 0.4.0
 
 ## Scope
@@ -778,6 +780,28 @@ governed publication
 - credentials are absent from serialized references;
 - write and publication semantics remain distinct;
 - pushdown does not corrupt lineage.
+
+## Implementation closure
+
+LOT-20 closes the `0.4.x` line with:
+
+- explicit Reader and Writer Protocols plus scheme-based `ResourceIORegistry`;
+- portable `ResourceReference`, `CredentialReference`, `RetrySafety`, `WriteMode` and `WriteStatus` semantics;
+- `ReadRequest` / `ReadResult` and `WriteRequest` / `WriteResult` runtime contracts;
+- local filesystem root confinement;
+- CSV, JSONL, Parquet and Arrow IPC reads/writes;
+- Parquet projection/predicate pushdown and Hive partition pruning;
+- explicit POST_SCAN evidence when non-Parquet projection/filtering cannot be source-pushed;
+- Arrow interchange as the physical bridge into Pandas, Polars, PyArrow and DuckDB;
+- resource-backed runtime input resolution and explicit output materialization;
+- physical ResourceReference linkage in lineage without changing logical derivation semantics;
+- typed write modes kept distinct from publication semantics;
+- explicit write retry-safety declarations;
+- reconciliation-required `UNKNOWN_OUTCOME` propagation for uncertain side effects;
+- no RAW lifecycle, DatasetVersion store, publication pointer or ingestion replay ownership.
+
+The next implementation lot is **LOT-21 — Versioned Serialization and Canonical IR**,
+targeting **`0.5.0a1`**.
 
 ---
 

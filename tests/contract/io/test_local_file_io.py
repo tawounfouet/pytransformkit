@@ -12,9 +12,10 @@ pq = pytest.importorskip("pyarrow.parquet")
 from pytransformkit import ResourceReference, RetrySafety, WriteMode
 from pytransformkit.adapters.pyarrow import PyArrowDatasetHandle
 from pytransformkit.functions import col
+from pytransformkit.errors import ResourcePathViolationError, ResourceWriteError
+from pytransformkit.infrastructure.engines.pyarrow.types import PyArrowSchemaInspector
 from pytransformkit.readers import LocalFileReader, PushdownStatus, ReadRequest
 from pytransformkit.writers import LocalFileWriter, WriteRequest, WriteStatus
-from pytransformkit.errors import ResourcePathViolationError, ResourceWriteError
 
 
 @pytest.mark.parametrize(
@@ -48,7 +49,7 @@ def test_local_file_round_trip_supported_formats(
         WriteRequest(
             resource=resource,
             handle=PyArrowDatasetHandle(table),
-            schema=None,  # type: ignore[arg-type]
+            schema=PyArrowSchemaInspector().inspect(table),
             mode=WriteMode.CREATE_NEW,
             retry_safety=RetrySafety.SAFE,
         )
@@ -136,13 +137,6 @@ def test_create_new_refuses_existing_target(tmp_path: Path) -> None:
     handle = PyArrowDatasetHandle(table)
     resource = ResourceReference(scheme="file", locator="records.parquet")
     writer = LocalFileWriter(tmp_path)
-    schema = LocalFileReader  # sentinel to avoid pyright-style inference
-    del schema
-
-    from pytransformkit.infrastructure.engines.pyarrow.types import (
-        PyArrowSchemaInspector,
-    )
-
     logical_schema = PyArrowSchemaInspector().inspect(table)
     request = WriteRequest(
         resource=resource,
@@ -159,10 +153,6 @@ def test_create_new_refuses_existing_target(tmp_path: Path) -> None:
 
 def test_csv_append_is_not_allowed_to_claim_safe_retry(tmp_path: Path) -> None:
     table = pa.table({"id": [1]})
-    from pytransformkit.infrastructure.engines.pyarrow.types import (
-        PyArrowSchemaInspector,
-    )
-
     with pytest.raises(ResourceWriteError):
         LocalFileWriter(tmp_path).write(
             WriteRequest(

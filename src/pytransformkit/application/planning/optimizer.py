@@ -15,8 +15,8 @@ from pytransformkit.domain.pipelines.plan import LogicalPlan, LogicalPlanNode
 from pytransformkit.domain.quality.rules import ExpressionValidation
 from pytransformkit.domain.shared.fingerprint import Fingerprint
 from pytransformkit.domain.shared.identifiers import NodeId
+from pytransformkit.domain.expressions.aggregate import AggregateExpression
 from pytransformkit.domain.transformations.aggregation import (
-    AggregateExpression,
     AggregateMetric,
     AggregateTransformation,
 )

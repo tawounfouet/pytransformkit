@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
 from pytransformkit.domain.shared.identifiers import (
+    DatasetId,
     NodeId,
     PipelineId,
     StepId,
@@ -21,6 +22,7 @@ class LogicalPlanNode:
     kind: PipelineNodeKind
     input_schema: Schema | None
     output_schema: Schema
+    dataset_id: DatasetId
     step_id: StepId | None = None
     transformation: TransformationSpec | None = None
     name: str | None = None
@@ -28,6 +30,8 @@ class LogicalPlanNode:
     input_schemas: tuple[Schema, ...] = ()
 
     def __post_init__(self) -> None:
+        if not isinstance(self.dataset_id, DatasetId):
+            raise TypeError("LogicalPlanNode dataset_id must be a DatasetId.")
         if self.input_schemas and len(self.input_schemas) != len(self.input_node_ids):
             raise ValueError(
                 "LogicalPlanNode input_schemas and input_node_ids must align."

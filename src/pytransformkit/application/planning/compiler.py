@@ -16,7 +16,7 @@ from pytransformkit.domain.plans import (
     TransformationPlanValidator,
     ordered_predecessors,
 )
-from pytransformkit.domain.shared.identifiers import NodeId
+from pytransformkit.domain.shared.identifiers import DatasetId, NodeId
 from pytransformkit.domain.transformations.schema_resolution import (
     OutputSchemaResolver,
 )
@@ -46,6 +46,7 @@ class TransformationCompiler:
         )
         node_by_id = {node.id: node for node in plan.nodes}
         output_schema_by_node: dict[NodeId, Schema] = {}
+        dataset_id_by_node: dict[NodeId, DatasetId] = {}
         planned_nodes: list[LogicalPlanNode] = []
 
         for node_id in ordered_ids:
@@ -57,12 +58,17 @@ class TransformationCompiler:
             predecessor_schemas = tuple(
                 output_schema_by_node[item] for item in predecessor_ids
             )
+            predecessor_dataset_ids = tuple(
+                dataset_id_by_node[item] for item in predecessor_ids
+            )
             planned = self._compile_node(
                 node,
                 predecessor_ids,
                 predecessor_schemas,
+                predecessor_dataset_ids,
             )
             output_schema_by_node[node_id] = planned.output_schema
+            dataset_id_by_node[node_id] = planned.dataset_id
             planned_nodes.append(planned)
 
         outputs = tuple(
@@ -90,6 +96,7 @@ class TransformationCompiler:
         node: PipelineNode,
         predecessor_ids: tuple[NodeId, ...],
         predecessor_schemas: tuple[Schema, ...],
+        predecessor_dataset_ids: tuple[DatasetId, ...],
     ) -> LogicalPlanNode:
         if isinstance(node, InputNode):
             if predecessor_ids:
@@ -99,6 +106,7 @@ class TransformationCompiler:
                 kind=node.kind,
                 input_schema=None,
                 output_schema=node.schema,
+                dataset_id=node.dataset_id or DatasetId(node.id.value),
                 name=node.name,
             )
 
@@ -114,6 +122,7 @@ class TransformationCompiler:
                     predecessor_schemas[0] if len(predecessor_schemas) == 1 else None
                 ),
                 output_schema=output_schema,
+                dataset_id=node.dataset_id or DatasetId(node.id.value),
                 step_id=node.step_id,
                 transformation=node.transformation,
                 name=node.name,
@@ -131,6 +140,7 @@ class TransformationCompiler:
                 kind=node.kind,
                 input_schema=predecessor_schemas[0],
                 output_schema=predecessor_schemas[0],
+                dataset_id=predecessor_dataset_ids[0],
                 name=node.name,
                 input_node_ids=predecessor_ids,
                 input_schemas=predecessor_schemas,

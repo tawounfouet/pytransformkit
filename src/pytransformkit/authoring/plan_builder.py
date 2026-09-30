@@ -103,7 +103,8 @@ class TransformationPlanBuilder:
         node = InputNode.create(name, schema)
         self._nodes.append(node)
         self._input_names.add(name)
-        return self._new_dataset(name, schema, node.id)
+        assert node.dataset_id is not None
+        return self._new_dataset(name, schema, node.id, node.dataset_id)
 
     def apply(
         self,
@@ -130,7 +131,13 @@ class TransformationPlanBuilder:
                 input_index=0,
             )
         )
-        return self._new_dataset(name, output_schema, node.id)
+        assert node.dataset_id is not None
+        return self._new_dataset(
+            name,
+            output_schema,
+            node.id,
+            node.dataset_id,
+        )
 
     def select(
         self,
@@ -533,16 +540,23 @@ class TransformationPlanBuilder:
                 ),
             )
         )
-        return self._new_dataset(name, output_schema, node.id)
+        assert node.dataset_id is not None
+        return self._new_dataset(
+            name,
+            output_schema,
+            node.id,
+            node.dataset_id,
+        )
 
     def _new_dataset(
         self,
         name: str,
         schema: Schema,
         node_id: NodeId,
+        dataset_id: DatasetId,
     ) -> Dataset:
         dataset = Dataset(
-            id=DatasetId.new(),
+            id=dataset_id,
             schema=schema,
             metadata=DatasetMetadata(name=name),
         )

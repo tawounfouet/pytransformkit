@@ -17,6 +17,7 @@ from pytransformkit.errors.expression import (
     FunctionNotFoundError,
     InvalidBooleanUsageError,
 )
+from pytransformkit.errors.lineage import LineageError, UnsupportedLineageError
 from pytransformkit.errors.pipeline import (
     InvalidPipelineError,
     PipelineCycleError,
@@ -57,6 +58,7 @@ __all__ = [
     "InvalidPipelineError",
     "InvalidTransformationError",
     "InvalidValidationError",
+    "LineageError",
     "PipelineCycleError",
     "PipelineError",
     "PipelineNodeNotFoundError",
@@ -67,5 +69,6 @@ __all__ = [
     "SchemaError",
     "TransformationError",
     "UnsupportedEngineCapabilityError",
+    "UnsupportedLineageError",
     "UnsupportedTransformationError",
 ]

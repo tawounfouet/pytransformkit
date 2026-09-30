@@ -19,7 +19,7 @@ from pytransformkit.domain.pipelines.validation import (
     PipelineGraphValidator,
     topological_order,
 )
-from pytransformkit.domain.shared.identifiers import NodeId
+from pytransformkit.domain.shared.identifiers import DatasetId, NodeId
 from pytransformkit.domain.transformations.schema_resolution import (
     OutputSchemaResolver,
 )
@@ -47,6 +47,7 @@ class PipelinePlanner:
         node_by_id = {node.id: node for node in pipeline.nodes}
         predecessors = _predecessors(pipeline)
         output_schema_by_node: dict[NodeId, Schema] = {}
+        dataset_id_by_node: dict[NodeId, DatasetId] = {}
         planned_nodes: list[LogicalPlanNode] = []
 
         for node_id in ordered_ids:
@@ -55,8 +56,10 @@ class PipelinePlanner:
                 node,
                 predecessors[node_id],
                 output_schema_by_node,
+                dataset_id_by_node,
             )
             output_schema_by_node[node_id] = planned.output_schema
+            dataset_id_by_node[node_id] = planned.dataset_id
             planned_nodes.append(planned)
 
         output_schema = output_schema_by_node[pipeline.output_node.id]
@@ -74,6 +77,7 @@ class PipelinePlanner:
         node: PipelineNode,
         predecessor_ids: tuple[NodeId, ...],
         output_schema_by_node: dict[NodeId, Schema],
+        dataset_id_by_node: dict[NodeId, DatasetId],
     ) -> LogicalPlanNode:
         if isinstance(node, InputNode):
             if predecessor_ids:
@@ -83,6 +87,7 @@ class PipelinePlanner:
                 kind=node.kind,
                 input_schema=None,
                 output_schema=node.schema,
+                dataset_id=node.dataset_id or DatasetId(node.id.value),
                 name=node.name,
             )
 
@@ -104,6 +109,7 @@ class PipelinePlanner:
                 kind=node.kind,
                 input_schema=input_schema,
                 output_schema=output_schema,
+                dataset_id=node.dataset_id or DatasetId(node.id.value),
                 step_id=node.step_id,
                 transformation=node.transformation,
                 name=node.name,
@@ -117,6 +123,7 @@ class PipelinePlanner:
                 kind=node.kind,
                 input_schema=input_schema,
                 output_schema=input_schema,
+                dataset_id=dataset_id_by_node[predecessor_ids[0]],
                 name=node.name,
                 input_node_ids=predecessor_ids,
                 input_schemas=(input_schema,),

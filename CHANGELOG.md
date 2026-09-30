@@ -91,6 +91,17 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 - Quality evidence propagated through `EngineExecutionResult` and `TransformationResult`.
 - Pandas and Polars quality evaluators with cross-engine conformance, including Polars lazy quality evaluation.
 - Explicit `QUALITY` engine capability and nested-path capability propagation for quality rules.
+- Logical Dataset identity preservation from `TransformationPlan` authoring through `LogicalPlan` compilation.
+- Engine-neutral lineage contracts including `FieldReference`, `DatasetLineageEdge`, `FieldLineageEdge`, `FieldDependency`, `TransformationLineage`, derivation kinds and confidence levels.
+- Stable lineage-confidence vocabulary: `EXACT`, `DECLARED`, `INFERRED`, `PARTIAL`, and `UNKNOWN`.
+- Static `LineageAnalyzer` covering every current built-in transformation without executing physical data.
+- Explicit separation between value derivation and operational field dependencies for filters, grouping, joins, ordering, windows, deduplication, distinct, quality checks, pivoting and set membership.
+- Exact field lineage for rename, cast, derive, aggregate, window, join, pivot, unpivot, explode and flatten semantics.
+- Declarative `ResourceReference` linkage for logical inputs and outputs without resource resolution.
+- `LineageImpactAnalyzer` for transitive upstream/downstream field and logical Dataset impact analysis.
+- Public `pytransformkit.lineage` namespace and `lineage.analyze()` convenience entry point.
+- `LineageError` / `UnsupportedLineageError` hierarchy preventing fabricated lineage for unsupported semantics.
+- Cross-engine conformance proving Pandas and Polars execution do not alter logical lineage.
 
 ### Changed
 

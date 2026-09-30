@@ -8,6 +8,17 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 
 ### Added
 
+- LOT-21 versioned serialization and canonical IR targeting `0.5.0a1`.
+- Public `pytransformkit.serialization` namespace with codecs for DataType, Field, Schema, Expression, TransformationPlan, LogicalPlan, ResourceReference, TransformationExecutionReference, TransformationLineage, Diagnostic, and ExecutionManifest.
+- Canonical JSON with UTF-8, Unicode NFC normalization, deterministic key ordering, compact separators, strict finite-number handling, typed collections, and exact durable representations for UUID/Decimal/date/time/datetime/bytes.
+- Closed semantic type registry with stable PyTransformKit semantic tags and no payload-controlled Python module/class imports.
+- Strict envelope decoding with explicit `contract` and integer `contract_version`, duplicate-key rejection, unknown-field/type rejection, payload-size and nesting-depth limits, and fail-closed handling of future versions.
+- Explicit contiguous wire migration hooks through `MigrationRegistry`; package version and wire contract version remain independent.
+- Portable `TransformationExecutionReference` DTO for inter-framework execution references.
+- Semantic SHA-256 fingerprints for Expression, TransformationPlan, and LogicalPlan codecs while preserving existing identity-independent plan semantics.
+- Golden v1 fixtures for ResourceReference, Schema, and Expression plus deterministic round-trip, migration, security-negative, plan/logical-plan, lineage, diagnostic, and manifest conformance tests.
+- Dedicated serialization CI contract gate and explicit prohibition of pickle/cloudpickle/dill/eval/exec reconstruction paths.
+
 - LOT-20 physical I/O and resource boundary, completing the `0.4.0` line.
 - Portable `CredentialReference`, `ResourceFormat`, `RetrySafety`, `WriteMode`, and `WriteStatus` values with no raw secret material.
 - Explicit `ReadRequest` / `ReadResult` and `WriteRequest` / `WriteResult` contracts plus Reader/Writer protocols and `ResourceIORegistry`.

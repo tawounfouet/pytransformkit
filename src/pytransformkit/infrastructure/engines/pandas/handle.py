@@ -19,3 +19,9 @@ class PandasDatasetHandle:
     @property
     def engine_id(self) -> str:
         return "pandas"
+
+    def to_arrow_table(self) -> Any:
+        """Materialize this DataFrame as an Arrow Table for explicit I/O."""
+        import pyarrow as pa
+
+        return pa.Table.from_pandas(self.dataframe, preserve_index=False)

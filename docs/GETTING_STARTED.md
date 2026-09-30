@@ -744,7 +744,87 @@ The Expression DSL currently includes:
 
 ---
 
-## 16. Run the local experimentation script
+## 16. Logical and field lineage
+
+LOT-16 adds static lineage analysis to the engine-neutral plan model. Lineage is derived from transformation semantics; it does not execute data and it does not depend on Pandas, Polars or another physical engine.
+
+~~~python
+from pytransformkit import lineage
+
+evidence = lineage.analyze(plan)
+
+customers_ref = evidence.input("customers")
+result_ref = evidence.output("result")
+
+for edge in evidence.field_edges:
+    print(
+        edge.source,
+        edge.derivation,
+        edge.target,
+        edge.confidence,
+    )
+
+for dependency in evidence.dependencies:
+    print(
+        dependency.kind,
+        dependency.field,
+        dependency.target_dataset,
+    )
+~~~
+
+PyTransformKit deliberately distinguishes value ancestry from operational dependencies. For example, a filter on `status` changes row membership but does not falsely make every output field derived from `status`. Likewise, sort keys, join keys, grouping keys, window partition/order keys, deduplication keys and quality-rule fields remain explicit dependencies.
+
+Built-in declarative transformations currently produce `EXACT` lineage when semantics are statically knowable. The stable confidence vocabulary is:
+
+~~~text
+EXACT
+DECLARED
+INFERRED
+PARTIAL
+UNKNOWN
+~~~
+
+The current built-in lineage model covers direct projection, rename, cast, expression derivation, joins, aggregation, analytical windows, set operations, pivot/unpivot, explode/flatten and quality gates.
+
+Portable resources may be connected explicitly without resolving or opening them:
+
+~~~python
+from pytransformkit import lineage
+from pytransformkit import ResourceReference
+
+evidence = lineage.analyze(
+    plan,
+    input_resources={
+        "customers": ResourceReference(
+            scheme="file",
+            locator="/data/customers.parquet",
+        ),
+    },
+)
+~~~
+
+This is logical traceability, not ingestion provenance. PyTransformKit does not create a governed DatasetVersion or take ownership of RAW/source provenance.
+
+Impact analysis is available over the typed lineage projection:
+
+~~~python
+from pytransformkit.lineage import FieldReference, LineageImpactAnalyzer
+
+impact = LineageImpactAnalyzer()
+
+target = FieldReference.of(
+    evidence.output("result"),
+    "normalized_email",
+)
+
+upstream = impact.upstream_fields(evidence, target)
+~~~
+
+Because lineage is derived from the logical plan, running the same plan through Pandas or Polars does not create different logical ancestry.
+
+---
+
+## 17. Run the local experimentation script
 
 The repository includes:
 
@@ -771,7 +851,7 @@ It demonstrates:
 
 ---
 
-## 17. Run the notebook
+## 18. Run the notebook
 
 An interactive equivalent is available at:
 
@@ -784,7 +864,7 @@ Start your preferred Jupyter frontend and open the notebook from the repository 
 
 ---
 
-## 18. Run the test suites
+## 19. Run the test suites
 
 ### Complete default suite
 
@@ -823,11 +903,10 @@ The CI matrix currently verifies Python 3.11, 3.12, 3.13 and 3.14 plus dedicated
 
 ---
 
-## 19. What comes next
+## 20. What comes next
 
 The revised V1 roadmap continues with:
 
-- **LOT-16** — Logical and Field Lineage;
 - **LOT-17** — Runtime Evidence / Identity / Observability;
 - **LOT-18** — PyArrow;
 - **LOT-19** — DuckDB;
@@ -849,7 +928,7 @@ docs/specifications/PYTRANSFORMKIT_V1_REVISED_IMPLEMENTATION_ROADMAP.md
 
 ---
 
-## 20. Recommended experimentation workflow
+## 21. Recommended experimentation workflow
 
 While PyTransformKit is pre-1.0:
 

@@ -19,7 +19,9 @@ class ResourceIORegistry:
         for scheme in reader.schemes:
             normalized = _scheme(scheme)
             if normalized in self._readers:
-                raise ValueError(f"Reader already registered for scheme {normalized!r}.")
+                raise ValueError(
+                    f"Reader already registered for scheme {normalized!r}."
+                )
             self._readers[normalized] = reader
 
     def register_writer(self, writer: Writer) -> None:
@@ -28,7 +30,9 @@ class ResourceIORegistry:
         for scheme in writer.schemes:
             normalized = _scheme(scheme)
             if normalized in self._writers:
-                raise ValueError(f"Writer already registered for scheme {normalized!r}.")
+                raise ValueError(
+                    f"Writer already registered for scheme {normalized!r}."
+                )
             self._writers[normalized] = writer
 
     def reader_for(self, scheme: str) -> Reader:

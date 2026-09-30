@@ -8,6 +8,20 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 
 ### Added
 
+- LOT-23 extension and plugin architecture, completing the `0.5.0` line.
+- Public qualified `pytransformkit.plugins` namespace exposing PluginRegistry, PluginDescriptor, PluginCompatibility, PluginKind, PluginActivationContext, EngineAdapter, Reader, Writer, ResourceResolver, FunctionExtension, OptimizerRule and TelemetrySink contracts.
+- Entry-point discovery under `pytransformkit.plugins` that records metadata without importing plugin code; `EntryPoint.load()` is called only from explicit `activate(plugin_id)`.
+- Machine-checkable framework and plugin-protocol compatibility ranges with plugin API version 1.
+- Explicit FunctionRegistry, OptimizerRuleRegistry, ResourceResolverRegistry and TelemetrySinkRegistry with deterministic duplicate/conflict handling.
+- Freeze semantics for PluginRegistry, EngineRegistry, ResourceIORegistry and extension registries so runtime configuration can become immutable before execution.
+- Explicit extension optimizer rules integrated into LogicalOptimizer with rule provenance and bounded optimizer passes.
+- LocalFilePathResolver conformance to the public ResourceResolver protocol while retaining configured-root confinement.
+- Stable plugin error hierarchy for not-found, conflicts, compatibility failures, activation failures and frozen-registry mutation.
+- Security tests proving PluginDescriptor is not accepted by the closed safe wire semantic registry and importing the plugin namespace does not trigger discovery.
+- Built-in conformance tests for Pandas, Polars, PyArrow and DuckDB EngineAdapter implementations, local Reader/Writer/ResourceResolver implementations, and NullTelemetrySink.
+- Dedicated plugin-contract CI gate covering discovery/activation separation, compatibility, conflicts, freezing, protocol conformance and wire-security boundaries.
+
+
 - LOT-22 engine-neutral Logical Optimizer targeting `0.5.0a2`.
 - Public `LogicalOptimizer`, `OptimizationResult`, `OptimizationReport`, rule-application provenance, optimizer diagnostics, and `ExpressionOptimizer` planning APIs without introducing a public `OptimizedLogicalPlan`.
 - Conservative fixed-point rewrites for constant folding, boolean simplification, predicate pushdown through safe unbranched Select/Sort boundaries, projection pruning for successive selections, and dead-node elimination.

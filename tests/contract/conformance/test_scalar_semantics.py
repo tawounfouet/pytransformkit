@@ -28,6 +28,7 @@ from pytransformkit.domain.data.field import Field
 from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.transformations.casting import CastPolicy
 from pytransformkit.functions import col, lower
+from pytransformkit.planning import TransformationCompiler
 
 
 def _runtime(adapter: object) -> TransformationRuntime:
@@ -144,7 +145,8 @@ def test_numeric_promotion_matches_between_pandas_and_polars() -> None:
 
     assert pandas == [{"total": 2.5}, {"total": 4.25}]
     assert polars == pandas
-    assert isinstance(plan.output_schema.field("total").data_type, FloatType)
+    logical = TransformationCompiler().compile(plan)
+    assert isinstance(logical.output_schema.field("total").data_type, FloatType)
 
 
 def test_decimal_cast_and_sum_match_between_pandas_and_polars() -> None:
@@ -176,7 +178,8 @@ def test_decimal_cast_and_sum_match_between_pandas_and_polars() -> None:
 
     assert pandas == [{"total_amount": Decimal("12.45")}]
     assert polars == pandas
-    assert plan.output_schema.field("total_amount").data_type == DecimalType(10, 2)
+    logical = TransformationCompiler().compile(plan)
+    assert logical.output_schema.field("total_amount").data_type == DecimalType(10, 2)
 
 
 def test_unicode_distinct_ordering_and_empty_data_match() -> None:

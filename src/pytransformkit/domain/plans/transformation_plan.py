@@ -79,3 +79,15 @@ class TransformationPlan:
             self.nodes,
             self.dependencies,
         )
+
+    def fingerprint(self):
+        """Return the deterministic semantic fingerprint of this declaration."""
+        from pytransformkit.serialization import TransformationPlanCodec
+
+        return TransformationPlanCodec().fingerprint(self)
+
+    def explain(self, *, format: str = "text") -> str:
+        """Compile and explain this plan without executing physical data."""
+        from pytransformkit.application.planning import TransformationCompiler
+
+        return TransformationCompiler().compile(self).explain(format=format)

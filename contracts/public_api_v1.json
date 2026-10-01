@@ -1,0 +1,120 @@
+{
+  "category_hashes": {
+    "engine_ids": "96bde4504cc62571ae102c9907634504e7d52f9e5e80307806dc395ee4bd2a91",
+    "enum_members": "3c3679375355bb5997ca66d8f86d3305d463f360ad5f329e174d9db77614eab3",
+    "exception_hierarchy": "b7e5e2141d57816e71adeb13802976115bde6c3068b874040f674a333f1071d6",
+    "extras": "bc32af831c4d789869e126db2a05f4cac9655e2fecea2acb7db3e064c60edec0",
+    "forbidden_public_types": "c7d08a258592bcf09362502011f96d45ed7a8e894eb74e373317b9713c5215a3",
+    "modules": "851cea70c727582fa1cf3d427de961fbf5e7a39dddd07ad023f75efe8dd2f501",
+    "protocol_members": "61f1e31245d97d5c27ae699a13166715d5dc1d00118117a8e0f248500dae5676",
+    "root_legacy_compatibility": "509f09bf61d0078f18f5e05bce3dcdbe1b14ca8aa111afe6be5cee2b55fe6e60",
+    "signatures": "c0ca9699b970026ad7a5864c014edb3361daa59cfa487869aef3ac997d0515ac",
+    "wire_contracts": "f7d59f8f1a60ff2503a118df9883f9d130bda5c2363c10872a3b3d5cffbf0a44"
+  },
+  "engine_ids": [
+    "duckdb",
+    "pandas",
+    "polars",
+    "pyarrow"
+  ],
+  "extras": {
+    "stable_runtime": [
+      "duckdb",
+      "io",
+      "pandas",
+      "polars",
+      "pyarrow"
+    ],
+    "tooling": [
+      "dev",
+      "performance"
+    ]
+  },
+  "forbidden_public_types": [
+    "TransformationGraph",
+    "OptimizedLogicalPlan",
+    "PhysicalPlan"
+  ],
+  "framework_line": "0.8.x",
+  "root_exports": [
+    "DataType",
+    "Dataset",
+    "Expression",
+    "Field",
+    "InputBinding",
+    "LogicalPlan",
+    "OutputBinding",
+    "ResourceReference",
+    "Schema",
+    "TransformationExecutionId",
+    "TransformationPlan",
+    "TransformationResult",
+    "TransformationRuntime",
+    "__version__",
+    "col",
+    "diagnostics",
+    "lit",
+    "lineage",
+    "quality",
+    "window"
+  ],
+  "root_legacy_compatibility": [
+    "CredentialReference",
+    "EngineRegistry",
+    "ExecutionContext",
+    "ExecutionMode",
+    "Pipeline",
+    "PipelineExecutionResult",
+    "RetrySafety",
+    "RunPipelineService",
+    "WriteMode",
+    "WriteStatus"
+  ],
+  "snapshot_version": 1,
+  "wire_contracts": {
+    "DataTypeCodec": {
+      "contract": "pytransformkit.data_type",
+      "contract_version": 1
+    },
+    "DiagnosticCodec": {
+      "contract": "pytransformkit.diagnostic",
+      "contract_version": 1
+    },
+    "ExecutionManifestCodec": {
+      "contract": "pytransformkit.execution_manifest",
+      "contract_version": 1
+    },
+    "ExpressionCodec": {
+      "contract": "pytransformkit.expression",
+      "contract_version": 1
+    },
+    "FieldCodec": {
+      "contract": "pytransformkit.field",
+      "contract_version": 1
+    },
+    "LineageCodec": {
+      "contract": "pytransformkit.transformation_lineage",
+      "contract_version": 1
+    },
+    "LogicalPlanCodec": {
+      "contract": "pytransformkit.logical_plan",
+      "contract_version": 1
+    },
+    "ResourceReferenceCodec": {
+      "contract": "pykit.resource_reference",
+      "contract_version": 1
+    },
+    "SchemaCodec": {
+      "contract": "pytransformkit.schema",
+      "contract_version": 1
+    },
+    "TransformationExecutionReferenceCodec": {
+      "contract": "pykit.transformation_execution_reference",
+      "contract_version": 1
+    },
+    "TransformationPlanCodec": {
+      "contract": "pytransformkit.transformation_plan",
+      "contract_version": 1
+    }
+  }
+}

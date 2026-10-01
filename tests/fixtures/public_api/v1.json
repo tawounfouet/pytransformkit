@@ -1,0 +1,416 @@
+{
+  "root_exports": [
+    "CredentialReference",
+    "DataType",
+    "Dataset",
+    "Expression",
+    "Field",
+    "InputBinding",
+    "LogicalPlan",
+    "OutputBinding",
+    "ResourceReference",
+    "RetrySafety",
+    "Schema",
+    "TransformationExecutionId",
+    "TransformationPlan",
+    "TransformationResult",
+    "TransformationRuntime",
+    "WriteMode",
+    "WriteStatus",
+    "__version__",
+    "col",
+    "diagnostics",
+    "lit",
+    "lineage",
+    "quality",
+    "window"
+  ],
+  "stable_namespaces": {
+    "pytransformkit.authoring": [
+      "TransformationPlanBuilder"
+    ],
+    "pytransformkit.expressions": [
+      "AggregateExpression",
+      "BinaryExpression",
+      "ColumnReference",
+      "Expression",
+      "IsNotNullExpression",
+      "IsNullExpression",
+      "Literal",
+      "UnaryExpression",
+      "WindowExpression",
+      "col",
+      "expression_fingerprint",
+      "lit"
+    ],
+    "pytransformkit.functions": [
+      "avg",
+      "col",
+      "concat",
+      "count",
+      "count_distinct",
+      "convert_timezone",
+      "day",
+      "duration_between",
+      "hour",
+      "lit",
+      "lower",
+      "max",
+      "mean",
+      "minute",
+      "min",
+      "month",
+      "normalize_timestamp",
+      "second",
+      "sum",
+      "to_date",
+      "trim",
+      "upper",
+      "year"
+    ],
+    "pytransformkit.transformations": [
+      "AggregateTransformation",
+      "CastPolicy",
+      "CastTransformation",
+      "DeduplicateTransformation",
+      "DeduplicationStrategy",
+      "DeriveTransformation",
+      "DistinctTransformation",
+      "DropTransformation",
+      "ExceptTransformation",
+      "ExplodeTransformation",
+      "FilterTransformation",
+      "FlattenTransformation",
+      "IntersectTransformation",
+      "JoinTransformation",
+      "JoinType",
+      "LimitTransformation",
+      "NullJoinPolicy",
+      "PivotTransformation",
+      "QualityGate",
+      "RenameTransformation",
+      "SelectTransformation",
+      "SortTransformation",
+      "TransformationSpec",
+      "UnionTransformation",
+      "UnpivotTransformation"
+    ],
+    "pytransformkit.planning": [
+      "LogicalOptimizer",
+      "LogicalPlan",
+      "TransformationCompiler"
+    ],
+    "pytransformkit.engines": [
+      "Capability",
+      "EngineAdapter",
+      "EngineCapability",
+      "EngineDescriptor",
+      "EngineRegistry",
+      "PhysicalHandle"
+    ],
+    "pytransformkit.adapters.pandas": [
+      "PandasEngineAdapter"
+    ],
+    "pytransformkit.adapters.polars": [
+      "PolarsEngineAdapter"
+    ]
+  },
+  "signatures": {
+    "pytransformkit.Field": [
+      ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["data_type", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["nullable", "POSITIONAL_OR_KEYWORD", true],
+      ["description", "POSITIONAL_OR_KEYWORD", null]
+    ],
+    "pytransformkit.Schema": [
+      ["fields", "POSITIONAL_OR_KEYWORD", "<required>"]
+    ],
+    "pytransformkit.ResourceReference": [
+      ["scheme", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["locator", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["media_type", "POSITIONAL_OR_KEYWORD", null],
+      ["metadata", "POSITIONAL_OR_KEYWORD", []]
+    ],
+    "pytransformkit.DataType.decimal": [
+      ["precision", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["scale", "POSITIONAL_OR_KEYWORD", "<required>"]
+    ],
+    "pytransformkit.DataType.timestamp": [
+      ["timezone", "KEYWORD_ONLY", null],
+      ["unit", "KEYWORD_ONLY", "us"]
+    ],
+    "pytransformkit.TransformationPlan.builder": [
+      ["name", "POSITIONAL_OR_KEYWORD", "<required>"]
+    ],
+    "pytransformkit.TransformationPlan.explain": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["format", "KEYWORD_ONLY", "text"]
+    ],
+    "pytransformkit.LogicalPlan.explain": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["format", "KEYWORD_ONLY", "text"]
+    ],
+    "pytransformkit.planning.TransformationCompiler.compile": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["plan", "POSITIONAL_OR_KEYWORD", "<required>"]
+    ],
+    "pytransformkit.InputBinding.from_native": [
+      ["input_name", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["value", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["engine", "KEYWORD_ONLY", "<required>"]
+    ],
+    "pytransformkit.InputBinding.from_resource": [
+      ["input_name", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["resource", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["credential", "KEYWORD_ONLY", null]
+    ],
+    "pytransformkit.OutputBinding.to_resource": [
+      ["output_name", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["resource", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["mode", "KEYWORD_ONLY", "WriteMode.CREATE_NEW"],
+      ["credential", "KEYWORD_ONLY", null],
+      ["retry_safety", "KEYWORD_ONLY", "RetrySafety.UNKNOWN"]
+    ],
+    "pytransformkit.TransformationRuntime.__init__": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["engines", "KEYWORD_ONLY", "<required>"],
+      ["compiler", "KEYWORD_ONLY", null],
+      ["compatibility", "KEYWORD_ONLY", null],
+      ["telemetry", "KEYWORD_ONLY", null],
+      ["resources", "KEYWORD_ONLY", null]
+    ],
+    "pytransformkit.TransformationRuntime.execute": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["plan", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["engine", "KEYWORD_ONLY", "<required>"],
+      ["inputs", "KEYWORD_ONLY", "<required>"],
+      ["outputs", "KEYWORD_ONLY", null],
+      ["mode", "KEYWORD_ONLY", "ExecutionMode.AUTO"],
+      ["correlation", "KEYWORD_ONLY", null],
+      ["cancellation", "KEYWORD_ONLY", null]
+    ],
+    "pytransformkit.engines.EngineRegistry.register": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["adapter", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["replace", "KEYWORD_ONLY", false]
+    ],
+    "pytransformkit.engines.EngineRegistry.unregister": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["engine_id", "POSITIONAL_OR_KEYWORD", "<required>"]
+    ],
+    "pytransformkit.engines.EngineRegistry.get": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["engine_id", "POSITIONAL_OR_KEYWORD", "<required>"]
+    ],
+    "pytransformkit.engines.EngineRegistry.has": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["engine_id", "POSITIONAL_OR_KEYWORD", "<required>"]
+    ],
+    "pytransformkit.engines.EngineRegistry.list": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+    ],
+    "pytransformkit.engines.EngineRegistry.capabilities": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["engine_id", "POSITIONAL_OR_KEYWORD", "<required>"]
+    ]
+  },
+  "protocol_members": {
+    "pytransformkit.engines.EngineAdapter": [
+      "descriptor",
+      "execute"
+    ],
+    "pytransformkit.engines.PhysicalHandle": [
+      "engine_id"
+    ],
+    "pytransformkit.plugins.Reader": [
+      "read",
+      "schemes"
+    ],
+    "pytransformkit.plugins.Writer": [
+      "schemes",
+      "write"
+    ],
+    "pytransformkit.plugins.ResourceResolver": [
+      "resolve",
+      "schemes"
+    ],
+    "pytransformkit.plugins.FunctionExtension": [
+      "build",
+      "identifier"
+    ],
+    "pytransformkit.plugins.OptimizerRule": [
+      "apply",
+      "rule_id"
+    ],
+    "pytransformkit.plugins.TelemetrySink": [
+      "emit_event",
+      "record_metric",
+      "record_span"
+    ]
+  },
+  "exception_hierarchy": {
+    "PyTransformKitError": ["Exception", "PTK-CORE-000"],
+    "SchemaError": ["PyTransformKitError", "PTK-SCHEMA-000"],
+    "FieldNotFoundError": ["SchemaError", "PTK-SCHEMA-001"],
+    "DuplicateFieldError": ["SchemaError", "PTK-SCHEMA-002"],
+    "FieldCollisionError": ["SchemaError", "PTK-SCHEMA-003"],
+    "ExpressionError": ["PyTransformKitError", "PTK-EXPR-000"],
+    "ExpressionTypeError": ["ExpressionError", "PTK-EXPR-001"],
+    "InvalidBooleanUsageError": ["ExpressionError", "PTK-EXPR-002"],
+    "FunctionNotFoundError": ["ExpressionError", "PTK-EXPR-003"],
+    "TransformationError": ["PyTransformKitError", "PTK-TRANSFORM-000"],
+    "InvalidTransformationError": ["TransformationError", "PTK-TRANSFORM-001"],
+    "UnsupportedTransformationError": ["TransformationError", "PTK-TRANSFORM-002"],
+    "EngineError": ["PyTransformKitError", "PTK-ENGINE-000"],
+    "EngineNotFoundError": ["EngineError", "PTK-ENGINE-001"],
+    "UnsupportedEngineCapabilityError": ["EngineError", "PTK-ENGINE-002"],
+    "AdapterError": ["EngineError", "PTK-ENGINE-100"],
+    "BindingError": ["PyTransformKitError", "PTK-BIND-001"],
+    "ResourceResolutionError": ["BindingError", "PTK-BIND-002"],
+    "ExecutionError": ["PyTransformKitError", "PTK-EXEC-000"],
+    "TransformationExecutionError": ["ExecutionError", "PTK-EXEC-001"],
+    "ExecutionTimeoutError": ["ExecutionError", "PTK-EXEC-002"],
+    "ExecutionCancelledError": ["ExecutionError", "PTK-EXEC-003"],
+    "UnknownOutcomeExecutionError": ["ExecutionError", "PTK-EXEC-004"],
+    "EngineContractViolationError": ["ExecutionError", "PTK-EXEC-005"],
+    "QualityError": ["PyTransformKitError", "PTK-QUALITY-000"],
+    "InvalidValidationError": ["QualityError", "PTK-QUALITY-001"],
+    "QualityGateError": ["QualityError", "PTK-QUALITY-002"],
+    "LineageError": ["PyTransformKitError", "PTK-LINEAGE-000"],
+    "UnsupportedLineageError": ["LineageError", "PTK-LINEAGE-001"],
+    "SerializationError": ["PyTransformKitError", "PTK-WIRE-000"],
+    "WireParseError": ["SerializationError", "PTK-WIRE-001"],
+    "UnknownContractError": ["SerializationError", "PTK-WIRE-002"],
+    "UnsupportedContractVersionError": ["SerializationError", "PTK-WIRE-003"],
+    "InvalidWirePayloadError": ["SerializationError", "PTK-WIRE-004"],
+    "PayloadTooLargeError": ["SerializationError", "PTK-WIRE-005"],
+    "NonPortableValueError": ["SerializationError", "PTK-WIRE-006"],
+    "MigrationError": ["SerializationError", "PTK-WIRE-007"],
+    "PluginError": ["PyTransformKitError", "PTK-PLUGIN-000"],
+    "PluginNotFoundError": ["PluginError", "PTK-PLUGIN-001"],
+    "PluginConflictError": ["PluginError", "PTK-PLUGIN-002"],
+    "PluginCompatibilityError": ["PluginError", "PTK-PLUGIN-003"],
+    "PluginActivationError": ["PluginError", "PTK-PLUGIN-004"],
+    "RegistryFrozenError": ["PluginError", "PTK-PLUGIN-005"],
+    "ResourceIOError": ["PyTransformKitError", "PTK-IO-000"],
+    "UnsupportedResourceSchemeError": ["ResourceIOError", "PTK-IO-001"],
+    "UnsupportedResourceFormatError": ["ResourceIOError", "PTK-IO-002"],
+    "ResourceReadError": ["ResourceIOError", "PTK-IO-003"],
+    "ResourceWriteError": ["ResourceIOError", "PTK-IO-004"],
+    "ResourcePathViolationError": ["ResourceIOError", "PTK-IO-005"]
+  },
+  "enum_members": {
+    "pytransformkit.engines.EngineCapability": {
+      "SELECT": "select",
+      "DROP": "drop",
+      "RENAME": "rename",
+      "FILTER": "filter",
+      "LIMIT": "limit",
+      "DISTINCT": "distinct",
+      "CAST": "cast",
+      "DERIVE": "derive",
+      "SORT": "sort",
+      "DEDUPLICATE": "deduplicate",
+      "JOIN": "join",
+      "JOIN_INNER": "join_inner",
+      "JOIN_LEFT": "join_left",
+      "JOIN_RIGHT": "join_right",
+      "JOIN_FULL": "join_full",
+      "JOIN_SEMI": "join_semi",
+      "JOIN_ANTI": "join_anti",
+      "JOIN_CROSS": "join_cross",
+      "UNION": "union",
+      "INTERSECT": "intersect",
+      "EXCEPT": "except",
+      "AGGREGATE": "aggregate",
+      "WINDOW": "window",
+      "WINDOW_ROWS_CUMULATIVE": "window_rows_cumulative",
+      "WINDOW_ROWS_MOVING": "window_rows_moving",
+      "WINDOW_ROWS_ARBITRARY": "window_rows_arbitrary",
+      "WINDOW_RANGE": "window_range",
+      "PIVOT": "pivot",
+      "UNPIVOT": "unpivot",
+      "EXPLODE": "explode",
+      "FLATTEN": "flatten",
+      "NESTED": "nested",
+      "TEMPORAL": "temporal",
+      "DURATION": "duration",
+      "QUALITY": "quality",
+      "LAZY": "lazy",
+      "STREAMING": "streaming",
+      "PYTHON_UDF": "python_udf"
+    },
+    "pytransformkit.runtime.ExecutionMode": {
+      "EAGER": "eager",
+      "LAZY": "lazy",
+      "AUTO": "auto"
+    },
+    "pytransformkit.runtime.ExecutionStatus": {
+      "CREATED": "created",
+      "RUNNING": "running",
+      "SUCCEEDED": "succeeded",
+      "FAILED": "failed",
+      "CANCELLED": "cancelled",
+      "TIMED_OUT": "timed_out",
+      "UNKNOWN_OUTCOME": "unknown_outcome",
+      "REQUIRES_RECONCILIATION": "requires_reconciliation"
+    },
+    "pytransformkit.runtime.WriteMode": {
+      "CREATE_NEW": "create_new",
+      "FAIL_IF_EXISTS": "fail_if_exists",
+      "REPLACE": "replace",
+      "APPEND": "append"
+    },
+    "pytransformkit.runtime.WriteStatus": {
+      "SUCCEEDED": "succeeded",
+      "FAILED": "failed",
+      "UNKNOWN_OUTCOME": "unknown_outcome"
+    },
+    "pytransformkit.runtime.RetrySafety": {
+      "SAFE": "safe",
+      "UNSAFE": "unsafe",
+      "UNKNOWN": "unknown",
+      "REQUIRES_RECONCILIATION": "requires_reconciliation"
+    },
+    "pytransformkit.plugins.PluginKind": {
+      "ENGINE_ADAPTER": "engine_adapter",
+      "READER": "reader",
+      "WRITER": "writer",
+      "RESOURCE_RESOLVER": "resource_resolver",
+      "FUNCTION": "function",
+      "OPTIMIZER_RULE": "optimizer_rule",
+      "TELEMETRY_SINK": "telemetry_sink"
+    }
+  },
+  "extras": {
+    "stable": ["pandas", "polars"],
+    "provisional": ["duckdb", "io", "pyarrow"],
+    "development": ["dev", "performance"],
+    "all_names": ["dev", "duckdb", "io", "pandas", "performance", "polars", "pyarrow"]
+  },
+  "engine_profiles": {
+    "pandas": "stable",
+    "polars": "stable",
+    "pyarrow": "provisional",
+    "duckdb": "provisional"
+  },
+  "plugin": {
+    "api_version": 1,
+    "entry_point_group": "pytransformkit.plugins",
+    "default_framework_min": "0.5.0",
+    "default_framework_max_exclusive": "2.0.0"
+  },
+  "wire_contracts": {
+    "DataTypeCodec": ["pytransformkit.data_type", 1],
+    "FieldCodec": ["pytransformkit.field", 1],
+    "SchemaCodec": ["pytransformkit.schema", 1],
+    "ExpressionCodec": ["pytransformkit.expression", 1],
+    "TransformationPlanCodec": ["pytransformkit.transformation_plan", 1],
+    "LogicalPlanCodec": ["pytransformkit.logical_plan", 1],
+    "ResourceReferenceCodec": ["pykit.resource_reference", 1],
+    "TransformationExecutionReferenceCodec": ["pykit.transformation_execution_reference", 1],
+    "LineageCodec": ["pytransformkit.transformation_lineage", 1],
+    "DiagnosticCodec": ["pytransformkit.diagnostic", 1],
+    "ExecutionManifestCodec": ["pytransformkit.execution_manifest", 1]
+  }
+}

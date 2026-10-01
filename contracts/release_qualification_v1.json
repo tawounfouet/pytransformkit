@@ -1,8 +1,8 @@
 {
   "manifest_version": 1,
   "lot": "LOT-27",
-  "phase": "release-qualification",
-  "project_version": "0.9.0",
+  "phase": "release-candidate",
+  "project_version": "1.0.0rc1",
   "release_candidate_target": "1.0.0rc1",
   "requires_python": ">=3.11",
   "python_versions": [
@@ -65,6 +65,8 @@
     "docs/MIGRATION_TO_V1.md",
     "docs/PUBLIC_API_V1_FREEZE.md",
     "docs/BACKWARDS_COMPATIBILITY_V1.md",
+    "docs/LOT_27_RC1_RELEASE_REVIEW.md",
+    "docs/RELEASE_NOTES_1_0_0rc1.md",
     "docs/RUNTIME_AND_ENGINE_SAFETY.md",
     "docs/SECURITY_AND_THREAT_MODEL.md",
     "benchmarks/budgets_ci.json",

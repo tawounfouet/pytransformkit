@@ -1097,6 +1097,8 @@ targeting **`0.7.0`**.
 
 # 19. LOT-25 — Performance and Memory Qualification
 
+**Status:** DONE — `0.7.0`
+
 **Target milestone:** 0.7.0
 
 ## Scope
@@ -1123,6 +1125,54 @@ lineage/diagnostic overhead
 - no optimization changes public semantics;
 - observability does not force unnecessary materialization;
 - abstraction overhead is measured rather than assumed.
+
+## Implementation closure
+
+LOT-25 closes the performance qualification gate with:
+
+- a reproducible `benchmarks/` harness using monotonic high-resolution timing, Python allocation tracing, deterministic warmups and repeated samples;
+- explicit CI and local benchmark profiles with fixed synthetic datasets;
+- JSON reports containing framework/Python/platform metadata, median, p95, sample timings, Python peak allocation and scenario-specific native metrics;
+- benchmark coverage for TransformationPlan compilation and LogicalOptimizer overhead;
+- physical expression-lowering measurements for DuckDB and Polars plus Pandas lowering/vectorized evaluation;
+- direct Pandas adapter versus full TransformationRuntime overhead measurement;
+- Pandas and Polars native memory-amplification measurements using engine-native size APIs;
+- Polars eager versus lazy-and-materialized measurement with semantic-equivalence tests;
+- Pandas/Polars to/from Arrow interchange cost measurement;
+- DuckDB eager, lazy-dispatch and lazy-materialization boundary measurements;
+- Parquet full-scan versus projection/predicate source-pushdown measurement with structured pushdown evidence;
+- logical lineage analysis overhead measurement;
+- null telemetry versus recording telemetry overhead measurement without changing transformation results;
+- absolute regression budgets for median/p95 duration, Python allocation peaks and native amplification;
+- relative regression budgets for runtime/adapter, lazy/eager, materialization, pushdown and telemetry overhead;
+- a committed first CI baseline at `benchmarks/baselines/0.7.0-ci.json`;
+- a dedicated `performance-contract` CI job that runs semantic qualification checks, enforces budgets and uploads `performance-report.json`;
+- retained optimizer equivalence contracts proving optimization does not redefine public semantics.
+
+The first qualified 10,000-row CI run observed, among other measurements:
+
+~~~text
+planning compile                         1.37 ms median
+logical optimize                        10.52 ms median
+Pandas direct adapter                   33.86 ms median
+Pandas full runtime                     52.78 ms median
+Polars eager                            24.02 ms median
+Polars lazy + materialize               22.63 ms median
+DuckDB eager                            38.67 ms median
+DuckDB lazy + materialize               38.84 ms median
+Parquet full scan                        3.15 ms median
+Parquet source pushdown                  2.13 ms median
+lineage analysis                         1.63 ms median
+null telemetry runtime                  27.79 ms median
+recording telemetry runtime             29.37 ms median
+~~~
+
+These values are qualification evidence from one GitHub-hosted runner, not public
+latency guarantees. The enforced budgets are deliberately wider than the observed
+baseline to tolerate shared-runner variance while still detecting material regressions.
+
+The next implementation lot is **LOT-26 — Public API, Security and Migration Freeze**,
+targeting **`0.8.0`**.
 
 ---
 

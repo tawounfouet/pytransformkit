@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib
 import inspect
 import json
@@ -280,6 +281,45 @@ def build_snapshot(project_file: Path) -> dict[str, object]:
     }
 
 
+def _category_digest(value: object) -> str:
+    payload = json.dumps(
+        value,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def freeze_manifest(snapshot: dict[str, object]) -> dict[str, object]:
+    """Reduce the full API snapshot to a reviewable cryptographic manifest."""
+    category_names = (
+        "modules",
+        "signatures",
+        "protocol_members",
+        "exception_hierarchy",
+        "enum_members",
+        "extras",
+        "engine_ids",
+        "wire_contracts",
+        "root_legacy_compatibility",
+        "forbidden_public_types",
+    )
+    return {
+        "snapshot_version": snapshot["snapshot_version"],
+        "framework_line": snapshot["framework_line"],
+        "category_hashes": {
+            name: _category_digest(snapshot[name]) for name in category_names
+        },
+        "root_exports": snapshot["modules"]["pytransformkit"]["exports"],
+        "extras": snapshot["extras"],
+        "engine_ids": snapshot["engine_ids"],
+        "wire_contracts": snapshot["wire_contracts"],
+        "root_legacy_compatibility": snapshot["root_legacy_compatibility"],
+        "forbidden_public_types": snapshot["forbidden_public_types"],
+    }
+
+
 def _arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
@@ -295,7 +335,8 @@ def _arguments() -> argparse.Namespace:
 
 def main() -> int:
     args = _arguments()
-    actual = build_snapshot(args.project)
+    snapshot = build_snapshot(args.project)
+    actual = freeze_manifest(snapshot)
 
     if args.write is not None:
         args.write.parent.mkdir(parents=True, exist_ok=True)
@@ -303,7 +344,7 @@ def main() -> int:
             json.dumps(actual, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
-        print(f"Wrote public API snapshot to {args.write}")
+        print(f"Wrote public API freeze manifest to {args.write}")
         return 0
 
     expected = json.loads(args.check.read_text(encoding="utf-8"))
@@ -311,13 +352,19 @@ def main() -> int:
         print("Public API freeze: PASS")
         return 0
 
-    expected_text = json.dumps(expected, indent=2, sort_keys=True)
-    actual_text = json.dumps(actual, indent=2, sort_keys=True)
+    expected_hashes = expected.get("category_hashes", {})
+    actual_hashes = actual.get("category_hashes", {})
+    changed = sorted(
+        name
+        for name in set(expected_hashes) | set(actual_hashes)
+        if expected_hashes.get(name) != actual_hashes.get(name)
+    )
     print("Public API freeze: FAIL", file=sys.stderr)
-    print("--- expected", file=sys.stderr)
-    print(expected_text, file=sys.stderr)
-    print("--- actual", file=sys.stderr)
-    print(actual_text, file=sys.stderr)
+    print(f"Changed categories: {changed!r}", file=sys.stderr)
+    print("--- expected manifest", file=sys.stderr)
+    print(json.dumps(expected, indent=2, sort_keys=True), file=sys.stderr)
+    print("--- actual manifest", file=sys.stderr)
+    print(json.dumps(actual, indent=2, sort_keys=True), file=sys.stderr)
     return 1
 
 

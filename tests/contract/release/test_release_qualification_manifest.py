@@ -5,7 +5,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).parents[3]
 SCRIPT = ROOT / "scripts" / "release_qualification.py"
 MANIFEST = ROOT / "contracts" / "release_qualification_v1.json"

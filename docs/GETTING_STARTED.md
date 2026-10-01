@@ -2,7 +2,7 @@
 
 PyTransformKit lets you define engine-neutral transformation semantics once, compile them into a LogicalPlan, and execute them explicitly through supported physical engines.
 
-The current development line targets **0.3.0a1** and includes LOT-15: transformation-owned data quality and validation on top of the V1 transformation-semantics baseline.
+The current development line is **0.8.0** and includes LOT-26: the V1 public API, security, packaging, and migration freeze.
 
 The canonical path is:
 
@@ -27,6 +27,23 @@ TransformationResult
 ~~~
 
 The former Pipeline / RunPipelineService path is retained only as a pre-V1 compatibility surface.
+
+The freeze and migration references are:
+
+~~~text
+docs/PUBLIC_API_FREEZE.md
+docs/SECURITY_THREAT_MODEL.md
+docs/MIGRATION_TO_V1.md
+docs/ENGINE_CONFORMANCE_MATRIX.md
+docs/engines/PANDAS.md
+docs/engines/POLARS.md
+~~~
+
+The machine-checkable V1 compatibility snapshot is:
+
+~~~text
+tests/fixtures/public_api/v1.json
+~~~
 
 ---
 
@@ -100,15 +117,13 @@ The core package has no mandatory physical-engine dependency.
 Start with a logical Schema:
 
 ~~~python
-from pytransformkit.domain.data.data_types import IntegerType, StringType
-from pytransformkit.domain.data.field import Field
-from pytransformkit.domain.data.schema import Schema
+from pytransformkit import DataType, Field, Schema
 
 schema = Schema(
     fields=(
-        Field("customer_id", IntegerType(), nullable=False),
-        Field("email", StringType(), nullable=True),
-        Field("status", StringType(), nullable=False),
+        Field("customer_id", DataType.int64(), nullable=False),
+        Field("email", DataType.string(), nullable=True),
+        Field("status", DataType.string(), nullable=False),
     )
 )
 ~~~
@@ -1268,6 +1283,20 @@ pytest tests/contract/cross_engine -ra
 
 ~~~bash
 pytest tests/contract/cross_engine tests/contract/conformance -ra
+~~~
+
+### LOT-26 public API and security freeze
+
+~~~bash
+pytest tests/contract/api tests/contract/security -ra
+~~~
+
+Installed-artifact documentation probes are executed in CI from the built wheel:
+
+~~~bash
+python examples/installed/core_getting_started.py
+python examples/installed/pandas_engine.py
+python examples/installed/polars_engine.py
 ~~~
 
 ### LOT-25 performance qualification

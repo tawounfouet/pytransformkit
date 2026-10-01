@@ -56,8 +56,6 @@ def _legacy_alias_snapshot(names: list[str]) -> dict[str, dict[str, str]]:
             )
 
         result[name] = {
-            "module": getattr(value, "__module__", type(value).__module__),
-            "qualname": getattr(value, "__qualname__", type(value).__qualname__),
             "warning": "DeprecationWarning",
         }
     return result

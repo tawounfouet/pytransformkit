@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from decimal import Decimal, InvalidOperation
 from importlib.metadata import PackageNotFoundError, version
 from typing import Any
 
@@ -23,6 +24,7 @@ from pytransformkit.application.ports.engines import PhysicalHandle
 from pytransformkit.domain.data.data_types import (
     BooleanType,
     DateType,
+    DecimalType,
     FloatType,
     IntegerType,
     StringType,
@@ -684,6 +686,15 @@ class PandasAdapter:
             converted = pd.to_numeric(series, errors=errors)
             return converted.astype(self._type_mapper.to_native(data_type))
 
+        if isinstance(data_type, DecimalType):
+            return series.map(
+                lambda value: _pandas_decimal(
+                    value,
+                    data_type,
+                    null_on_error=transformation.policy is CastPolicy.NULL,
+                )
+            ).astype("object")
+
         if isinstance(data_type, StringType):
             return series.astype("string")
 
@@ -706,6 +717,34 @@ class PandasAdapter:
         raise AdapterError(
             f"Pandas casting is not implemented for {type(data_type).__name__!r}."
         )
+
+
+def _pandas_decimal(
+    value: object,
+    data_type: DecimalType,
+    *,
+    null_on_error: bool,
+) -> object:
+    if value is None or value is pd.NA or value is pd.NaT:
+        return pd.NA
+
+    try:
+        decimal_value = value if isinstance(value, Decimal) else Decimal(str(value))
+        if not decimal_value.is_finite():
+            raise InvalidOperation
+        quantum = Decimal(1).scaleb(-data_type.scale)
+        quantized = decimal_value.quantize(quantum)
+        precision = max(len(quantized.as_tuple().digits), data_type.scale)
+        if precision > data_type.precision:
+            raise InvalidOperation
+        return quantized
+    except (InvalidOperation, TypeError, ValueError) as error:
+        if null_on_error:
+            return pd.NA
+        raise AdapterError(
+            f"Cannot cast value {value!r} to Decimal"
+            f"({data_type.precision},{data_type.scale})."
+        ) from error
 
 
 def _pandas_pivot_aggregate(

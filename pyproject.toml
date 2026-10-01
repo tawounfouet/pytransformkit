@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytransformkit"
-version = "0.6.0"
+version = "0.7.0"
 description = "Engine-agnostic data transformation framework for Python."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -58,6 +58,12 @@ duckdb = [
 ]
 io = [
   "pyarrow>=20,<26",
+]
+performance = [
+  "pandas>=2.2,<4",
+  "polars>=1.0,<2",
+  "pyarrow>=20,<26",
+  "duckdb>=1.4,<2",
 ]
 
 [project.urls]

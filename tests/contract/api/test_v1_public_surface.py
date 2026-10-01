@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import warnings
 
+import pytest
+
 import pytransformkit
 from pytransformkit import DataType, Field
 from pytransformkit.domain.data.data_types import (
@@ -128,7 +130,6 @@ def test_stable_qualified_namespaces_import() -> None:
 
 
 def test_stable_adapter_namespaces_export_only_engine_adapters() -> None:
-    pytest = __import__("pytest")
     pytest.importorskip("pandas")
     pytest.importorskip("polars")
 

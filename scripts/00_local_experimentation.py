@@ -11,12 +11,16 @@ from __future__ import annotations
 import pandas as pd
 import polars as pl
 
-from pytransformkit import InputBinding, TransformationPlan, TransformationRuntime
+from pytransformkit import (
+    DataType,
+    Field,
+    InputBinding,
+    Schema,
+    TransformationPlan,
+    TransformationRuntime,
+)
 from pytransformkit.adapters.pandas import PandasEngineAdapter
 from pytransformkit.adapters.polars import PolarsEngineAdapter
-from pytransformkit.domain.data.data_types import IntegerType, StringType
-from pytransformkit.domain.data.field import Field
-from pytransformkit.domain.data.schema import Schema
 from pytransformkit.engines import EngineRegistry
 from pytransformkit.functions import col, lower, trim
 from pytransformkit.planning import TransformationCompiler
@@ -50,9 +54,9 @@ def build_schema() -> Schema:
     """Create the logical, engine-independent input Schema."""
     return Schema(
         fields=(
-            Field("customer_id", IntegerType(), nullable=False),
-            Field("email", StringType(), nullable=True),
-            Field("status", StringType(), nullable=False),
+            Field("customer_id", DataType.int64(), nullable=False),
+            Field("email", DataType.string(), nullable=True),
+            Field("status", DataType.string(), nullable=False),
         )
     )
 

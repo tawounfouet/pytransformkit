@@ -13,6 +13,7 @@ from pytransformkit.domain.pipelines.nodes import (
     TransformationNode,
 )
 from pytransformkit.domain.plans.validation import TransformationPlanValidator
+from pytransformkit.domain.shared.fingerprint import Fingerprint
 from pytransformkit.domain.shared.identifiers import TransformationPlanId
 
 if TYPE_CHECKING:
@@ -80,7 +81,7 @@ class TransformationPlan:
             self.dependencies,
         )
 
-    def fingerprint(self):
+    def fingerprint(self) -> Fingerprint:
         """Return the deterministic semantic fingerprint of this declaration."""
         from pytransformkit.serialization import TransformationPlanCodec
 

@@ -1,0 +1,56 @@
+{
+  "framework_version": "0.7.0",
+  "profile": "ci",
+  "source_workflow_run_id": 36817814955,
+  "python_version": "3.11.16",
+  "platform": "Linux x86_64 GitHub-hosted runner",
+  "row_count": 10000,
+  "warmups": 1,
+  "repeats": 3,
+  "scenarios": {
+    "planning_compile": {"median_ms": 1.367116, "p95_ms": 2.536065, "peak_bytes": 11244},
+    "planning_optimize": {"median_ms": 10.523291, "p95_ms": 10.59778, "peak_bytes": 199979},
+    "expression_duckdb_compile": {"median_ms": 0.071052, "p95_ms": 0.072685, "peak_bytes": 1968},
+    "expression_polars_compile": {"median_ms": 0.130383, "p95_ms": 0.13403, "peak_bytes": 2704},
+    "expression_pandas_compile_eval": {"median_ms": 1.90033, "p95_ms": 1.934463, "peak_bytes": 8767},
+    "pandas_adapter_execution": {"median_ms": 33.859057, "p95_ms": 34.468733, "peak_bytes": 740144},
+    "pandas_runtime_execution": {"median_ms": 52.784559, "p95_ms": 53.762941, "peak_bytes": 765887},
+    "pandas_memory_amplification": {
+      "median_ms": 31.47156,
+      "p95_ms": 31.502679,
+      "peak_bytes": 414494,
+      "native_input_bytes": 715690,
+      "native_output_bytes": 420888,
+      "native_amplification_ratio": 0.5880870209168774
+    },
+    "polars_eager_execution": {"median_ms": 24.020232, "p95_ms": 24.32546, "peak_bytes": 251677},
+    "polars_lazy_execution": {"median_ms": 22.631339, "p95_ms": 22.781311, "peak_bytes": 252117},
+    "polars_memory_amplification": {
+      "median_ms": 18.687889,
+      "p95_ms": 18.76878,
+      "peak_bytes": 248507,
+      "native_input_bytes": 475558,
+      "native_output_bytes": 259236,
+      "native_amplification_ratio": 0.5451196278897632
+    },
+    "pandas_to_arrow": {"median_ms": 2.803362, "p95_ms": 2.884774, "peak_bytes": 34158},
+    "arrow_to_pandas": {"median_ms": 3.418207, "p95_ms": 3.420047, "peak_bytes": 18796},
+    "polars_to_arrow": {"median_ms": 0.583025, "p95_ms": 0.877134, "peak_bytes": 2797},
+    "arrow_to_polars": {"median_ms": 0.714491, "p95_ms": 0.98202, "peak_bytes": 3743},
+    "duckdb_eager_execution": {"median_ms": 38.66788, "p95_ms": 39.826061, "peak_bytes": 266151},
+    "duckdb_lazy_dispatch": {"median_ms": 38.467203, "p95_ms": 38.653732, "peak_bytes": 264205},
+    "duckdb_lazy_materialized": {"median_ms": 38.84243, "p95_ms": 39.255143, "peak_bytes": 263225},
+    "parquet_full_scan": {"median_ms": 3.14601, "p95_ms": 3.212609, "peak_bytes": 4238},
+    "parquet_pushdown": {"median_ms": 2.130789, "p95_ms": 2.155886, "peak_bytes": 4158},
+    "lineage_analysis": {"median_ms": 1.625558, "p95_ms": 1.64294, "peak_bytes": 14616},
+    "runtime_null_telemetry": {"median_ms": 27.787438, "p95_ms": 28.238548, "peak_bytes": 415766},
+    "runtime_recording_telemetry": {"median_ms": 29.366059, "p95_ms": 29.467137, "peak_bytes": 421749}
+  },
+  "derived_ratios": {
+    "runtime_vs_adapter_pandas": 1.558958810290444,
+    "polars_lazy_vs_eager": 0.9421715271165036,
+    "duckdb_lazy_materialized_vs_eager": 1.004513035019491,
+    "parquet_pushdown_vs_full_scan": 0.6772994984101455,
+    "recording_telemetry_vs_null": 1.0568178065279205
+  }
+}

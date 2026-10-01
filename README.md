@@ -43,8 +43,9 @@ The implementation baseline now covers:
 - **LOT-22 — Logical Optimizer**
 - **LOT-23 — Extension and Plugin Architecture**
 - **LOT-24 — Cross-Engine Conformance & Customer 360 Gate**
+- **LOT-25 — Performance & Memory Qualification**
 
-The current development line is **0.6.0**.
+The current development line is **0.7.0**.
 
 ### Canonical V1 model
 
@@ -133,6 +134,8 @@ LOT-22 adds an engine-neutral `LogicalOptimizer` while preserving the public `Lo
 LOT-23 closes the `0.5.x` extension line with the qualified `pytransformkit.plugins` surface. `PluginRegistry.discover()` enumerates entry-point metadata only; plugin modules are imported exclusively by explicit `activate(plugin_id)`. `PluginCompatibility` declares machine-checkable framework/protocol ranges, while EngineAdapter, Reader/Writer, ResourceResolver, FunctionExtension, OptimizerRule and TelemetrySink form the public extension contracts. Registries reject duplicates by default, can be frozen after configuration, and plugin metadata remains outside the safe wire semantic registry so deserialization cannot activate code.
 
 LOT-24 publishes the cross-engine qualification baseline in `pytransformkit.conformance` and `docs/ENGINE_CONFORMANCE_MATRIX.md`. Pandas and Polars are the STABLE mandatory V1 engines; PyArrow and DuckDB remain deliberately PROVISIONAL for their qualified subsets. The release gate covers NULL/NaN, numeric promotion, Decimal, timezone/nested values, Unicode, ordering, duplicates, empty data, joins, aggregates, windows, quality, lineage, serialization, explicit capability failures and no hidden fallback. A canonical Customer 360 TransformationPlan is executed unchanged on Pandas and Polars, including Polars lazy execution, with equivalent normalized output, transitive field lineage, quality evidence, canonical serialization and Parquet ResourceReference handoff.
+
+LOT-25 makes performance evidence reproducible instead of anecdotal. The `benchmarks/` harness measures planning, optimizer and expression overhead, stable-engine execution, native memory amplification, Polars eager/lazy behavior, Pandas/Polars ↔ Arrow interchange, DuckDB materialization boundaries, Parquet pushdown, lineage and telemetry. CI applies explicit absolute and relative regression budgets and uploads a JSON report. The first qualified `0.7.0` baseline is committed under `benchmarks/baselines/0.7.0-ci.json`; performance budgets remain regression tripwires rather than public latency SLAs.
 
 ### Runtime and engines
 
@@ -223,9 +226,9 @@ The historical `docs/ROADMAP_LOT_11_TO_1_0.md` remains useful as project history
 Current count:
 
 - Total roadmap: **29 lots** (`LOT-00` → `LOT-28`)
-- Completed after LOT-24: **25 lots** (`LOT-00` → `LOT-24`)
-- Remaining: **4 lots** (`LOT-25` → `LOT-28`)
-- Next lot: **LOT-25 — Performance and Memory Qualification**
+- Completed after LOT-25: **26 lots** (`LOT-00` → `LOT-25`)
+- Remaining: **3 lots** (`LOT-26` → `LOT-28`)
+- Next lot: **LOT-26 — Public API, Security and Migration Freeze**
 - Final lot: **LOT-28 — PyTransformKit 1.0.0 Stable Release**
 
 ## Development
@@ -267,6 +270,7 @@ Start with:
 
 - `docs/GETTING_STARTED.md` — canonical V1 authoring and execution path;
 - `docs/ENGINE_CONFORMANCE_MATRIX.md` — published engine stability and semantic qualification matrix;
+- `benchmarks/README.md` — LOT-25 performance harness, budgets and qualified `0.7.0` baseline;
 - `notebooks/00 - Local Experimentation.ipynb` — interactive first experiment;
 - `scripts/00_local_experimentation.py` — executable equivalent;
 - `docs/specifications/PYTRANSFORMKIT_V1_TARGET_ARCHITECTURE.md` — V1 target architecture;

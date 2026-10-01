@@ -21,6 +21,29 @@ It defines stable vocabulary, import paths, construction patterns, authoring flo
 
 ---
 
+# 1.1 LOT-26 implementation freeze amendment
+
+LOT-26 reconciles earlier aspirational examples with the qualified implementation.
+Where an earlier example in this document conflicts with the machine-readable
+`0.8.x` snapshot, the following frozen forms govern V1:
+
+~~~text
+Field.data_type        canonical logical type property
+Field.dtype            stable convenience alias
+Schema.names()         stable method form
+Dataset                explicit logical identity; normal plan authoring obtains
+                       Dataset values from TransformationPlanBuilder
+DataType.null()        not frozen; nullability remains Field/Schema semantics
+LogicalPlan            no duplicate OptimizedLogicalPlan/PhysicalPlan type
+lineage                inspected through pytransformkit.lineage.analyze(...)
+legacy Pipeline        migration-only, not root __all__
+RunPipelineService     migration-only, replaced by TransformationRuntime
+~~~
+
+The exact V1 compatibility surface is snapshotted by
+`contracts/public_api_v1.json` and verified against built artifacts by
+`scripts/public_api_snapshot.py`.
+
 # 2. Canonical lifecycle
 
 ~~~text
@@ -174,7 +197,6 @@ DataType.map_of(
     key=DataType.string(),
     value=DataType.string(),
 )
-DataType.null()
 DataType.unknown()
 ~~~
 
@@ -196,14 +218,18 @@ Field(
 )
 ~~~
 
-Stable properties SHOULD include:
+Stable properties include:
 
 ~~~text
 name
+data_type
 dtype
 nullable
-metadata
+description
 ~~~
+
+`dtype` is a convenience alias for `data_type`; it never carries an
+engine-native dtype.
 
 Field values are immutable.
 
@@ -228,9 +254,9 @@ Stable inspection SHOULD include:
 ~~~python
 schema.field("customer_id")
 schema.has_field("country")
-schema.names
+schema.names()
 schema.fields
-schema.fingerprint()
+SchemaCodec().fingerprint(schema)
 ~~~
 
 Field order is explicit and deterministic.

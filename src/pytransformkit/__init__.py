@@ -19,13 +19,7 @@ from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.expressions.base import Expression
 from pytransformkit.domain.pipelines.plan import LogicalPlan
 from pytransformkit.domain.plans import TransformationPlan
-from pytransformkit.domain.resources import (
-    CredentialReference,
-    ResourceReference,
-    RetrySafety,
-    WriteMode,
-    WriteStatus,
-)
+from pytransformkit.domain.resources import ResourceReference
 from pytransformkit.domain.shared.identifiers import TransformationExecutionId
 from pytransformkit.functions import col, lit
 
@@ -34,10 +28,9 @@ from . import diagnostics, lineage, quality, window
 try:
     __version__ = version("pytransformkit")
 except PackageNotFoundError:
-    __version__ = "0.7.0"
+    __version__ = "0.8.0"
 
 __all__ = [
-    "CredentialReference",
     "DataType",
     "Dataset",
     "Expression",
@@ -46,14 +39,11 @@ __all__ = [
     "LogicalPlan",
     "OutputBinding",
     "ResourceReference",
-    "RetrySafety",
     "Schema",
     "TransformationExecutionId",
     "TransformationPlan",
     "TransformationResult",
     "TransformationRuntime",
-    "WriteMode",
-    "WriteStatus",
     "__version__",
     "col",
     "diagnostics",
@@ -90,6 +80,18 @@ def __getattr__(name: str) -> Any:
         }[name]
         _warn_legacy(name, replacement)
         return getattr(execution, name)
+
+    if name in {"CredentialReference", "RetrySafety", "WriteMode", "WriteStatus"}:
+        from pytransformkit import runtime
+
+        replacement = {
+            "CredentialReference": "pytransformkit.runtime.CredentialReference",
+            "RetrySafety": "pytransformkit.runtime.RetrySafety",
+            "WriteMode": "pytransformkit.runtime.WriteMode",
+            "WriteStatus": "pytransformkit.runtime.WriteStatus",
+        }[name]
+        _warn_legacy(name, replacement)
+        return getattr(runtime, name)
 
     raise AttributeError(f"module 'pytransformkit' has no attribute {name!r}")
 

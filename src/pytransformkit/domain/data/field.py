@@ -19,3 +19,8 @@ class Field:
             raise ValueError("Field name must not be empty.")
         if not isinstance(self.data_type, DataType):
             raise TypeError("Field data_type must be a PyTransformKit DataType.")
+
+    @property
+    def dtype(self) -> DataType:
+        """Stable V1 convenience alias for data_type."""
+        return self.data_type

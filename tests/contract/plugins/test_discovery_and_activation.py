@@ -27,7 +27,7 @@ from pytransformkit.errors import (
 )
 from pytransformkit.errors.serialization import NonPortableValueError
 from pytransformkit.functions import col
-from pytransformkit.serialization import SemanticTypeRegistry
+from pytransformkit.serialization.registry import SemanticTypeRegistry
 
 
 class FakeEntryPoint:

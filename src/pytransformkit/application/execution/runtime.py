@@ -1078,7 +1078,7 @@ def _package_version() -> str:
     try:
         return version("pytransformkit")
     except PackageNotFoundError:
-        return "0.7.0"
+        return "0.8.0"
 
 
 def _input_schema(plan: LogicalPlan, name: str) -> Schema:

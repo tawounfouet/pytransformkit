@@ -17,8 +17,8 @@ from pytransformkit.serialization import (
     ExpressionCodec,
     MigrationRegistry,
     ResourceReferenceCodec,
-    canonical_json,
 )
+from pytransformkit.serialization.canonical import canonical_json
 
 
 class _ResourceReferenceV2Codec(ResourceReferenceCodec):

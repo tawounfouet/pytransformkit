@@ -303,6 +303,12 @@ jobs:
       - name: Run Getting Started engine smoke
         run: |
           .api-freeze-venv/bin/python scripts/00_local_experimentation.py
+      - name: Run Pandas engine guide
+        run: |
+          .api-freeze-venv/bin/python scripts/guides/pandas_engine.py
+      - name: Run Polars engine guide
+        run: |
+          .api-freeze-venv/bin/python scripts/guides/polars_engine.py
 
   build:
     runs-on: ubuntu-latest

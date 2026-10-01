@@ -13,6 +13,13 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 - Deterministic `scripts/release_qualification.py` verifier that detects version, Python matrix, extras, CI-job, evidence-path, engine-partition and frozen-API drift.
 - Dedicated `release-qualification-contract` CI gate that builds wheel and sdist, installs both in clean environments, runs metadata/import smoke checks, and proves the core wheel does not require Pandas, Polars, PyArrow or DuckDB.
 - `docs/RELEASE_CANDIDATE_QUALIFICATION.md` defining the 0.9.0 → 1.0.0rc1 qualification sequence and blocker-only policy after rc1.
+- Frozen V1 error-code catalogue with 53 public PyTransformKit exception identities, parent relationships and machine-readable `PTK-*` codes.
+- Consumer compatibility snapshot covering the 0.8.0 baseline, legacy root aliases, wire contracts, error catalogue digest and plugin protocol contract.
+- Dedicated `backwards-compatibility-contract` CI gate for error-code, consumer and plugin compatibility evidence.
+
+### Fixed
+
+- Extended the default plugin-protocol V1 host range from `>=0.5,<1.0` to `>=0.5,<2.0` so a default V1 plugin remains compatible with PyTransformKit `1.x`, including `1.0.0` stable. This is a controlled pre-RC compatibility correction and requires a deliberate LOT-26 signature-baseline amendment before `1.0.0rc1`.
 
 - LOT-25 performance and memory qualification, advancing the release line to `0.7.0`.
 - Reproducible stdlib-first benchmark harness using `perf_counter_ns`, `tracemalloc`, deterministic warmups/repetitions and portable JSON reporting.

@@ -1,0 +1,92 @@
+{
+  "manifest_version": 1,
+  "lot": "LOT-27",
+  "phase": "release-qualification",
+  "project_version": "0.9.0",
+  "release_candidate_target": "1.0.0rc1",
+  "requires_python": ">=3.11",
+  "python_versions": [
+    "3.11",
+    "3.12",
+    "3.13",
+    "3.14"
+  ],
+  "extras": [
+    "dev",
+    "duckdb",
+    "io",
+    "pandas",
+    "performance",
+    "polars",
+    "pyarrow"
+  ],
+  "engine_ids": [
+    "duckdb",
+    "pandas",
+    "polars",
+    "pyarrow"
+  ],
+  "stable_engines": [
+    "pandas",
+    "polars"
+  ],
+  "provisional_engines": [
+    "duckdb",
+    "pyarrow"
+  ],
+  "required_ci_jobs": [
+    "quality",
+    "tests",
+    "pandas-contract",
+    "polars-contract",
+    "cross-engine-contract",
+    "pyarrow-contract",
+    "arrow-interchange-contract",
+    "duckdb-contract",
+    "duckdb-cross-engine-contract",
+    "io-contract",
+    "serialization-contract",
+    "conformance-contract",
+    "plugin-contract",
+    "optimizer-contract",
+    "performance-contract",
+    "security-contract",
+    "api-freeze-contract",
+    "release-qualification-contract",
+    "build"
+  ],
+  "required_paths": [
+    "contracts/public_api_v1.json",
+    "docs/ENGINE_CONFORMANCE_MATRIX.md",
+    "docs/GETTING_STARTED.md",
+    "docs/MIGRATION_TO_V1.md",
+    "docs/PUBLIC_API_V1_FREEZE.md",
+    "docs/RUNTIME_AND_ENGINE_SAFETY.md",
+    "docs/SECURITY_AND_THREAT_MODEL.md",
+    "benchmarks/budgets_ci.json",
+    "benchmarks/baselines/0.7.0-ci.json"
+  ],
+  "frozen_api_category_hashes": {
+    "engine_ids": "96bde4504cc62571ae102c9907634504e7d52f9e5e80307806dc395ee4bd2a91",
+    "enum_members": "3c3679375355bb5997ca66d8f86d3305d463f360ad5f329e174d9db77614eab3",
+    "exception_hierarchy": "b7e5e2141d57816e71adeb13802976115bde6c3068b874040f674a333f1071d6",
+    "extras": "bc32af831c4d789869e126db2a05f4cac9655e2fecea2acb7db3e064c60edec0",
+    "forbidden_public_types": "c7d08a258592bcf09362502011f96d45ed7a8e894eb74e373317b9713c5215a3",
+    "modules": "643a39207f7d945895603cffc6bf9c09a6bd406fa0cccffc44c7345f47356f01",
+    "protocol_members": "61f1e31245d97d5c27ae699a13166715d5dc1d00118117a8e0f248500dae5676",
+    "root_legacy_compatibility": "509f09bf61d0078f18f5e05bce3dcdbe1b14ca8aa111afe6be5cee2b55fe6e60",
+    "signatures": "c0ca9699b970026ad7a5864c014edb3361daa59cfa487869aef3ac997d0515ac",
+    "wire_contracts": "f7d59f8f1a60ff2503a118df9883f9d130bda5c2363c10872a3b3d5cffbf0a44"
+  },
+  "artifact_policy": {
+    "wheel_required": true,
+    "sdist_required": true,
+    "clean_install_required": true,
+    "core_optional_dependency_isolation_required": true
+  },
+  "post_rc1_policy": {
+    "architecture_changes_allowed": false,
+    "feature_changes_allowed": false,
+    "blocker_fixes_only": true
+  }
+}

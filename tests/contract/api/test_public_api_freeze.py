@@ -156,8 +156,8 @@ def test_plugin_protocol_constants_and_default_range_match_v1_freeze() -> None:
     expected = _baseline()["plugin"]
     compatibility = PluginCompatibility()
 
-    assert PLUGIN_API_VERSION == expected["api_version"]
-    assert PLUGIN_ENTRY_POINT_GROUP == expected["entry_point_group"]
+    assert expected["api_version"] == PLUGIN_API_VERSION
+    assert expected["entry_point_group"] == PLUGIN_ENTRY_POINT_GROUP
     assert str(compatibility.framework_min) == expected["default_framework_min"]
     assert (
         str(compatibility.framework_max_exclusive)

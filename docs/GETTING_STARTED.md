@@ -1142,6 +1142,62 @@ optimizer = LogicalOptimizer(
 Plugin descriptors and provider objects are intentionally outside the safe serialization registry. A valid wire payload can describe transformation semantics or portable references, but cannot discover, import or activate plugin code.
 
 
+
+### Cross-engine conformance and Customer 360
+
+LOT-24 publishes the release-level engine matrix under:
+
+~~~text
+docs/ENGINE_CONFORMANCE_MATRIX.md
+pytransformkit.conformance
+~~~
+
+Pandas and Polars are the mandatory STABLE V1 engines. PyArrow and DuckDB remain PROVISIONAL for their explicitly qualified subsets.
+
+Programmatic inspection is available without importing engine-native types:
+
+~~~python
+from pytransformkit.conformance import (
+    ConformanceDimension,
+    engine_profile,
+)
+
+profile = engine_profile("polars")
+
+print(profile.stability)
+print(
+    profile.status_for(
+        ConformanceDimension.WINDOWS
+    )
+)
+~~~
+
+The release conformance gate exercises the same logical contracts on stable engines, including NULL/NaN handling, numeric promotion, Decimal, Unicode, ordering, duplicates, empty data, relational semantics, aggregates, analytical windows, quality, lineage and explicit failure when a capability is unsupported.
+
+LOT-24 also adds a canonical Customer 360 reference path:
+
+~~~text
+customers ------------------------------┐
+                                        │
+orders                                  │
+  ↓ filter PAID                         │
+  ↓ aggregate                           │
+  └───────────────────────────────┐     │
+                                  ↓     ↓
+                                LEFT JOIN
+                                  ↓
+                         normalize email
+                                  ↓
+                           quality gate
+                                  ↓
+                         project + order
+                                  ↓
+                           customer_360
+~~~
+
+The exact same TransformationPlan is qualified on Pandas eager, Polars eager and Polars lazy. The gate also verifies canonical serialization, transitive field lineage and Parquet output materialization carrying an output ResourceReference.
+
+
 ## 18. Run the local experimentation script
 
 The repository includes:
@@ -1208,6 +1264,12 @@ pytest tests/contract/engines/polars -ra
 pytest tests/contract/cross_engine -ra
 ~~~
 
+### LOT-24 release conformance gate
+
+~~~bash
+pytest tests/contract/cross_engine tests/contract/conformance -ra
+~~~
+
 ### Static quality checks
 
 ~~~bash
@@ -1217,7 +1279,7 @@ mypy src/pytransformkit
 python -m build
 ~~~
 
-The CI matrix currently verifies Python 3.11, 3.12, 3.13 and 3.14 plus dedicated Pandas, Polars and cross-engine contracts.
+The CI matrix verifies Python 3.11, 3.12, 3.13 and 3.14 plus dedicated Pandas, Polars, PyArrow, DuckDB, I/O, serialization, plugin, optimizer and LOT-24 cross-engine conformance contracts.
 
 ---
 
@@ -1225,7 +1287,6 @@ The CI matrix currently verifies Python 3.11, 3.12, 3.13 and 3.14 plus dedicated
 
 The revised V1 roadmap continues with:
 
-- **LOT-24** — Cross-Engine Conformance + Customer 360;
 - **LOT-25** — Performance Qualification;
 - **LOT-26** — Public API / Security / Migration Freeze;
 - **LOT-27** — 1.0 Release Candidate;

@@ -1,30 +1,16 @@
 {
   "manifest_version": 1,
-  "lot": "LOT-27",
-  "phase": "release-qualification",
+  "lot": "LOT-28",
+  "phase": "stable-release",
   "project_version": "1.0.0",
-  "release_candidate_target": "1.0.0rc1",
+  "release_candidate_version": "1.0.0rc1",
+  "release_candidate_main_commit": "d8dc2799935d1ea1c0ad9e4f184676b508102d5d",
   "requires_python": ">=3.11",
   "python_versions": [
     "3.11",
     "3.12",
     "3.13",
     "3.14"
-  ],
-  "extras": [
-    "dev",
-    "duckdb",
-    "io",
-    "pandas",
-    "performance",
-    "polars",
-    "pyarrow"
-  ],
-  "engine_ids": [
-    "duckdb",
-    "pandas",
-    "polars",
-    "pyarrow"
   ],
   "stable_engines": [
     "pandas",
@@ -54,25 +40,26 @@
     "api-freeze-contract",
     "backwards-compatibility-contract",
     "release-qualification-contract",
+    "stable-release-contract",
     "build"
   ],
   "required_paths": [
     "contracts/public_api_v1.json",
     "contracts/error_codes_v1.json",
     "contracts/consumer_compatibility_v1.json",
+    "contracts/release_qualification_v1.json",
+    "contracts/stable_release_v1.json",
     "docs/ENGINE_CONFORMANCE_MATRIX.md",
     "docs/GETTING_STARTED.md",
     "docs/MIGRATION_TO_V1.md",
     "docs/PUBLIC_API_V1_FREEZE.md",
     "docs/BACKWARDS_COMPATIBILITY_V1.md",
-    "docs/LOT_27_RC1_RELEASE_REVIEW.md",
-    "docs/RELEASE_NOTES_1_0_0rc1.md",
-    "docs/RELEASE_NOTES_1_0_0.md",
-    "docs/LOT_28_STABLE_RELEASE_REVIEW.md",
     "docs/RUNTIME_AND_ENGINE_SAFETY.md",
     "docs/SECURITY_AND_THREAT_MODEL.md",
-    "benchmarks/budgets_ci.json",
-    "benchmarks/baselines/0.7.0-ci.json"
+    "docs/RELEASE_CANDIDATE_QUALIFICATION.md",
+    "docs/RELEASE_NOTES_1_0_0.md",
+    "docs/LOT_28_STABLE_RELEASE_REVIEW.md",
+    "CHANGELOG.md"
   ],
   "frozen_api_category_hashes": {
     "engine_ids": "96bde4504cc62571ae102c9907634504e7d52f9e5e80307806dc395ee4bd2a91",
@@ -86,15 +73,20 @@
     "signatures": "06dce4df153c45b59f6be39a32cdd7d8fb0141b09e1c03162d351d7f400ceba9",
     "wire_contracts": "f7d59f8f1a60ff2503a118df9883f9d130bda5c2363c10872a3b3d5cffbf0a44"
   },
-  "artifact_policy": {
-    "wheel_required": true,
-    "sdist_required": true,
-    "clean_install_required": true,
-    "core_optional_dependency_isolation_required": true
+  "error_catalogue_sha256": "976bf02404782306cdd1c662e96e264f3e523652b09e8c527c48fe50f0dcd51c",
+  "plugin_contract": {
+    "entry_point_group": "pytransformkit.plugins",
+    "protocol_version": 1,
+    "default_framework_min": "0.5.0",
+    "default_framework_max_exclusive": "2.0.0",
+    "default_protocol_min": 1,
+    "default_protocol_max": 1
   },
-  "post_rc1_policy": {
+  "release_policy": {
+    "new_features_allowed": false,
     "architecture_changes_allowed": false,
-    "feature_changes_allowed": false,
-    "blocker_fixes_only": true
+    "public_api_drift_allowed": false,
+    "wire_contract_drift_allowed": false,
+    "error_code_drift_allowed": false
   }
 }

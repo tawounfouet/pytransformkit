@@ -8,6 +8,25 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 
 No changes yet.
 
+## [1.0.0] - 2026-10-01
+
+### Added
+
+- LOT-28 stable-release manifest and verifier, freezing the RC-to-stable promotion contract.
+- Stable release review and final `1.0.0` release notes.
+- Dedicated `stable-release-contract` CI gate preserving API hashes, wire contracts, error codes, plugin protocol and engine stability partition.
+
+### Changed
+
+- Promoted the qualified package from `1.0.0rc1` to `1.0.0`.
+- Updated package maturity metadata to `Development Status :: 5 - Production/Stable`.
+- Re-ran the full release qualification against stable wheel and sdist artifacts.
+
+### Compatibility
+
+- No public API category hash changed between `1.0.0rc1` and `1.0.0`.
+- No serialization wire contract, public error code, plugin protocol or engine stability classification changed after RC freeze.
+
 ## [1.0.0rc1] - 2026-10-01
 
 ### Added

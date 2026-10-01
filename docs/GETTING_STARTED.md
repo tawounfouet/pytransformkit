@@ -1270,6 +1270,30 @@ pytest tests/contract/cross_engine -ra
 pytest tests/contract/cross_engine tests/contract/conformance -ra
 ~~~
 
+### LOT-25 performance qualification
+
+~~~bash
+pip install -e ".[dev,performance]"
+
+pytest tests/performance -ra
+
+python -m benchmarks.run \
+  --profile ci \
+  --output performance-report.json \
+  --assert-budgets
+~~~
+
+The versioned `0.7.0` CI baseline is:
+
+~~~text
+benchmarks/baselines/0.7.0-ci.json
+~~~
+
+The performance budgets are regression tripwires, not public latency guarantees.
+They combine absolute ceilings with ratios such as full runtime versus direct adapter,
+Polars lazy versus eager, Parquet pushdown versus full scan and recording telemetry
+versus the null sink.
+
 ### Static quality checks
 
 ~~~bash
@@ -1279,7 +1303,7 @@ mypy src/pytransformkit
 python -m build
 ~~~
 
-The CI matrix verifies Python 3.11, 3.12, 3.13 and 3.14 plus dedicated Pandas, Polars, PyArrow, DuckDB, I/O, serialization, plugin, optimizer and LOT-24 cross-engine conformance contracts.
+The CI matrix verifies Python 3.11, 3.12, 3.13 and 3.14 plus dedicated Pandas, Polars, PyArrow, DuckDB, I/O, serialization, plugin, optimizer, conformance and performance qualification contracts.
 
 ---
 
@@ -1287,7 +1311,6 @@ The CI matrix verifies Python 3.11, 3.12, 3.13 and 3.14 plus dedicated Pandas, P
 
 The revised V1 roadmap continues with:
 
-- **LOT-25** — Performance Qualification;
 - **LOT-26** — Public API / Security / Migration Freeze;
 - **LOT-27** — 1.0 Release Candidate;
 - **LOT-28** — 1.0.0 Stable.

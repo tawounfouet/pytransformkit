@@ -20,6 +20,7 @@ from pytransformkit.domain.data.data_types import (
 )
 from pytransformkit.domain.data.dataset import Dataset
 from pytransformkit.domain.data.field import Field
+from pytransformkit.domain.data.fingerprint import schema_fingerprint
 from pytransformkit.domain.data.field_path import FieldPath
 from pytransformkit.domain.data.metadata import DatasetMetadata
 from pytransformkit.domain.data.references import (
@@ -48,6 +49,7 @@ __all__ = [
     "LogicalDatasetReference",
     "MapType",
     "Schema",
+    "schema_fingerprint",
     "StringType",
     "StructField",
     "StructType",

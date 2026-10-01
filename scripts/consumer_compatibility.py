@@ -44,7 +44,7 @@ def _legacy_alias_snapshot(names: list[str]) -> dict[str, dict[str, str]]:
             )
         with warnings.catch_warnings(record=True) as captured:
             warnings.simplefilter("always")
-            value = getattr(pytransformkit, name)
+            getattr(pytransformkit, name)
 
         deprecations = [
             item for item in captured if item.category is DeprecationWarning

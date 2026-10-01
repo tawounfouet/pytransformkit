@@ -10,7 +10,6 @@ import sys
 import tomllib
 from enum import Enum
 from pathlib import Path
-from typing import Any
 
 STABLE_MODULES = (
     "pytransformkit",
@@ -159,13 +158,14 @@ def _exception_snapshot() -> dict[str, list[str]]:
 
 def _wire_snapshot() -> dict[str, object]:
     module = importlib.import_module("pytransformkit.serialization")
-    return {
-        name: {
-            "contract": getattr(getattr(module, name), "contract"),
-            "contract_version": getattr(getattr(module, name), "contract_version"),
+    result: dict[str, object] = {}
+    for name in CODECS:
+        codec = getattr(module, name)
+        result[name] = {
+            "contract": codec.contract,
+            "contract_version": codec.contract_version,
         }
-        for name in CODECS
-    }
+    return result
 
 
 def _extras_snapshot(project_file: Path) -> dict[str, list[str]]:
@@ -204,7 +204,7 @@ def build_snapshot(project_file: Path) -> dict[str, object]:
         )
 
     conformance = importlib.import_module("pytransformkit.conformance")
-    profiles = getattr(conformance, "PUBLISHED_ENGINE_PROFILES")
+    profiles = conformance.PUBLISHED_ENGINE_PROFILES
 
     return {
         "snapshot_version": 1,

@@ -144,7 +144,9 @@ def _profile(
         engine_id=engine_id,
         stability=stability,
         mandatory_for_v1=mandatory_for_v1,
-        dimensions=tuple((dimension, values[dimension]) for dimension in ConformanceDimension),
+        dimensions=tuple(
+            (dimension, values[dimension]) for dimension in ConformanceDimension
+        ),
     )
 
 

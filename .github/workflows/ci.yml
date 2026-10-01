@@ -365,8 +365,8 @@ jobs:
 
           import pytransformkit
 
-          assert version("pytransformkit") == "0.9.0"
-          assert pytransformkit.__version__ == "0.9.0"
+          assert version("pytransformkit") == "1.0.0rc1"
+          assert pytransformkit.__version__ == "1.0.0rc1"
           for module_name in ("pandas", "polars", "pyarrow", "duckdb"):
               assert importlib.util.find_spec(module_name) is None, module_name
           PY
@@ -387,8 +387,8 @@ jobs:
 
           import pytransformkit
 
-          assert version("pytransformkit") == "0.9.0"
-          assert pytransformkit.__version__ == "0.9.0"
+          assert version("pytransformkit") == "1.0.0rc1"
+          assert pytransformkit.__version__ == "1.0.0rc1"
           PY
 
   build:

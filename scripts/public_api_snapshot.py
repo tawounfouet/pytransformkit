@@ -34,6 +34,58 @@ STABLE_MODULES = (
     "pytransformkit.adapters.polars",
 )
 
+SIGNATURE_TARGETS = (
+    ("pytransformkit", "DataType"),
+    ("pytransformkit", "Dataset"),
+    ("pytransformkit", "Field"),
+    ("pytransformkit", "Schema"),
+    ("pytransformkit", "TransformationPlan"),
+    ("pytransformkit", "LogicalPlan"),
+    ("pytransformkit", "InputBinding"),
+    ("pytransformkit", "OutputBinding"),
+    ("pytransformkit", "TransformationRuntime"),
+    ("pytransformkit", "TransformationResult"),
+    ("pytransformkit", "ResourceReference"),
+    ("pytransformkit", "col"),
+    ("pytransformkit", "lit"),
+    ("pytransformkit.authoring", "TransformationPlanBuilder"),
+    ("pytransformkit.planning", "TransformationCompiler"),
+    ("pytransformkit.planning", "LogicalOptimizer"),
+    ("pytransformkit.engines", "EngineRegistry"),
+    ("pytransformkit.engines", "EngineAdapter"),
+    ("pytransformkit.engines", "EngineDescriptor"),
+    ("pytransformkit.runtime", "ExecutionContext"),
+    ("pytransformkit.runtime", "CorrelationContext"),
+    ("pytransformkit.plugins", "PluginRegistry"),
+    ("pytransformkit.plugins", "PluginDescriptor"),
+    ("pytransformkit.plugins", "PluginCompatibility"),
+    ("pytransformkit.readers", "ReadRequest"),
+    ("pytransformkit.readers", "ReadResult"),
+    ("pytransformkit.writers", "WriteRequest"),
+    ("pytransformkit.writers", "WriteResult"),
+    ("pytransformkit.adapters.pandas", "PandasEngineAdapter"),
+    ("pytransformkit.adapters.polars", "PolarsEngineAdapter"),
+)
+
+ENUM_TARGETS = (
+    ("pytransformkit.engines", "EngineCapability"),
+    ("pytransformkit.runtime", "CancellationSupport"),
+    ("pytransformkit.runtime", "ExecutionMode"),
+    ("pytransformkit.runtime", "ExecutionStatus"),
+    ("pytransformkit.runtime", "FailureCategory"),
+    ("pytransformkit.runtime", "OutcomeUncertainty"),
+    ("pytransformkit.runtime", "Retryability"),
+    ("pytransformkit.runtime", "RetrySafety"),
+    ("pytransformkit.runtime", "WriteMode"),
+    ("pytransformkit.runtime", "WriteStatus"),
+    ("pytransformkit.diagnostics", "DiagnosticSeverity"),
+    ("pytransformkit.diagnostics", "MetricKind"),
+    ("pytransformkit.plugins", "PluginKind"),
+    ("pytransformkit.conformance", "ConformanceDimension"),
+    ("pytransformkit.conformance", "ConformanceStatus"),
+    ("pytransformkit.conformance", "EngineStability"),
+)
+
 PROTOCOLS = (
     ("pytransformkit.engines", "EngineAdapter"),
     ("pytransformkit.readers", "Reader"),
@@ -97,27 +149,34 @@ def _exports(module_name: str) -> tuple[str, ...]:
 
 
 def _module_snapshot(module_name: str) -> dict[str, object]:
-    module = importlib.import_module(module_name)
-    exports = _exports(module_name)
-    signatures: dict[str, str] = {}
-    enum_members: dict[str, dict[str, object]] = {}
+    return {"exports": list(_exports(module_name))}
 
-    for name in exports:
-        value = getattr(module, name)
+
+def _signature_snapshot() -> dict[str, str]:
+    result: dict[str, str] = {}
+    for module_name, symbol_name in SIGNATURE_TARGETS:
+        value = getattr(importlib.import_module(module_name), symbol_name)
         signature = _signature(value)
-        if signature is not None:
-            signatures[name] = signature
+        if signature is None:
+            raise RuntimeError(
+                f"Cannot freeze signature for {module_name}.{symbol_name}."
+            )
+        result[f"{module_name}.{symbol_name}"] = signature
+    return result
 
-        if inspect.isclass(value) and issubclass(value, Enum):
-            enum_members[name] = {
-                member.name: member.value for member in value
-            }
 
-    return {
-        "exports": list(exports),
-        "signatures": signatures,
-        "enum_members": enum_members,
-    }
+def _enum_snapshot() -> dict[str, dict[str, object]]:
+    result: dict[str, dict[str, object]] = {}
+    for module_name, symbol_name in ENUM_TARGETS:
+        value = getattr(importlib.import_module(module_name), symbol_name)
+        if not inspect.isclass(value) or not issubclass(value, Enum):
+            raise RuntimeError(
+                f"{module_name}.{symbol_name} is not an enum."
+            )
+        result[f"{module_name}.{symbol_name}"] = {
+            member.name: member.value for member in value
+        }
+    return result
 
 
 def _protocol_snapshot() -> dict[str, object]:
@@ -213,8 +272,10 @@ def build_snapshot(project_file: Path) -> dict[str, object]:
             module_name: _module_snapshot(module_name)
             for module_name in STABLE_MODULES
         },
+        "signatures": _signature_snapshot(),
         "protocol_members": _protocol_snapshot(),
         "exception_hierarchy": _exception_snapshot(),
+        "enum_members": _enum_snapshot(),
         "extras": _extras_snapshot(project_file),
         "engine_ids": sorted(profile.engine_id for profile in profiles),
         "wire_contracts": _wire_snapshot(),

@@ -93,9 +93,7 @@ def validate(root: Path, manifest_path: Path) -> list[str]:
             f"got {project.get('requires-python')!r}"
         )
 
-    workflow = (root / ".github" / "workflows" / "ci.yml").read_text(
-        encoding="utf-8"
-    )
+    workflow = (root / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
     if _python_matrix(workflow) != manifest.get("python_versions", []):
         errors.append("Python CI matrix drifted from the stable manifest")
 

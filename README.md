@@ -4,7 +4,7 @@
 
 PyTransformKit is an engine-agnostic Python framework for defining typed, composable data transformations independently from their physical execution engine.
 
-> Status: early pre-1.0 implementation. Public APIs may still evolve while the V1 contracts are being qualified.
+> Status: PyTransformKit 1.0.0rc1 release candidate. The V1 contract is frozen; only blocker fixes are accepted before 1.0.0.
 
 ## Goals
 
@@ -43,9 +43,11 @@ The implementation baseline now covers:
 - **LOT-22 — Logical Optimizer**
 - **LOT-23 — Extension and Plugin Architecture**
 - **LOT-24 — Cross-Engine Conformance & Customer 360 Gate**
-- **LOT-25 — Performance & Memory Qualification**\n- **LOT-26 — Public API, Documentation, Security & Compatibility**\n- **LOT-27 — 1.0 Release Candidate Qualification** *(in progress)*
+- **LOT-25 — Performance & Memory Qualification**
+- **LOT-26 — Public API, Documentation, Security & Compatibility**
+- **LOT-27 — 1.0 Release Candidate Qualification** *(in progress)*
 
-The current development line is **0.9.0**. LOT-27 release-candidate qualification is in progress.
+The current development line is **1.0.0rc1**. LOT-27 release-candidate qualification is complete pending publication/RC validation.
 
 ### Canonical V1 model
 

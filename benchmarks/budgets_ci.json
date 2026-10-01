@@ -1,0 +1,126 @@
+{
+  "absolute": {
+    "planning_compile": {
+      "median_ms": 250.0,
+      "p95_ms": 500.0,
+      "max_python_peak_bytes": 134217728
+    },
+    "planning_optimize": {
+      "median_ms": 500.0,
+      "p95_ms": 1000.0,
+      "max_python_peak_bytes": 134217728
+    },
+    "expression_duckdb_compile": {
+      "median_ms": 100.0
+    },
+    "expression_polars_compile": {
+      "median_ms": 100.0
+    },
+    "expression_pandas_compile_eval": {
+      "median_ms": 750.0
+    },
+    "pandas_adapter_execution": {
+      "median_ms": 2000.0,
+      "max_python_peak_bytes": 536870912
+    },
+    "pandas_runtime_execution": {
+      "median_ms": 3000.0,
+      "max_python_peak_bytes": 536870912
+    },
+    "pandas_memory_amplification": {
+      "median_ms": 3000.0,
+      "native_amplification_ratio": 1.75
+    },
+    "polars_eager_execution": {
+      "median_ms": 2000.0,
+      "max_python_peak_bytes": 536870912
+    },
+    "polars_lazy_execution": {
+      "median_ms": 3000.0,
+      "max_python_peak_bytes": 536870912
+    },
+    "polars_memory_amplification": {
+      "median_ms": 3000.0,
+      "native_amplification_ratio": 1.75
+    },
+    "pandas_to_arrow": {
+      "median_ms": 1500.0
+    },
+    "arrow_to_pandas": {
+      "median_ms": 1500.0
+    },
+    "polars_to_arrow": {
+      "median_ms": 1500.0
+    },
+    "arrow_to_polars": {
+      "median_ms": 1500.0
+    },
+    "duckdb_eager_execution": {
+      "median_ms": 3000.0,
+      "max_python_peak_bytes": 536870912
+    },
+    "duckdb_lazy_dispatch": {
+      "median_ms": 2500.0,
+      "max_python_peak_bytes": 536870912
+    },
+    "duckdb_lazy_materialized": {
+      "median_ms": 3500.0,
+      "max_python_peak_bytes": 536870912
+    },
+    "parquet_full_scan": {
+      "median_ms": 2500.0,
+      "max_python_peak_bytes": 536870912
+    },
+    "parquet_pushdown": {
+      "median_ms": 2500.0,
+      "max_python_peak_bytes": 536870912
+    },
+    "lineage_analysis": {
+      "median_ms": 300.0,
+      "max_python_peak_bytes": 134217728
+    },
+    "runtime_null_telemetry": {
+      "median_ms": 3000.0
+    },
+    "runtime_recording_telemetry": {
+      "median_ms": 3500.0
+    }
+  },
+  "ratios": [
+    {
+      "name": "runtime_vs_adapter_pandas",
+      "numerator": "pandas_runtime_execution",
+      "denominator": "pandas_adapter_execution",
+      "metric": "median_ms",
+      "maximum": 8.0
+    },
+    {
+      "name": "polars_lazy_vs_eager",
+      "numerator": "polars_lazy_execution",
+      "denominator": "polars_eager_execution",
+      "metric": "median_ms",
+      "maximum": 5.0
+    },
+    {
+      "name": "duckdb_lazy_materialized_vs_eager",
+      "numerator": "duckdb_lazy_materialized",
+      "denominator": "duckdb_eager_execution",
+      "metric": "median_ms",
+      "maximum": 5.0
+    },
+    {
+      "name": "parquet_pushdown_vs_full_scan",
+      "numerator": "parquet_pushdown",
+      "denominator": "parquet_full_scan",
+      "metric": "median_ms",
+      "maximum": 5.0
+    },
+    {
+      "name": "recording_telemetry_vs_null",
+      "numerator": "runtime_recording_telemetry",
+      "denominator": "runtime_null_telemetry",
+      "metric": "median_ms",
+      "maximum": 3.0
+    }
+  ]
+}

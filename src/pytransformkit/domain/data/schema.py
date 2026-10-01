@@ -8,6 +8,7 @@ from dataclasses import dataclass, replace
 from pytransformkit.domain.data.data_types import StructType
 from pytransformkit.domain.data.field import Field
 from pytransformkit.domain.data.field_path import FieldPath
+from pytransformkit.domain.shared.fingerprint import Fingerprint
 from pytransformkit.errors.schema import (
     DuplicateFieldError,
     FieldCollisionError,
@@ -132,7 +133,7 @@ class Schema:
             )
         )
 
-    def fingerprint(self):
+    def fingerprint(self) -> Fingerprint:
         """Return a deterministic semantic fingerprint for this Schema."""
         from pytransformkit.domain.data.fingerprint import schema_fingerprint
 

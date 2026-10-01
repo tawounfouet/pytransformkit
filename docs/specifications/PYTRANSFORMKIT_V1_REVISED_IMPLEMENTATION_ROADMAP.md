@@ -1012,6 +1012,8 @@ targeting **`0.6.0`**.
 
 # 18. LOT-24 — Cross-Engine Conformance and Customer 360 Transformation Gate
 
+**Status:** DONE — `0.6.0`
+
 **Target milestone:** 0.6.0
 
 ## Scope
@@ -1063,6 +1065,33 @@ Customer 360 requirements:
 - Pandas and Polars are fully green for mandatory 1.0 semantics;
 - optional engines are labeled STABLE or PROVISIONAL honestly;
 - Customer 360 transform path is green.
+
+## Implementation closure
+
+LOT-24 closes the semantic-conformance gate with:
+
+- a public qualified `pytransformkit.conformance` profile model;
+- a published engine matrix in `docs/ENGINE_CONFORMANCE_MATRIX.md`;
+- Pandas and Polars classified STABLE and mandatory for the V1 common semantic denominator;
+- PyArrow and DuckDB classified PROVISIONAL with unsupported behavior stated explicitly;
+- an executable mandatory V1 capability set shared by Pandas and Polars;
+- conformance coverage for NULL versus preserved NaN, numeric promotion, Decimal, timezone, nested data, Unicode, ordering, duplicates and empty data;
+- existing and retained cross-engine gates for joins, aggregates, windows, quality and lineage;
+- canonical serialization coverage retained as part of release qualification;
+- explicit unsupported-capability failure before physical execution;
+- explicit engine selection with regression coverage proving there is no hidden fallback;
+- Pandas fixed-precision Decimal casting through Python Decimal values with precision/scale validation;
+- one canonical Customer 360 TransformationPlan using two logical inputs;
+- equivalent Pandas eager and Polars eager results;
+- equivalent Polars lazy results where lazy execution applies;
+- Customer 360 quality evidence and deterministic output ordering;
+- transitive field lineage from orders.amount to paid_revenue and customers.email to normalized_email;
+- canonical TransformationPlan serialization for the Customer 360 declaration;
+- Parquet materialization with output ResourceReference linkage suitable for later consumer-side PyIngestKit publication;
+- a dedicated conformance-contract CI gate combining legacy cross-engine evidence with LOT-24 release contracts.
+
+The next implementation lot is **LOT-25 — Performance and Memory Qualification**,
+targeting **`0.7.0`**.
 
 ---
 

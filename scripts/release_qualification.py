@@ -35,7 +35,7 @@ def _workflow_jobs(workflow: str) -> set[str]:
 
 def _python_matrix(workflow: str) -> list[str]:
     match = re.search(
-        r'python-version:\s*\[([^\]]+)\]',
+        r"python-version:\s*\[([^\]]+)\]",
         workflow,
     )
     if match is None:

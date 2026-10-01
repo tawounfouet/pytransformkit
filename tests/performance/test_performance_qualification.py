@@ -141,10 +141,9 @@ def test_recording_telemetry_emits_evidence_without_changing_result(
     baseline = suite.runtime_null_telemetry().value
     observed = suite.runtime_recording_telemetry()
 
-    assert (
-        observed.value.output_handle.dataframe.to_dict(orient="records")
-        == baseline.output_handle.dataframe.to_dict(orient="records")
-    )
+    assert observed.value.output_handle.dataframe.to_dict(
+        orient="records"
+    ) == baseline.output_handle.dataframe.to_dict(orient="records")
     metrics = dict(observed.metrics)
     assert metrics["events"] > 0
     assert metrics["metrics"] > 0

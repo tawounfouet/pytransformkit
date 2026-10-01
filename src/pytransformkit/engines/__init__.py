@@ -16,6 +16,5 @@ __all__ = [
     "EngineCapability",
     "EngineDescriptor",
     "EngineRegistry",
-    "MultiInputEngineAdapter",
     "PhysicalHandle",
 ]

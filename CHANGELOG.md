@@ -6,6 +6,10 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 
 ## [Unreleased]
 
+No changes yet.
+
+## [1.0.0rc1] - 2026-10-01
+
 ### Added
 
 - LOT-27 release-candidate qualification baseline, advancing the qualification line to `0.9.0`.
@@ -16,10 +20,12 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 - Frozen V1 error-code catalogue with 53 public PyTransformKit exception identities, parent relationships and machine-readable `PTK-*` codes.
 - Consumer compatibility snapshot covering the 0.8.0 baseline, legacy root aliases, wire contracts, error catalogue digest and plugin protocol contract.
 - Dedicated `backwards-compatibility-contract` CI gate for error-code, consumer and plugin compatibility evidence.
+- `docs/LOT_27_RC1_RELEASE_REVIEW.md` and `docs/RELEASE_NOTES_1_0_0rc1.md` completing the release-candidate review package.
+- Promotion of the qualified package line from `0.9.0` to `1.0.0rc1`; post-RC changes are blocker-only.
 
 ### Fixed
 
-- Extended the default plugin-protocol V1 host range from `>=0.5,<1.0` to `>=0.5,<2.0` so a default V1 plugin remains compatible with PyTransformKit `1.x`, including `1.0.0` stable. This is a controlled pre-RC compatibility correction and requires a deliberate LOT-26 signature-baseline amendment before `1.0.0rc1`.
+- Extended the default plugin-protocol V1 host range from `>=0.5,<1.0` to `>=0.5,<2.0` so a default V1 plugin remains compatible with PyTransformKit `1.x`, including `1.0.0` stable. This was a controlled pre-RC compatibility correction; the LOT-26 signature baseline and consumer compatibility snapshot were amended explicitly before `1.0.0rc1`.
 
 - LOT-25 performance and memory qualification, advancing the release line to `0.7.0`.
 - Reproducible stdlib-first benchmark harness using `perf_counter_ns`, `tracemalloc`, deterministic warmups/repetitions and portable JSON reporting.

@@ -43,7 +43,7 @@ The implementation baseline now covers:
 - **LOT-22 — Logical Optimizer**
 - **LOT-23 — Extension and Plugin Architecture**
 - **LOT-24 — Cross-Engine Conformance & Customer 360 Gate**
-- **LOT-25 — Performance & Memory Qualification**\n- **LOT-26 — Public API, Documentation, Security & Compatibility**
+- **LOT-25 — Performance & Memory Qualification**\n- **LOT-26 — Public API, Documentation, Security & Compatibility**\n- **LOT-27 — 1.0 Release Candidate Qualification** *(in progress)*
 
 The current development line is **0.9.0**. LOT-27 release-candidate qualification is in progress.
 

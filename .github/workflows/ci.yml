@@ -310,6 +310,87 @@ jobs:
         run: |
           .api-freeze-venv/bin/python scripts/guides/polars_engine.py
 
+  backwards-compatibility-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install compatibility qualification dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Verify V1 error-code catalogue
+        run: |
+          python scripts/error_code_catalog.py \
+            --check contracts/error_codes_v1.json
+      - name: Verify V1 consumer compatibility snapshot
+        run: |
+          python scripts/consumer_compatibility.py \
+            --check contracts/consumer_compatibility_v1.json
+      - name: Run backwards-compatibility contracts
+        run: |
+          pytest tests/contract/release/test_backward_compatibility.py \
+            tests/unit/application/extensions/test_compatibility.py -ra
+
+  release-qualification-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Validate LOT-27 release qualification manifest
+        run: |
+          python scripts/release_qualification.py \
+            --check contracts/release_qualification_v1.json
+      - name: Build release artifacts
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
+          test -n "$(find dist -maxdepth 1 -name '*.whl' -print -quit)"
+          test -n "$(find dist -maxdepth 1 -name '*.tar.gz' -print -quit)"
+      - name: Qualify wheel in clean core environment
+        run: |
+          python -m venv .release-wheel-venv
+          .release-wheel-venv/bin/python -m pip install --upgrade pip
+          .release-wheel-venv/bin/python -m pip install dist/*.whl
+          .release-wheel-venv/bin/python -m pip check
+          .release-wheel-venv/bin/python - <<'PY'
+          import importlib.util
+          from importlib.metadata import version
+
+          import pytransformkit
+
+          assert version("pytransformkit") == "1.0.0rc1"
+          assert pytransformkit.__version__ == "1.0.0rc1"
+          for module_name in ("pandas", "polars", "pyarrow", "duckdb"):
+              assert importlib.util.find_spec(module_name) is None, module_name
+          PY
+      - name: Verify V1 compatibility from built wheel
+        run: |
+          .release-wheel-venv/bin/python scripts/error_code_catalog.py \
+            --check contracts/error_codes_v1.json
+          .release-wheel-venv/bin/python scripts/consumer_compatibility.py \
+            --check contracts/consumer_compatibility_v1.json
+      - name: Qualify sdist in clean environment
+        run: |
+          python -m venv .release-sdist-venv
+          .release-sdist-venv/bin/python -m pip install --upgrade pip
+          .release-sdist-venv/bin/python -m pip install dist/*.tar.gz
+          .release-sdist-venv/bin/python -m pip check
+          .release-sdist-venv/bin/python - <<'PY'
+          from importlib.metadata import version
+
+          import pytransformkit
+
+          assert version("pytransformkit") == "1.0.0rc1"
+          assert pytransformkit.__version__ == "1.0.0rc1"
+          PY
+
   build:
     runs-on: ubuntu-latest
     steps:

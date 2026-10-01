@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import importlib.abc
 import json
-import socket
 import subprocess
 import sys
 from pathlib import Path
@@ -12,16 +10,6 @@ import pytest
 from pytransformkit import InputBinding, OutputBinding, ResourceReference
 from pytransformkit.errors import InvalidWirePayloadError
 from pytransformkit.serialization import ResourceReferenceCodec
-
-
-class _BlockOptionalEngines(importlib.abc.MetaPathFinder):
-    blocked = {"duckdb", "pandas", "polars", "pyarrow"}
-
-    def find_spec(self, fullname: str, path=None, target=None):  # type: ignore[no-untyped-def]
-        del path, target
-        if fullname.split(".", 1)[0] in self.blocked:
-            raise AssertionError(f"core import attempted optional dependency {fullname!r}")
-        return None
 
 
 def test_core_import_is_safe_without_optional_engines_or_network() -> None:
@@ -60,7 +48,10 @@ assert "RunPipelineService" not in pytransformkit.__all__
     )
 
 
-def test_binding_constructors_do_not_touch_filesystem(monkeypatch, tmp_path: Path) -> None:
+def test_binding_constructors_do_not_touch_filesystem(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
     resource = ResourceReference(
         scheme="file",
         locator=str(tmp_path / "does-not-exist.parquet"),

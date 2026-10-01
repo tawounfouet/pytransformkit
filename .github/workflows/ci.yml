@@ -370,6 +370,12 @@ jobs:
           for module_name in ("pandas", "polars", "pyarrow", "duckdb"):
               assert importlib.util.find_spec(module_name) is None, module_name
           PY
+      - name: Verify V1 compatibility from built wheel
+        run: |
+          .release-wheel-venv/bin/python scripts/error_code_catalog.py \
+            --check contracts/error_codes_v1.json
+          .release-wheel-venv/bin/python scripts/consumer_compatibility.py \
+            --check contracts/consumer_compatibility_v1.json
       - name: Qualify sdist in clean environment
         run: |
           python -m venv .release-sdist-venv

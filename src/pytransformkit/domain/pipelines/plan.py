@@ -1,6 +1,9 @@
 """Engine-independent compiled logical plans."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from pytransformkit.domain.data.schema import Schema
 from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
@@ -13,6 +16,10 @@ from pytransformkit.domain.shared.identifiers import (
     TransformationPlanId,
 )
 from pytransformkit.domain.transformations.base import TransformationSpec
+
+if TYPE_CHECKING:
+    from pytransformkit.domain.engines import EngineCapability
+    from pytransformkit.domain.lineage import TransformationLineage
 
 
 @dataclass(frozen=True, slots=True)
@@ -88,7 +95,7 @@ class LogicalPlan:
         raise KeyError(name)
 
     @property
-    def required_capabilities(self):
+    def required_capabilities(self) -> frozenset[EngineCapability]:
         """Return the engine capabilities required by this LogicalPlan."""
         from pytransformkit.application.execution.compatibility import (
             EngineCapabilityAnalyzer,
@@ -97,7 +104,7 @@ class LogicalPlan:
         return EngineCapabilityAnalyzer().required_capabilities(self)
 
     @property
-    def lineage(self):
+    def lineage(self) -> TransformationLineage:
         """Return engine-independent logical lineage for this compiled plan."""
         from pytransformkit.domain.lineage import LineageAnalyzer
 

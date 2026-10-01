@@ -35,8 +35,8 @@ def test_pandas_and_polars_are_stable_v1_engines_with_mandatory_capabilities() -
     assert PANDAS_CONFORMANCE.mandatory_for_v1 is True
     assert POLARS_CONFORMANCE.mandatory_for_v1 is True
 
-    assert MANDATORY_V1_CAPABILITIES <= pandas.capabilities
-    assert MANDATORY_V1_CAPABILITIES <= polars.capabilities
+    assert pandas.capabilities >= MANDATORY_V1_CAPABILITIES
+    assert polars.capabilities >= MANDATORY_V1_CAPABILITIES
 
     assert all(
         status is ConformanceStatus.QUALIFIED
@@ -59,8 +59,8 @@ def test_optional_engines_are_published_as_provisional_without_overclaiming() ->
         assert PYARROW_CONFORMANCE.mandatory_for_v1 is False
         assert DUCKDB_CONFORMANCE.mandatory_for_v1 is False
 
-        assert not MANDATORY_V1_CAPABILITIES <= pyarrow.capabilities
-        assert not MANDATORY_V1_CAPABILITIES <= duckdb.capabilities
+        assert not pyarrow.capabilities >= MANDATORY_V1_CAPABILITIES
+        assert not duckdb.capabilities >= MANDATORY_V1_CAPABILITIES
 
         assert (
             PYARROW_CONFORMANCE.status_for(ConformanceDimension.JOINS)

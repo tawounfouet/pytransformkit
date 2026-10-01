@@ -82,7 +82,10 @@ def _reject_inline_credentials(
             "use CredentialReference instead."
         )
 
-    query_keys = {key.lower() for key, _ in parse_qsl(parsed.query, keep_blank_values=True)}
+    query_keys = {
+        key.lower()
+        for key, _ in parse_qsl(parsed.query, keep_blank_values=True)
+    }
     sensitive_query = sorted(query_keys & _SENSITIVE_LOCATOR_KEYS)
     if sensitive_query:
         raise ValueError(

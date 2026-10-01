@@ -1,10 +1,7 @@
 """Public Pandas adapter surface."""
 
-from pytransformkit.infrastructure.engines.pandas import (
-    PandasAdapter,
-    PandasDatasetHandle,
+from pytransformkit.infrastructure.engines.pandas.adapter import (
+    PandasAdapter as PandasEngineAdapter,
 )
-
-PandasEngineAdapter = PandasAdapter
 
 __all__ = ["PandasEngineAdapter"]

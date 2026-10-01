@@ -144,7 +144,7 @@ class PerformanceScenarios:
         )
 
     def planning_optimize(self) -> ScenarioOutcome:
-        optimized = LogicalOptimizer().optimize(self.logical_plan)
+        optimized = LogicalOptimizer().optimize_with_report(self.logical_plan)
         return ScenarioOutcome(
             value=optimized,
             metrics=metric_pairs(

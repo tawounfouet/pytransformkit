@@ -106,8 +106,6 @@ def test_stable_qualified_namespaces_import() -> None:
     import pytransformkit.runtime as runtime
     import pytransformkit.serialization as serialization
     import pytransformkit.transformations as transformations
-    from pytransformkit.adapters import pandas as pandas_adapter
-    from pytransformkit.adapters import polars as polars_adapter
 
     assert authoring.__all__ == ["TransformationPlanBuilder"]
     assert "Expression" in expressions.__all__
@@ -127,5 +125,15 @@ def test_stable_qualified_namespaces_import() -> None:
     assert "OutputMode" not in runtime.__all__
     assert "ContractCodec" not in serialization.__all__
     assert "SemanticTypeRegistry" not in serialization.__all__
+
+
+def test_stable_adapter_namespaces_export_only_engine_adapters() -> None:
+    pytest = __import__("pytest")
+    pytest.importorskip("pandas")
+    pytest.importorskip("polars")
+
+    from pytransformkit.adapters import pandas as pandas_adapter
+    from pytransformkit.adapters import polars as polars_adapter
+
     assert pandas_adapter.__all__ == ["PandasEngineAdapter"]
     assert polars_adapter.__all__ == ["PolarsEngineAdapter"]

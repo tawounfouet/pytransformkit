@@ -216,7 +216,7 @@ def build_snapshot(project_file: Path) -> dict[str, object]:
         "protocol_members": _protocol_snapshot(),
         "exception_hierarchy": _exception_snapshot(),
         "extras": _extras_snapshot(project_file),
-        "engine_ids": sorted(profiles),
+        "engine_ids": sorted(profile.engine_id for profile in profiles),
         "wire_contracts": _wire_snapshot(),
         "root_legacy_compatibility": list(LEGACY_ROOT_NAMES),
         "forbidden_public_types": list(FORBIDDEN_PUBLIC_TYPES),

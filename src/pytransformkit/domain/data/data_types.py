@@ -11,8 +11,84 @@ class DataType:
     __slots__ = ()
 
     @staticmethod
+    def boolean() -> BooleanType:
+        return BooleanType()
+
+    @staticmethod
+    def int8() -> IntegerType:
+        return IntegerType(bits=8, signed=True)
+
+    @staticmethod
+    def int16() -> IntegerType:
+        return IntegerType(bits=16, signed=True)
+
+    @staticmethod
+    def int32() -> IntegerType:
+        return IntegerType(bits=32, signed=True)
+
+    @staticmethod
+    def int64() -> IntegerType:
+        return IntegerType(bits=64, signed=True)
+
+    @staticmethod
+    def uint8() -> IntegerType:
+        return IntegerType(bits=8, signed=False)
+
+    @staticmethod
+    def uint16() -> IntegerType:
+        return IntegerType(bits=16, signed=False)
+
+    @staticmethod
+    def uint32() -> IntegerType:
+        return IntegerType(bits=32, signed=False)
+
+    @staticmethod
+    def uint64() -> IntegerType:
+        return IntegerType(bits=64, signed=False)
+
+    @staticmethod
+    def float32() -> FloatType:
+        return FloatType(bits=32)
+
+    @staticmethod
+    def float64() -> FloatType:
+        return FloatType(bits=64)
+
+    @staticmethod
+    def decimal(precision: int, scale: int) -> DecimalType:
+        return DecimalType(precision=precision, scale=scale)
+
+    @staticmethod
+    def string() -> StringType:
+        return StringType()
+
+    @staticmethod
+    def binary() -> BinaryType:
+        return BinaryType()
+
+    @staticmethod
+    def date() -> DateType:
+        return DateType()
+
+    @staticmethod
+    def time(unit: str = "us") -> TimeType:
+        return TimeType(unit=unit)
+
+    @staticmethod
+    def timestamp(
+        *,
+        timezone: str | None = None,
+        unit: str = "us",
+    ) -> TimestampType:
+        return TimestampType(unit=unit, timezone=timezone)
+
+    @staticmethod
     def duration(unit: str = "us") -> DurationType:
         return DurationType(unit=unit)
+
+    @staticmethod
+    def unknown() -> UnknownType:
+        return UnknownType()
 
     @staticmethod
     def list_of(

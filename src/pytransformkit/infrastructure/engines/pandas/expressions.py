@@ -162,8 +162,8 @@ class PandasExpressionCompiler:
     @staticmethod
     def _is_null(value: Any) -> Any:
         if isinstance(value, pd.Series):
-            return value.isna()
-        return pd.isna(value)
+            return value.map(_logical_is_null_scalar).astype("boolean")
+        return _logical_is_null_scalar(value)
 
 
 def _column_reference(
@@ -245,6 +245,22 @@ def _is_null_scalar(value: Any) -> bool:
     if isinstance(value, pd.Series):
         return False
     return value is None or value is pd.NA
+
+
+def _logical_is_null_scalar(value: Any) -> bool:
+    if value is None or value is pd.NA or value is pd.NaT:
+        return True
+    try:
+        unequal_to_self = value != value
+    except Exception:
+        unequal_to_self = False
+    if isinstance(unequal_to_self, bool) and unequal_to_self:
+        return False
+    try:
+        result = pd.isna(value)
+    except (TypeError, ValueError):
+        return False
+    return bool(result) if isinstance(result, bool) else False
 
 
 def _string_unary(value: Any, method: str) -> Any:

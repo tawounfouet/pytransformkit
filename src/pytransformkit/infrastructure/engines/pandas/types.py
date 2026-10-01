@@ -59,9 +59,7 @@ class PandasTypeMapper:
         ):
             return "object"
         if isinstance(data_type, DecimalType):
-            raise AdapterError(
-                "Pandas Decimal mapping is not supported in the initial adapter."
-            )
+            return "object"
 
         raise AdapterError(
             f"Unsupported logical DataType {type(data_type).__name__!r}."

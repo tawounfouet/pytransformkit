@@ -49,7 +49,14 @@ The dedicated `release-qualification-contract` job must:
 7. run the same package version smoke check.
 
 This gate complements, rather than replaces, the existing engine, serialization,
-plugin, security, API-freeze, conformance and performance jobs.
+plugin, security, API-freeze, backwards-compatibility, conformance and performance
+jobs.
+
+The dedicated `backwards-compatibility-contract` additionally freezes the public
+error-code catalogue, legacy migration aliases, wire contracts and plugin protocol
+V1 compatibility. The release-artifact gate re-runs those compatibility verifiers
+with the cleanly installed wheel, so compatibility evidence is tied to the
+distributable artifact rather than only the source checkout.
 
 ## RC policy
 

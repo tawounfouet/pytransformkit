@@ -54,7 +54,6 @@ SIGNATURE_TARGETS = (
     ("pytransformkit.engines", "EngineRegistry"),
     ("pytransformkit.engines", "EngineAdapter"),
     ("pytransformkit.engines", "EngineDescriptor"),
-    ("pytransformkit.runtime", "ExecutionContext"),
     ("pytransformkit.runtime", "CorrelationContext"),
     ("pytransformkit.plugins", "PluginRegistry"),
     ("pytransformkit.plugins", "PluginDescriptor"),
@@ -170,9 +169,7 @@ def _enum_snapshot() -> dict[str, dict[str, object]]:
     for module_name, symbol_name in ENUM_TARGETS:
         value = getattr(importlib.import_module(module_name), symbol_name)
         if not inspect.isclass(value) or not issubclass(value, Enum):
-            raise RuntimeError(
-                f"{module_name}.{symbol_name} is not an enum."
-            )
+            raise RuntimeError(f"{module_name}.{symbol_name} is not an enum.")
         result[f"{module_name}.{symbol_name}"] = {
             member.name: member.value for member in value
         }
@@ -269,8 +266,7 @@ def build_snapshot(project_file: Path) -> dict[str, object]:
         "snapshot_version": 1,
         "framework_line": "0.8.x",
         "modules": {
-            module_name: _module_snapshot(module_name)
-            for module_name in STABLE_MODULES
+            module_name: _module_snapshot(module_name) for module_name in STABLE_MODULES
         },
         "signatures": _signature_snapshot(),
         "protocol_members": _protocol_snapshot(),

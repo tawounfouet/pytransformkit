@@ -208,3 +208,19 @@ After the 1.0 freeze, changes to the stable snapshot require one of:
 The API snapshot is evidence, not a replacement for semantic tests. Engine,
 serialization, security, optimizer and cross-engine conformance suites remain
 mandatory alongside it.
+
+
+## LOT-27 pre-RC amendment
+
+LOT-27 identified one release blocker in the frozen signature surface:
+`PluginCompatibility()` defaulted to a host range ending at `<1.0.0`, which
+would reject PyTransformKit `1.0.0` itself.
+
+Before the RC freeze, that default was deliberately corrected to
+`>=0.5.0,<2.0.0` for plugin protocol V1. The change affected only the
+`signatures` category of the public API snapshot. All exports, Protocol members,
+exception hierarchy, enum values, extras, engine IDs and wire contracts remained
+unchanged.
+
+The amended signature hash is the V1 RC baseline and is protected by both the
+built-wheel API gate and the consumer compatibility gate.

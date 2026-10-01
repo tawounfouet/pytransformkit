@@ -341,8 +341,7 @@ def test_customer_360_eager_result_lineage_and_resource_handoff(
     assert (tmp_path / output_resource.locator).exists()
 
     output_links = {
-        (link.name, link.resource, link.role.value)
-        for link in result.lineage.resources
+        (link.name, link.resource, link.role.value) for link in result.lineage.resources
     }
     assert ("customer_360", output_resource, "output") in output_links
 
@@ -362,16 +361,12 @@ def test_customer_360_eager_result_lineage_and_resource_handoff(
         result.lineage.input("orders"),
         "amount",
     ) in {
-        (reference.dataset, str(reference.field_path))
-        for reference in revenue_sources
+        (reference.dataset, str(reference.field_path)) for reference in revenue_sources
     }
     assert (
         result.lineage.input("customers"),
         "email",
-    ) in {
-        (reference.dataset, str(reference.field_path))
-        for reference in email_sources
-    }
+    ) in {(reference.dataset, str(reference.field_path)) for reference in email_sources}
 
 
 def test_customer_360_polars_lazy_matches_eager() -> None:

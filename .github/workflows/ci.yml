@@ -274,7 +274,7 @@ jobs:
             tests/contract/serialization/test_security_and_migrations.py \
             tests/contract/io -ra
 
-  api-freeze-snapshot:
+  api-freeze-contract:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -282,19 +282,27 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - name: Install full public surface
+      - name: Build frozen wheel
         run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev,pandas,polars,pyarrow,duckdb,io]"
-      - name: Generate current public API snapshot
+          python -m pip install --upgrade pip build
+          python -m build
+      - name: Install built wheel in clean environment
         run: |
-          python scripts/public_api_snapshot.py \
-            --write public-api-current.json
-      - name: Upload current API snapshot
-        uses: actions/upload-artifact@v4
-        with:
-          name: pytransformkit-public-api-current
-          path: public-api-current.json
+          python -m venv .api-freeze-venv
+          .api-freeze-venv/bin/python -m pip install --upgrade pip
+          .api-freeze-venv/bin/python -m pip install dist/*.whl
+          .api-freeze-venv/bin/python -m pip install \
+            "pandas>=2.2,<4" \
+            "polars>=1.0,<2" \
+            "pyarrow>=20,<26" \
+            "duckdb>=1.4,<2"
+      - name: Verify built-wheel public API freeze
+        run: |
+          .api-freeze-venv/bin/python scripts/public_api_snapshot.py \
+            --check contracts/public_api_v1.json
+      - name: Run Getting Started engine smoke
+        run: |
+          .api-freeze-venv/bin/python scripts/00_local_experimentation.py
 
   build:
     runs-on: ubuntu-latest

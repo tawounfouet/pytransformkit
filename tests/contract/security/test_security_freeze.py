@@ -5,8 +5,7 @@ import sys
 
 import pytest
 
-from pytransformkit import InputBinding, ResourceReference
-from pytransformkit.domain.resources import CredentialReference
+from pytransformkit import CredentialReference, InputBinding, ResourceReference
 
 
 pytestmark = pytest.mark.contract
@@ -77,7 +76,9 @@ import pytransformkit
 forbidden = {"pandas", "polars", "pyarrow", "duckdb"}
 loaded = forbidden.intersection(sys.modules)
 if loaded:
-    raise SystemExit("optional engines loaded by core import: " + ",".join(sorted(loaded)))
+    raise SystemExit(
+        "optional engines loaded by core import: " + ",".join(sorted(loaded))
+    )
 """
     completed = subprocess.run(
         [sys.executable, "-c", code],

@@ -25,6 +25,14 @@ def test_plugin_compatibility_checks_package_and_protocol_ranges() -> None:
     assert PLUGIN_API_VERSION == 1
 
 
+def test_default_plugin_compatibility_covers_framework_v1_line() -> None:
+    compatibility = PluginCompatibility()
+
+    assert compatibility.supports(Version(1, 0, 0), PLUGIN_API_VERSION)
+    assert compatibility.supports(Version(1, 9, 9), PLUGIN_API_VERSION)
+    assert not compatibility.supports(Version(2, 0, 0), PLUGIN_API_VERSION)
+
+
 def test_invalid_compatibility_range_fails_fast() -> None:
     with pytest.raises(ValueError):
         PluginCompatibility(

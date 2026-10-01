@@ -132,6 +132,12 @@ class Schema:
             )
         )
 
+    def fingerprint(self):
+        """Return a deterministic semantic fingerprint for this Schema."""
+        from pytransformkit.domain.data.fingerprint import schema_fingerprint
+
+        return schema_fingerprint(self)
+
 
 def _first_duplicate(values: tuple[str, ...]) -> str | None:
     seen: set[str] = set()

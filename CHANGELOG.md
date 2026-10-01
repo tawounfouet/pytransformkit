@@ -8,6 +8,18 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 
 ### Added
 
+- LOT-24 cross-engine conformance and Customer 360 transformation gate, advancing the release line to `0.6.0`.
+- Public qualified `pytransformkit.conformance` namespace with EngineStability, ConformanceDimension, ConformanceStatus, EngineConformanceProfile, mandatory V1 capabilities and published official-engine profiles.
+- Pandas and Polars labeled STABLE and mandatory for V1; PyArrow and DuckDB labeled PROVISIONAL with explicit unsupported/provisional dimensions rather than inferred parity.
+- Published `docs/ENGINE_CONFORMANCE_MATRIX.md` covering NULL/NaN, numeric promotion, Decimal, timezone, nested data, Unicode, ordering, duplicates, empty data, joins, aggregates, windows, quality, lineage, serialization, capability failure and no-hidden-fallback behavior.
+- Pandas logical Decimal casts backed by Python Decimal with precision/scale enforcement and NULL-on-error behavior.
+- Pandas expression null predicates now distinguish preserved floating-point NaN from logical NULL instead of treating every NaN as null.
+- New LOT-24 conformance contracts for NULL/NaN distinction, integer/float promotion, fixed-precision Decimal aggregation, Unicode normalization, deterministic ordering, duplicate elimination, empty datasets, explicit unsupported capability failure and explicit-engine no-fallback behavior.
+- Canonical Customer 360 multi-input TransformationPlan covering paid-order filtering, aggregation, left join, email normalization, data quality, projection and deterministic ordering.
+- Customer 360 qualified on Pandas eager, Polars eager and Polars lazy with equivalent normalized results, canonical serialization, transitive field lineage and Parquet ResourceReference output handoff.
+- Dedicated `conformance-contract` CI gate running both the existing cross-engine suite and the new LOT-24 release contracts.
+
+
 - LOT-23 extension and plugin architecture, completing the `0.5.0` line.
 - Public qualified `pytransformkit.plugins` namespace exposing PluginRegistry, PluginDescriptor, PluginCompatibility, PluginKind, PluginActivationContext, EngineAdapter, Reader, Writer, ResourceResolver, FunctionExtension, OptimizerRule and TelemetrySink contracts.
 - Entry-point discovery under `pytransformkit.plugins` that records metadata without importing plugin code; `EntryPoint.load()` is called only from explicit `activate(plugin_id)`.

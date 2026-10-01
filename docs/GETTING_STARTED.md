@@ -2,7 +2,7 @@
 
 PyTransformKit lets you define engine-neutral transformation semantics once, compile them into a LogicalPlan, and execute them explicitly through supported physical engines.
 
-The current development line targets **0.3.0a1** and includes LOT-15: transformation-owned data quality and validation on top of the V1 transformation-semantics baseline.
+The current development line is **0.8.0**. LOT-26 freezes the V1 public API, security boundaries and pre-1.0 migration path on top of the already qualified transformation, engine, I/O, serialization, optimizer, plugin, conformance and performance baselines.
 
 The canonical path is:
 
@@ -100,15 +100,13 @@ The core package has no mandatory physical-engine dependency.
 Start with a logical Schema:
 
 ~~~python
-from pytransformkit.domain.data.data_types import IntegerType, StringType
-from pytransformkit.domain.data.field import Field
-from pytransformkit.domain.data.schema import Schema
+from pytransformkit import DataType, Field, Schema
 
 schema = Schema(
     fields=(
-        Field("customer_id", IntegerType(), nullable=False),
-        Field("email", StringType(), nullable=True),
-        Field("status", StringType(), nullable=False),
+        Field("customer_id", DataType.int64(), nullable=False),
+        Field("email", DataType.string(), nullable=True),
+        Field("status", DataType.string(), nullable=False),
     )
 )
 ~~~
@@ -686,14 +684,9 @@ binding = InputBinding.from_native(
 LOT-20 also supports explicit resource-backed bindings through a configured Reader/Writer registry:
 
 ~~~python
-from pytransformkit import (
-    InputBinding,
-    OutputBinding,
-    ResourceReference,
-    RetrySafety,
-    WriteMode,
-)
+from pytransformkit import InputBinding, OutputBinding, ResourceReference
 from pytransformkit.application.io import ResourceIORegistry
+from pytransformkit.runtime import RetrySafety, WriteMode
 from pytransformkit.readers import LocalFileReader
 from pytransformkit.writers import LocalFileWriter
 
@@ -1311,7 +1304,6 @@ The CI matrix verifies Python 3.11, 3.12, 3.13 and 3.14 plus dedicated Pandas, P
 
 The revised V1 roadmap continues with:
 
-- **LOT-26** — Public API / Security / Migration Freeze;
 - **LOT-27** — 1.0 Release Candidate;
 - **LOT-28** — 1.0.0 Stable.
 

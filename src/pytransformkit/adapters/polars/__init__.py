@@ -7,8 +7,4 @@ from pytransformkit.infrastructure.engines.polars import (
 
 PolarsEngineAdapter = PolarsAdapter
 
-__all__ = [
-    "PolarsAdapter",
-    "PolarsDatasetHandle",
-    "PolarsEngineAdapter",
-]
+__all__ = ["PolarsEngineAdapter"]

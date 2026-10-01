@@ -124,7 +124,9 @@ MANDATORY_V1_CAPABILITIES = frozenset(
 )
 
 
-def _all(status: ConformanceStatus) -> tuple[
+def _all(
+    status: ConformanceStatus,
+) -> tuple[
     tuple[ConformanceDimension, ConformanceStatus],
     ...,
 ]:

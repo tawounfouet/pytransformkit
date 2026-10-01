@@ -21,17 +21,12 @@ def build_catalogue() -> dict[str, object]:
 
     for name in errors.__all__:
         value = getattr(errors, name)
-        if (
-            not inspect.isclass(value)
-            or not issubclass(value, PyTransformKitError)
-        ):
+        if not inspect.isclass(value) or not issubclass(value, PyTransformKitError):
             continue
 
         code = str(value.error_code)
         if ERROR_CODE_PATTERN.fullmatch(code) is None:
-            raise RuntimeError(
-                f"{name} exposes invalid V1 error code {code!r}."
-            )
+            raise RuntimeError(f"{name} exposes invalid V1 error code {code!r}.")
         previous = seen_codes.get(code)
         if previous is not None:
             raise RuntimeError(

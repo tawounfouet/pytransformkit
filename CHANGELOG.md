@@ -8,6 +8,12 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 
 ### Added
 
+- LOT-27 release-candidate qualification baseline, advancing the qualification line to `0.9.0`.
+- Machine-readable `contracts/release_qualification_v1.json` manifest pinning Python support, extras, engines, required CI gates, release evidence, LOT-26 public API hashes, artifact policy and the post-RC blocker-only rule.
+- Deterministic `scripts/release_qualification.py` verifier that detects version, Python matrix, extras, CI-job, evidence-path, engine-partition and frozen-API drift.
+- Dedicated `release-qualification-contract` CI gate that builds wheel and sdist, installs both in clean environments, runs metadata/import smoke checks, and proves the core wheel does not require Pandas, Polars, PyArrow or DuckDB.
+- `docs/RELEASE_CANDIDATE_QUALIFICATION.md` defining the 0.9.0 → 1.0.0rc1 qualification sequence and blocker-only policy after rc1.
+
 - LOT-25 performance and memory qualification, advancing the release line to `0.7.0`.
 - Reproducible stdlib-first benchmark harness using `perf_counter_ns`, `tracemalloc`, deterministic warmups/repetitions and portable JSON reporting.
 - Benchmark scenarios for plan compilation, logical optimization, expression compilation/lowering, direct adapter versus full runtime execution, native memory amplification, Polars eager/lazy execution, Pandas/Polars ↔ Arrow conversion, DuckDB eager/lazy materialization boundaries, Parquet full-scan versus source pushdown, lineage analysis and telemetry overhead.

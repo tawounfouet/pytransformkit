@@ -310,6 +310,31 @@ jobs:
         run: |
           .api-freeze-venv/bin/python scripts/guides/polars_engine.py
 
+  backwards-compatibility-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install compatibility qualification dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Verify V1 error-code catalogue
+        run: |
+          python scripts/error_code_catalog.py \
+            --check contracts/error_codes_v1.json
+      - name: Verify V1 consumer compatibility snapshot
+        run: |
+          python scripts/consumer_compatibility.py \
+            --check contracts/consumer_compatibility_v1.json
+      - name: Run backwards-compatibility contracts
+        run: |
+          pytest tests/contract/release/test_backward_compatibility.py \
+            tests/unit/application/extensions/test_compatibility.py -ra
+
   release-qualification-contract:
     runs-on: ubuntu-latest
     steps:

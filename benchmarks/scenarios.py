@@ -191,9 +191,7 @@ class PerformanceScenarios:
         )
         return ScenarioOutcome(
             value=result,
-            metrics=metric_pairs(
-                {"rows": len(result.output_handle.dataframe)}
-            ),
+            metrics=metric_pairs({"rows": len(result.output_handle.dataframe)}),
         )
 
     def pandas_memory_amplification(self) -> ScenarioOutcome:

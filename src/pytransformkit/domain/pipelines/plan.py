@@ -87,6 +87,22 @@ class LogicalPlan:
                 return schema
         raise KeyError(name)
 
+    @property
+    def required_capabilities(self):
+        """Return the engine capabilities required by this LogicalPlan."""
+        from pytransformkit.application.execution.compatibility import (
+            EngineCapabilityAnalyzer,
+        )
+
+        return EngineCapabilityAnalyzer().required_capabilities(self)
+
+    @property
+    def lineage(self):
+        """Return engine-independent logical lineage for this compiled plan."""
+        from pytransformkit.domain.lineage import LineageAnalyzer
+
+        return LineageAnalyzer().analyze(self)
+
     def fingerprint(self) -> Fingerprint:
         """Return a deterministic semantic fingerprint for this LogicalPlan."""
         from pytransformkit.application.planning.fingerprint import (
@@ -94,3 +110,35 @@ class LogicalPlan:
         )
 
         return logical_plan_fingerprint(self)
+
+    def explain(self, *, format: str = "text") -> str:
+        """Explain the compiled plan without invoking an execution engine."""
+        import json
+
+        capabilities = tuple(
+            sorted(capability.value for capability in self.required_capabilities)
+        )
+        payload = {
+            "format_version": 1,
+            "name": self.plan_name,
+            "inputs": self.input_names,
+            "outputs": self.output_names,
+            "node_count": len(self.nodes),
+            "required_capabilities": capabilities,
+            "fingerprint": str(self.fingerprint()),
+        }
+
+        if format == "json":
+            return json.dumps(payload, sort_keys=True, separators=(",", ":"))
+        if format != "text":
+            raise ValueError("LogicalPlan explain format must be 'text' or 'json'.")
+
+        return (
+            f"LogicalPlan {self.plan_name!r}\n"
+            f"inputs: {', '.join(self.input_names) or '<none>'}\n"
+            f"outputs: {', '.join(self.output_names) or '<none>'}\n"
+            f"nodes: {len(self.nodes)}\n"
+            "required_capabilities: "
+            f"{', '.join(capabilities) or '<none>'}\n"
+            f"fingerprint: {self.fingerprint()}"
+        )

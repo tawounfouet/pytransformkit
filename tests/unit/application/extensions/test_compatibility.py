@@ -31,3 +31,12 @@ def test_invalid_compatibility_range_fails_fast() -> None:
             framework_min=Version(1, 0, 0),
             framework_max_exclusive=Version(1, 0, 0),
         )
+
+
+def test_default_plugin_compatibility_covers_v1_release_line() -> None:
+    compatibility = PluginCompatibility()
+
+    assert compatibility.supports(Version(0, 9, 0), PLUGIN_API_VERSION)
+    assert compatibility.supports(Version(1, 0, 0), PLUGIN_API_VERSION)
+    assert compatibility.supports(Version(1, 9, 9), PLUGIN_API_VERSION)
+    assert not compatibility.supports(Version(2, 0, 0), PLUGIN_API_VERSION)

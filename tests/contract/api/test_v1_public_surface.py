@@ -100,9 +100,32 @@ def test_field_dtype_is_a_non_breaking_v1_alias() -> None:
 
 def test_stable_qualified_namespaces_import() -> None:
     import pytransformkit.authoring as authoring
+    import pytransformkit.engines as engines
     import pytransformkit.expressions as expressions
+    import pytransformkit.planning as planning
+    import pytransformkit.runtime as runtime
+    import pytransformkit.serialization as serialization
     import pytransformkit.transformations as transformations
+    from pytransformkit.adapters import pandas as pandas_adapter
+    from pytransformkit.adapters import polars as polars_adapter
 
-    assert "TransformationPlanBuilder" in authoring.__all__
+    assert authoring.__all__ == ["TransformationPlanBuilder"]
     assert "Expression" in expressions.__all__
     assert "TransformationSpec" in transformations.__all__
+    assert planning.__all__ == [
+        "LogicalOptimizer",
+        "LogicalPlan",
+        "TransformationCompiler",
+    ]
+    assert engines.__all__ == [
+        "Capability",
+        "EngineAdapter",
+        "EngineCapability",
+        "EngineDescriptor",
+        "EngineRegistry",
+    ]
+    assert "OutputMode" not in runtime.__all__
+    assert "ContractCodec" not in serialization.__all__
+    assert "SemanticTypeRegistry" not in serialization.__all__
+    assert pandas_adapter.__all__ == ["PandasEngineAdapter"]
+    assert polars_adapter.__all__ == ["PolarsEngineAdapter"]

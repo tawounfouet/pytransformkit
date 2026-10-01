@@ -51,8 +51,7 @@ def _legacy_alias_snapshot(names: list[str]) -> dict[str, dict[str, str]]:
         ]
         if len(deprecations) != 1:
             raise RuntimeError(
-                f"Legacy compatibility name {name!r} must emit one "
-                "DeprecationWarning."
+                f"Legacy compatibility name {name!r} must emit one DeprecationWarning."
             )
 
         result[name] = {

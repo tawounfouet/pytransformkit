@@ -15,16 +15,7 @@ from pytransformkit.application.planning import (
 from pytransformkit.domain.pipelines.plan import LogicalPlan, LogicalPlanNode
 
 __all__ = [
-    "ExpressionOptimization",
-    "ExpressionOptimizer",
     "LogicalOptimizer",
     "LogicalPlan",
-    "LogicalPlanNode",
-    "OptimizationReport",
-    "OptimizationResult",
-    "OptimizationRuleApplication",
-    "OptimizerDiagnostic",
     "TransformationCompiler",
-    "canonical_logical_plan",
-    "logical_plan_fingerprint",
 ]

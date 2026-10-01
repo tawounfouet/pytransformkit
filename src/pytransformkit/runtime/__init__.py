@@ -65,7 +65,6 @@ __all__ = [
     "NullTelemetrySink",
     "OutcomeUncertainty",
     "OutputBinding",
-    "OutputMode",
     "PhysicalHandle",
     "ProviderRetryEvidence",
     "ResourceReference",

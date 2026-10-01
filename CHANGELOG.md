@@ -8,6 +8,16 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 
 ### Added
 
+- LOT-25 performance and memory qualification, advancing the release line to `0.7.0`.
+- Reproducible stdlib-first benchmark harness using `perf_counter_ns`, `tracemalloc`, deterministic warmups/repetitions and portable JSON reporting.
+- Benchmark scenarios for plan compilation, logical optimization, expression compilation/lowering, direct adapter versus full runtime execution, native memory amplification, Polars eager/lazy execution, Pandas/Polars ↔ Arrow conversion, DuckDB eager/lazy materialization boundaries, Parquet full-scan versus source pushdown, lineage analysis and telemetry overhead.
+- Native memory measurements using Pandas deep memory usage, Polars estimated size and Arrow table bytes instead of treating Python allocation peaks as total process memory.
+- Explicit absolute and relative CI regression budgets in `benchmarks/budgets_ci.json`, including runtime/adapter, lazy/eager, DuckDB materialization, pushdown/full-scan and recording/null-telemetry ratios.
+- Qualified `0.7.0` CI baseline committed in `benchmarks/baselines/0.7.0-ci.json`, sourced from workflow run `36817814955`.
+- Performance qualification tests proving benchmarked execution-path comparisons retain equivalent results and that optimizer benchmarking preserves the logical output contract.
+- Dedicated `performance-contract` CI gate that runs qualification tests, enforces budgets and uploads `performance-report.json` as an inspectable workflow artifact.
+
+
 - LOT-24 cross-engine conformance and Customer 360 transformation gate, advancing the release line to `0.6.0`.
 - Public qualified `pytransformkit.conformance` namespace with EngineStability, ConformanceDimension, ConformanceStatus, EngineConformanceProfile, mandatory V1 capabilities and published official-engine profiles.
 - Pandas and Polars labeled STABLE and mandatory for V1; PyArrow and DuckDB labeled PROVISIONAL with explicit unsupported/provisional dimensions rather than inferred parity.

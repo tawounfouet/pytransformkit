@@ -64,6 +64,10 @@ def validate(root: Path, manifest_path: Path) -> list[str]:
     if manifest.get("release_candidate_version") != "1.0.0rc1":
         errors.append("release_candidate_version must be 1.0.0rc1")
 
+    rc_commit = manifest.get("release_candidate_main_commit")
+    if not isinstance(rc_commit, str) or re.fullmatch(r"[0-9a-f]{40}", rc_commit) is None:
+        errors.append("release_candidate_main_commit must be a 40-character SHA")
+
     with (root / "pyproject.toml").open("rb") as stream:
         project = tomllib.load(stream)["project"]
 
@@ -110,7 +114,19 @@ def validate(root: Path, manifest_path: Path) -> list[str]:
     if public_api.get("category_hashes") != expected_hashes:
         errors.append("V1 public API changed after the RC freeze")
 
+    release_qualification = _load_json(
+        root / "contracts" / "release_qualification_v1.json"
+    )
+    if release_qualification.get("project_version") != expected_version:
+        errors.append("release qualification does not target the stable version")
+    if release_qualification.get("frozen_api_category_hashes") != expected_hashes:
+        errors.append("release qualification API hashes drifted")
+
     consumer = _load_json(root / "contracts" / "consumer_compatibility_v1.json")
+    if consumer.get("source_baseline") != "0.8.0":
+        errors.append("consumer compatibility source baseline must remain 0.8.0")
+    if not str(consumer.get("candidate_line", "")).endswith("1.0.0"):
+        errors.append("consumer compatibility candidate line must end at 1.0.0")
     if consumer.get("public_api_category_hashes") != expected_hashes:
         errors.append("consumer compatibility API hashes drifted")
     if consumer.get("wire_contracts") != public_api.get("wire_contracts"):

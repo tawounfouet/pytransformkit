@@ -1,10 +1,7 @@
 """Public Polars adapter surface."""
 
-from pytransformkit.infrastructure.engines.polars import (
-    PolarsAdapter,
-    PolarsDatasetHandle,
+from pytransformkit.infrastructure.engines.polars.adapter import (
+    PolarsAdapter as PolarsEngineAdapter,
 )
-
-PolarsEngineAdapter = PolarsAdapter
 
 __all__ = ["PolarsEngineAdapter"]

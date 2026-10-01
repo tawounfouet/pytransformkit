@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import builtins
-import importlib
 import importlib.abc
 import json
 import socket
@@ -12,6 +10,7 @@ from pathlib import Path
 import pytest
 
 from pytransformkit import InputBinding, OutputBinding, ResourceReference
+from pytransformkit.errors import InvalidWirePayloadError
 from pytransformkit.serialization import ResourceReferenceCodec
 
 
@@ -103,7 +102,7 @@ def test_wire_decoder_rejects_unknown_executable_type() -> None:
         },
     }
 
-    with pytest.raises(Exception):
+    with pytest.raises(InvalidWirePayloadError):
         ResourceReferenceCodec().from_json(json.dumps(envelope))
 
 

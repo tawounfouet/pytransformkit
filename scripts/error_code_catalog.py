@@ -53,7 +53,9 @@ def build_catalogue() -> dict[str, object]:
         }
 
     if "PyTransformKitError" not in entries:
-        raise RuntimeError(\n            "PyTransformKitError must be part of the V1 error catalogue."\n        )
+        raise RuntimeError(
+            "PyTransformKitError must be part of the V1 error catalogue."
+        )
 
     return {
         "catalogue_version": 1,

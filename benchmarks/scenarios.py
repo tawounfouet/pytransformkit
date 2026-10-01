@@ -179,9 +179,7 @@ class PerformanceScenarios:
         )
         return ScenarioOutcome(
             value=result,
-            metrics=metric_pairs(
-                {"rows": len(result.output_handle.dataframe)}
-            ),
+            metrics=metric_pairs({"rows": len(result.output_handle.dataframe)}),
         )
 
     def pandas_runtime_execution(self) -> ScenarioOutcome:
@@ -327,9 +325,7 @@ class PerformanceScenarios:
             )
             return ScenarioOutcome(
                 value=None,
-                metrics=metric_pairs(
-                    {"diagnostics": len(result.diagnostics)}
-                ),
+                metrics=metric_pairs({"diagnostics": len(result.diagnostics)}),
             )
         finally:
             adapter.close()
@@ -378,9 +374,7 @@ class PerformanceScenarios:
         table = result.value
         return ScenarioOutcome(
             value=result,
-            metrics=metric_pairs(
-                {"rows": table.num_rows, "arrow_bytes": table.nbytes}
-            ),
+            metrics=metric_pairs({"rows": table.num_rows, "arrow_bytes": table.nbytes}),
         )
 
     def lineage_analysis(self) -> ScenarioOutcome:
@@ -519,13 +513,9 @@ def _payload(row_count: int) -> dict[str, list[object]]:
         "segment": [f"S{index % 20:02d}" for index in range(row_count)],
         "amount": [float((index % 100) * 1.25) for index in range(row_count)],
         "status": [
-            "ACTIVE" if index % 3 != 0 else "INACTIVE"
-            for index in range(row_count)
+            "ACTIVE" if index % 3 != 0 else "INACTIVE" for index in range(row_count)
         ],
-        "email": [
-            f" USER{index}@EXAMPLE.COM "
-            for index in range(row_count)
-        ],
+        "email": [f" USER{index}@EXAMPLE.COM " for index in range(row_count)],
     }
 
 

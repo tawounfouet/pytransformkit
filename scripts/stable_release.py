@@ -65,7 +65,10 @@ def validate(root: Path, manifest_path: Path) -> list[str]:
         errors.append("release_candidate_version must be 1.0.0rc1")
 
     rc_commit = manifest.get("release_candidate_main_commit")
-    if not isinstance(rc_commit, str) or re.fullmatch(r"[0-9a-f]{40}", rc_commit) is None:
+    if (
+        not isinstance(rc_commit, str)
+        or re.fullmatch(r"[0-9a-f]{40}", rc_commit) is None
+    ):
         errors.append("release_candidate_main_commit must be a 40-character SHA")
 
     with (root / "pyproject.toml").open("rb") as stream:

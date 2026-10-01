@@ -66,20 +66,16 @@ def test_budget_evaluation_reports_absolute_and_ratio_regressions(tmp_path) -> N
     budget_path.write_text(
         json.dumps(
             {
-                "absolute": {
-                    "slow": {
-                        "size": 15
-                    }
-                },
+                "absolute": {"slow": {"size": 15}},
                 "ratios": [
                     {
                         "name": "slow_vs_fast_size",
                         "numerator": "slow",
                         "denominator": "fast",
                         "metric": "size",
-                        "maximum": 1.5
+                        "maximum": 1.5,
                     }
-                ]
+                ],
             }
         ),
         encoding="utf-8",

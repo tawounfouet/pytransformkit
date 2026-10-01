@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import gc
 import json
+from collections.abc import Callable, Mapping
 import platform
 import statistics
 import sys
@@ -12,7 +13,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from time import perf_counter_ns
-from typing import Callable, Mapping, TypeVar
+from typing import TypeVar
 
 from pytransformkit import __version__
 

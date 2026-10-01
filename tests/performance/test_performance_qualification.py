@@ -1,4 +1,4 @@
-# ruff: noqa: E402
+# ruff: noqa: E402, I001
 
 from __future__ import annotations
 
@@ -6,9 +6,9 @@ from pathlib import Path
 
 import pytest
 
-pd = pytest.importorskip("pandas")
-pl = pytest.importorskip("polars")
-pa = pytest.importorskip("pyarrow")
+pytest.importorskip("pandas")
+pytest.importorskip("polars")
+pytest.importorskip("pyarrow")
 pytest.importorskip("duckdb")
 
 from benchmarks.harness import BenchmarkBudgetSet

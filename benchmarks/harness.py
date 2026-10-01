@@ -193,8 +193,7 @@ class BenchmarkBudgetSet:
             if not isinstance(scenario, str) or not isinstance(raw_limits, dict):
                 raise ValueError("Absolute benchmark budgets must be mappings.")
             limits = tuple(
-                (str(metric), float(maximum))
-                for metric, maximum in raw_limits.items()
+                (str(metric), float(maximum)) for metric, maximum in raw_limits.items()
             )
             absolute.append((scenario, limits))
 
@@ -312,7 +311,4 @@ def evaluate_budgets(
 
 def metric_pairs(values: Mapping[str, int | float]) -> tuple[tuple[str, float], ...]:
     """Normalize scenario metrics into deterministic pairs."""
-    return tuple(
-        (name, float(value))
-        for name, value in sorted(values.items())
-    )
+    return tuple((name, float(value)) for name, value in sorted(values.items()))

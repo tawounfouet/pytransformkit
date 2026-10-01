@@ -36,7 +36,7 @@ class PluginCompatibility:
     """Machine-checkable package and plugin-protocol compatibility range."""
 
     framework_min: Version = Version(0, 5, 0)
-    framework_max_exclusive: Version = Version(1, 0, 0)
+    framework_max_exclusive: Version = Version(2, 0, 0)
     protocol_min: int = PLUGIN_API_VERSION
     protocol_max: int = PLUGIN_API_VERSION
 

@@ -767,7 +767,7 @@ class _DeclarativeDecoder:
             path=f"{path}.name",
             mapping=mapping,
             key="name",
-            value=True,
+            use_value_mark=True,
             label="Field name",
         )
         nullable = self._decode_bool_property(
@@ -832,7 +832,7 @@ class _DeclarativeDecoder:
             path=f"{path}.name",
             mapping=mapping,
             key="name",
-            value=True,
+            use_value_mark=True,
             label="Struct field name",
             type_error=True,
         )

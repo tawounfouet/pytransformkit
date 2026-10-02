@@ -51,9 +51,7 @@ def test_declarative_error_hierarchy_matches_contract() -> None:
     assert DeclarativeSchemaUnknownPropertyError.__bases__ == (
         DeclarativeSchemaValidationError,
     )
-    assert DeclarativeSchemaTypeError.__bases__ == (
-        DeclarativeSchemaValidationError,
-    )
+    assert DeclarativeSchemaTypeError.__bases__ == (DeclarativeSchemaValidationError,)
     assert DeclarativeSchemaDuplicateKeyError.__bases__ == (
         DeclarativeSchemaParseError,
     )

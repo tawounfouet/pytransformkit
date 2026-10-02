@@ -181,10 +181,7 @@ def test_duplicate_nested_struct_fields_fail_depth_first() -> None:
         VALIDATOR.validate_document(document)
 
     assert error.value.field_name == "city"
-    assert (
-        error.value.object_path
-        == "schemas[0].fields[0].type.struct.fields[1].name"
-    )
+    assert error.value.object_path == "schemas[0].fields[0].type.struct.fields[1].name"
     assert error.value.first_context is not None
     assert (
         error.value.first_context.object_path
@@ -196,9 +193,7 @@ def test_custom_type_definition_fails_closed() -> None:
     class CustomTypeDefinition(TypeDefinition):
         pass
 
-    document = _document(
-        _schema("customers", _field("custom", CustomTypeDefinition()))
-    )
+    document = _document(_schema("customers", _field("custom", CustomTypeDefinition())))
 
     with pytest.raises(DeclarativeSchemaTypeError) as error:
         VALIDATOR.validate_document(document)
@@ -229,10 +224,7 @@ def test_invalid_temporal_unit_reports_type_error(unit: str) -> None:
     with pytest.raises(DeclarativeSchemaTypeError) as error:
         VALIDATOR.validate_document(document)
 
-    assert (
-        error.value.object_path
-        == "schemas[0].fields[0].type.timestamp.unit"
-    )
+    assert error.value.object_path == "schemas[0].fields[0].type.timestamp.unit"
 
 
 def test_blank_timestamp_timezone_reports_type_error() -> None:
@@ -243,10 +235,7 @@ def test_blank_timestamp_timezone_reports_type_error() -> None:
     with pytest.raises(DeclarativeSchemaTypeError) as error:
         VALIDATOR.validate_document(document)
 
-    assert (
-        error.value.object_path
-        == "schemas[0].fields[0].type.timestamp.timezone"
-    )
+    assert error.value.object_path == "schemas[0].fields[0].type.timestamp.timezone"
 
 
 def test_non_boolean_field_nullability_is_validation_error() -> None:
@@ -269,10 +258,7 @@ def test_non_boolean_nested_nullability_is_type_error() -> None:
     with pytest.raises(DeclarativeSchemaTypeError) as error:
         VALIDATOR.validate_document(document)
 
-    assert (
-        error.value.object_path
-        == "schemas[0].fields[0].type.list.element_nullable"
-    )
+    assert error.value.object_path == "schemas[0].fields[0].type.list.element_nullable"
 
 
 def test_blank_programmatic_schema_name_is_validation_error() -> None:

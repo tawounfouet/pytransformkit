@@ -19,22 +19,29 @@ class DeclarativeErrorContext:
     object_path: str | None = None
 
     def __post_init__(self) -> None:
-        for name, value in (
+        for text_name, text_value in (
             ("source", self.source),
             ("object_path", self.object_path),
         ):
-            if value is not None:
-                if not isinstance(value, str):
-                    raise TypeError(f"{name} must be a string or None.")
-                if not value.strip():
-                    raise ValueError(f"{name} must contain non-whitespace text.")
+            if text_value is not None:
+                if not isinstance(text_value, str):
+                    raise TypeError(f"{text_name} must be a string or None.")
+                if not text_value.strip():
+                    raise ValueError(
+                        f"{text_name} must contain non-whitespace text."
+                    )
 
-        for name, value in (("line", self.line), ("column", self.column)):
-            if value is not None:
-                if type(value) is not int:
-                    raise TypeError(f"{name} must be an int or None.")
-                if value <= 0:
-                    raise ValueError(f"{name} must be one-based when provided.")
+        for position_name, position_value in (
+            ("line", self.line),
+            ("column", self.column),
+        ):
+            if position_value is not None:
+                if type(position_value) is not int:
+                    raise TypeError(f"{position_name} must be an int or None.")
+                if position_value <= 0:
+                    raise ValueError(
+                        f"{position_name} must be one-based when provided."
+                    )
 
 
 class DeclarativeSchemaError(PyTransformKitError):

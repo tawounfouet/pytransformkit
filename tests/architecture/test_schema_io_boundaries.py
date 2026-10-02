@@ -224,8 +224,11 @@ def test_schema_io_internal_pipeline_has_no_network_or_secondary_io_imports() ->
                 if top_level in forbidden_top_level:
                     violations.append(f"{path}: forbidden import {module}")
 
-            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
-                if node.func.id == "open":
-                    violations.append(f"{path}: forbidden call open(...)")
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id == "open"
+            ):
+                violations.append(f"{path}: forbidden call open(...)")
 
     assert violations == []

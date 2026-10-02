@@ -20,8 +20,8 @@ from pytransformkit.schema_io._model import (
     StringTypeDefinition,
     StructFieldDefinition,
     StructTypeDefinition,
-    TimeTypeDefinition,
     TimestampTypeDefinition,
+    TimeTypeDefinition,
     TypeDefinition,
     UnknownTypeDefinition,
 )

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytransformkit"
-version = "1.1.0a7"
+version = "1.1.0a8"
 description = "Engine-agnostic data transformation framework for Python."
 readme = "README.md"
 requires-python = ">=3.11"

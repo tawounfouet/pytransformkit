@@ -81,8 +81,7 @@ def _baseline_mismatches(
         actual_entry = actual_entries.get(name)
         if actual_entry != expected_entry:
             mismatches.append(
-                f"{name} changed: expected={expected_entry!r}, "
-                f"actual={actual_entry!r}"
+                f"{name} changed: expected={expected_entry!r}, actual={actual_entry!r}"
             )
 
     return mismatches

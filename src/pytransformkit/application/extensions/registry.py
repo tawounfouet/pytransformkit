@@ -432,7 +432,7 @@ def _current_framework_version() -> Version:
     try:
         raw = version("pytransformkit")
     except PackageNotFoundError:
-        raw = "1.1.0a5"
+        raw = "1.1.0a6"
     match = re.match(r"^(\d+)\.(\d+)\.(\d+)", raw)
     if match is None:
         raise PluginCompatibilityError(

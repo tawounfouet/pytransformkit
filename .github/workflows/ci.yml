@@ -361,12 +361,17 @@ jobs:
           .release-wheel-venv/bin/python -m pip check
           .release-wheel-venv/bin/python - <<'PY'
           import importlib.util
+          import tomllib
           from importlib.metadata import version
+          from pathlib import Path
 
           import pytransformkit
 
-          assert version("pytransformkit") == "1.0.0"
-          assert pytransformkit.__version__ == "1.0.0"
+          with Path("pyproject.toml").open("rb") as stream:
+              expected_version = tomllib.load(stream)["project"]["version"]
+
+          assert version("pytransformkit") == expected_version
+          assert pytransformkit.__version__ == expected_version
           for module_name in ("pandas", "polars", "pyarrow", "duckdb"):
               assert importlib.util.find_spec(module_name) is None, module_name
           PY
@@ -383,12 +388,17 @@ jobs:
           .release-sdist-venv/bin/python -m pip install dist/*.tar.gz
           .release-sdist-venv/bin/python -m pip check
           .release-sdist-venv/bin/python - <<'PY'
+          import tomllib
           from importlib.metadata import version
+          from pathlib import Path
 
           import pytransformkit
 
-          assert version("pytransformkit") == "1.0.0"
-          assert pytransformkit.__version__ == "1.0.0"
+          with Path("pyproject.toml").open("rb") as stream:
+              expected_version = tomllib.load(stream)["project"]["version"]
+
+          assert version("pytransformkit") == expected_version
+          assert pytransformkit.__version__ == expected_version
           PY
 
   stable-release-contract:

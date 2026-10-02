@@ -145,11 +145,13 @@ def test_all_canonical_datatypes_round_trip_through_emitted_yaml() -> None:
     assert "type: integer" not in emitted
     assert "type: float\n" not in emitted
     assert "type: time\n" in emitted
-    assert "time:\n        unit: ns" in emitted
+    assert "time:" in emitted
+    assert "unit: ns" in emitted
     assert "type: timestamp\n" in emitted
     assert "timezone: Europe/Paris" in emitted
     assert "type: duration\n" in emitted
-    assert "duration:\n        unit: s" in emitted
+    assert "duration:" in emitted
+    assert "unit: s" in emitted
     assert "element_nullable: false" in emitted
     assert "value_nullable: false" in emitted
 

@@ -316,9 +316,7 @@ def test_yaml_dependency_failure_occurs_on_operation_not_namespace_import(
 
     assert schema_io.__all__ == _EXPECTED_EXPORTS
     with pytest.raises(DeclarativeSchemaDependencyError) as error:
-        schema_io.loads_schema(
-            "version: 1\nschema:\n  name: empty\n  fields: []\n"
-        )
+        schema_io.loads_schema("version: 1\nschema:\n  name: empty\n  fields: []\n")
 
     assert str(error.value.error_code) == "PTK-DECL-010"
     assert error.value.dependency_name == "PyYAML"

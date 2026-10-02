@@ -154,7 +154,9 @@ class DeclarativeSafeLoader:
 
         loader_type.yaml_implicit_resolvers = {
             initial: list(resolvers)
-            for initial, resolvers in yaml_module.SafeLoader.yaml_implicit_resolvers.items()
+            for initial, resolvers in (
+                yaml_module.SafeLoader.yaml_implicit_resolvers.items()
+            )
         }
 
         removed_tags = {
@@ -864,7 +866,12 @@ class _DeclarativeDecoder:
         parent_key: object | None = None,
     ) -> TypeDefinition:
         if isinstance(value, str):
-            return self._decode_simple_type(value, path=path, parent=parent, key=parent_key)
+            return self._decode_simple_type(
+                value,
+                path=path,
+                parent=parent,
+                key=parent_key,
+            )
 
         if type(value) is not dict:
             self._raise_type_error(
@@ -901,7 +908,12 @@ class _DeclarativeDecoder:
 
         body_path = f"{path}.{discriminator}"
         if discriminator == "decimal":
-            return self._decode_decimal(body, path=body_path, parent=mapping, key=discriminator)
+            return self._decode_decimal(
+                body,
+                path=body_path,
+                parent=mapping,
+                key=discriminator,
+            )
         if discriminator == "time":
             return TimeTypeDefinition(
                 unit=self._decode_temporal_body(
@@ -928,11 +940,26 @@ class _DeclarativeDecoder:
                 )
             )
         if discriminator == "list":
-            return self._decode_list(body, path=body_path, parent=mapping, key=discriminator)
+            return self._decode_list(
+                body,
+                path=body_path,
+                parent=mapping,
+                key=discriminator,
+            )
         if discriminator == "struct":
-            return self._decode_struct(body, path=body_path, parent=mapping, key=discriminator)
+            return self._decode_struct(
+                body,
+                path=body_path,
+                parent=mapping,
+                key=discriminator,
+            )
         if discriminator == "map":
-            return self._decode_map(body, path=body_path, parent=mapping, key=discriminator)
+            return self._decode_map(
+                body,
+                path=body_path,
+                parent=mapping,
+                key=discriminator,
+            )
 
         raise AssertionError("Structured type dispatch is not exhaustive.")
 

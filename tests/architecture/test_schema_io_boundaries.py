@@ -55,3 +55,32 @@ def test_schema_io_has_no_eager_optional_imports() -> None:
                 violations.append(f"{path}: eager import {module}")
 
     assert violations == []
+
+
+def test_definition_model_has_no_parser_domain_engine_or_io_dependencies() -> None:
+    model_path = SCHEMA_IO_ROOT / "_model.py"
+    forbidden_top_level = {
+        "yaml",
+        "pandas",
+        "polars",
+        "pyarrow",
+        "duckdb",
+        "pathlib",
+        "os",
+        "urllib",
+        "requests",
+    }
+    forbidden_internal_prefixes = (
+        "pytransformkit.domain",
+        "pytransformkit.infrastructure",
+    )
+    violations: list[str] = []
+
+    for module in _module_level_imports(model_path):
+        top_level = module.split(".", maxsplit=1)[0]
+        if top_level in forbidden_top_level or module.startswith(
+            forbidden_internal_prefixes
+        ):
+            violations.append(f"{model_path}: forbidden import {module}")
+
+    assert violations == []

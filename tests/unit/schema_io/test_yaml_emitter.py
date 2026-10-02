@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import importlib
+
 import pytest
 
 from pytransformkit.domain.data import (
@@ -21,12 +23,18 @@ from pytransformkit.domain.data import (
     TimeType,
     UnknownType,
 )
+from pytransformkit.errors import (
+    DeclarativeSchemaDependencyError,
+    DeclarativeSchemaDuplicateFieldError,
+)
 from pytransformkit.schema_io._api import (
+    _DeclarativeSchemaExporter,
     _dumps_schema,
     _dumps_schemas,
     _loads_schema,
     _loads_schemas,
 )
+from pytransformkit.schema_io._exporter import SchemaDocumentExporter
 from pytransformkit.schema_io._model import (
     FieldDefinition,
     SchemaDefinition,
@@ -322,3 +330,83 @@ def test_direct_emitter_auto_selects_multi_form_for_many_definitions() -> None:
     emitted = YamlSchemaEmitter().emit(document)
 
     assert emitted.startswith("version: 1\nschemas:\n")
+
+
+
+class _InvalidDocumentExporter(SchemaDocumentExporter):
+    def export_single(
+        self,
+        schema: Schema,
+        *,
+        name: str,
+        source: str | None = None,
+    ) -> SchemaDocument:
+        del schema, name, source
+        duplicate = FieldDefinition(
+            name="id",
+            data_type=StringTypeDefinition(),
+        )
+        return SchemaDocument(
+            version=1,
+            schemas=(
+                SchemaDefinition(
+                    name="invalid",
+                    fields=(duplicate, duplicate),
+                ),
+            ),
+        )
+
+
+class _SpyEmitter(YamlSchemaEmitter):
+    def __init__(self) -> None:
+        self.called = False
+
+    def emit(
+        self,
+        document: SchemaDocument,
+        *,
+        multi_schema: bool | None = None,
+    ) -> str:
+        del document, multi_schema
+        self.called = True
+        return "should-not-emit\n"
+
+
+def test_generated_document_is_validated_before_yaml_emission() -> None:
+    emitter = _SpyEmitter()
+    service = _DeclarativeSchemaExporter(
+        exporter=_InvalidDocumentExporter(),
+        emitter=emitter,
+    )
+
+    with pytest.raises(DeclarativeSchemaDuplicateFieldError):
+        service.dumps_schema(
+            Schema(fields=()),
+            name="ignored",
+        )
+
+    assert emitter.called is False
+
+
+def test_emitter_missing_yaml_dependency_is_controlled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    yaml_module = importlib.import_module("pytransformkit.schema_io._yaml")
+    real_import_module = yaml_module.importlib.import_module
+
+    def controlled_import(name: str, package: str | None = None) -> object:
+        if name == "yaml":
+            raise ModuleNotFoundError("No module named 'yaml'")
+        return real_import_module(name, package)
+
+    monkeypatch.setattr(yaml_module.importlib, "import_module", controlled_import)
+
+    document = SchemaDocument(
+        version=1,
+        schemas=(SchemaDefinition(name="sample", fields=()),),
+    )
+    with pytest.raises(DeclarativeSchemaDependencyError) as error:
+        yaml_module.YamlSchemaEmitter().emit(document)
+
+    assert str(error.value.code) == "PTK-DECL-010"
+    assert error.value.dependency_name == "PyYAML"

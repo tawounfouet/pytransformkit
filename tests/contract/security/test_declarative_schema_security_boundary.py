@@ -88,7 +88,7 @@ def test_url_looking_scalar_never_triggers_network_access(
         raise AssertionError("declarative parsing must not access the network")
 
     monkeypatch.setattr(urllib.request, "urlopen", forbidden_network)
-    monkeypatch.setattr(socket.socket, "connect", forbidden_network)
+    monkeypatch.setattr(socket, "create_connection", forbidden_network)
 
     schema = loads_schema(
         """

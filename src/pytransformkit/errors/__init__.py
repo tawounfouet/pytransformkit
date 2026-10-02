@@ -2,6 +2,23 @@
 
 from pytransformkit.errors.base import PyTransformKitError
 from pytransformkit.errors.codes import ErrorCode
+from pytransformkit.errors.declarative import (
+    DeclarativeErrorContext,
+    DeclarativeSchemaCardinalityError,
+    DeclarativeSchemaDependencyError,
+    DeclarativeSchemaDuplicateFieldError,
+    DeclarativeSchemaDuplicateKeyError,
+    DeclarativeSchemaDuplicateSchemaError,
+    DeclarativeSchemaError,
+    DeclarativeSchemaExportError,
+    DeclarativeSchemaIOError,
+    DeclarativeSchemaLimitError,
+    DeclarativeSchemaParseError,
+    DeclarativeSchemaTypeError,
+    DeclarativeSchemaUnknownPropertyError,
+    DeclarativeSchemaValidationError,
+    DeclarativeSchemaVersionError,
+)
 from pytransformkit.errors.engine import (
     AdapterError,
     BindingError,
@@ -75,6 +92,21 @@ from pytransformkit.errors.transformation import (
 __all__ = [
     "AdapterError",
     "BindingError",
+    "DeclarativeErrorContext",
+    "DeclarativeSchemaCardinalityError",
+    "DeclarativeSchemaDependencyError",
+    "DeclarativeSchemaDuplicateFieldError",
+    "DeclarativeSchemaDuplicateKeyError",
+    "DeclarativeSchemaDuplicateSchemaError",
+    "DeclarativeSchemaError",
+    "DeclarativeSchemaExportError",
+    "DeclarativeSchemaIOError",
+    "DeclarativeSchemaLimitError",
+    "DeclarativeSchemaParseError",
+    "DeclarativeSchemaTypeError",
+    "DeclarativeSchemaUnknownPropertyError",
+    "DeclarativeSchemaValidationError",
+    "DeclarativeSchemaVersionError",
     "DuplicateFieldError",
     "EngineContractViolationError",
     "EngineError",

@@ -47,7 +47,11 @@ def _version_core(value: str) -> tuple[int, int, int]:
     match = re.match(r"^(\\d+)\\.(\\d+)\\.(\\d+)", value)
     if match is None:
         raise ValueError(f"Unsupported project version {value!r}.")
-    return tuple(int(part) for part in match.groups())
+    return (
+        int(match.group(1)),
+        int(match.group(2)),
+        int(match.group(3)),
+    )
 
 
 def _preserves_release_line(current: str, baseline: str) -> bool:

@@ -1,10 +1,23 @@
-"""Declarative schema I/O package.
+"""Public declarative schema I/O API."""
 
-LOT-29 establishes the package boundary only. The stable load/dump API is
-introduced later in the declarative-schema roadmap after parsing, compilation,
-export, and security behavior are qualified.
-"""
+from pytransformkit.schema_io._api import (
+    dump_schema,
+    dump_schemas,
+    dumps_schema,
+    dumps_schemas,
+    load_schema,
+    load_schemas,
+    loads_schema,
+    loads_schemas,
+)
 
-from __future__ import annotations
-
-__all__: list[str] = []
+__all__ = [
+    "dump_schema",
+    "dump_schemas",
+    "dumps_schema",
+    "dumps_schemas",
+    "load_schema",
+    "load_schemas",
+    "loads_schema",
+    "loads_schemas",
+]

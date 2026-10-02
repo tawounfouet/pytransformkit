@@ -8,10 +8,22 @@ from pathlib import Path
 import pytransformkit
 import pytransformkit.schema_io as schema_io
 
+_EXPECTED_SCHEMA_IO_EXPORTS = [
+    "dump_schema",
+    "dump_schemas",
+    "dumps_schema",
+    "dumps_schemas",
+    "load_schema",
+    "load_schemas",
+    "loads_schema",
+    "loads_schemas",
+]
 
-def test_schema_io_bootstrap_does_not_expand_root_api() -> None:
+
+def test_schema_io_public_surface_does_not_expand_root_api() -> None:
     assert "schema_io" not in pytransformkit.__all__
-    assert schema_io.__all__ == []
+    assert set(_EXPECTED_SCHEMA_IO_EXPORTS).isdisjoint(pytransformkit.__all__)
+    assert schema_io.__all__ == _EXPECTED_SCHEMA_IO_EXPORTS
 
 
 def test_schema_io_import_does_not_eagerly_import_yaml() -> None:

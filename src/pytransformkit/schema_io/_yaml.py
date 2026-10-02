@@ -144,7 +144,7 @@ class DeclarativeSafeLoader:
 
     @staticmethod
     def build(yaml_module: Any) -> Any:
-        loader_type = type(
+        loader_type: Any = type(
             "DeclarativeSafeLoader",
             (yaml_module.SafeLoader,),
             {},

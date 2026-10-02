@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import NoReturn
+
 from pytransformkit.errors import (
     DeclarativeErrorContext,
     DeclarativeSchemaDuplicateFieldError,
@@ -88,6 +90,13 @@ class SchemaDefinitionValidator:
                     context=self._context(source, schema_path),
                 )
 
+            self._validate_non_blank_text(
+                schema.name,
+                path=f"{schema_path}.name",
+                source=source,
+                label="Schema name",
+            )
+
             first_schema_index = first_schema_indexes.get(schema.name)
             if first_schema_index is not None:
                 raise DeclarativeSchemaDuplicateSchemaError(
@@ -126,13 +135,6 @@ class SchemaDefinitionValidator:
         path: str,
         source: str | None,
     ) -> None:
-        self._validate_non_blank_text(
-            schema.name,
-            path=f"{path}.name",
-            source=source,
-            label="Schema name",
-        )
-
         if not isinstance(schema.fields, tuple):
             raise DeclarativeSchemaValidationError(
                 "Schema fields must be a tuple.",
@@ -147,6 +149,20 @@ class SchemaDefinitionValidator:
                     "Schema fields must contain only FieldDefinition values.",
                     context=self._context(source, field_path),
                 )
+
+            self._validate_non_blank_text(
+                field.name,
+                path=f"{field_path}.name",
+                source=source,
+                label="Field name",
+            )
+
+            self._validate_non_blank_text(
+                field.name,
+                path=f"{field_path}.name",
+                source=source,
+                label="Struct field name",
+            )
 
             first_field_index = first_field_indexes.get(field.name)
             if first_field_index is not None:
@@ -173,12 +189,6 @@ class SchemaDefinitionValidator:
         path: str,
         source: str | None,
     ) -> None:
-        self._validate_non_blank_text(
-            field.name,
-            path=f"{path}.name",
-            source=source,
-            label="Field name",
-        )
         self._validate_bool(
             field.nullable,
             path=f"{path}.nullable",
@@ -426,12 +436,6 @@ class SchemaDefinitionValidator:
                 )
             first_field_indexes[field.name] = field_index
 
-            self._validate_non_blank_text(
-                field.name,
-                path=f"{field_path}.name",
-                source=source,
-                label="Struct field name",
-            )
             self._validate_bool(
                 field.nullable,
                 path=f"{field_path}.nullable",
@@ -533,7 +537,7 @@ class SchemaDefinitionValidator:
         *,
         path: str,
         source: str | None,
-    ) -> None:
+    ) -> NoReturn:
         raise DeclarativeSchemaTypeError(
             message=message,
             context=self._context(source, path),

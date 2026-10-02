@@ -148,8 +148,15 @@ def _exports(module_name: str) -> tuple[str, ...]:
     return tuple(names)
 
 
+def _v1_exports(module_name: str) -> tuple[str, ...]:
+    names = _exports(module_name)
+    if module_name != "pytransformkit.errors":
+        return names
+    return tuple(name for name in names if not name.startswith("Declarative"))
+
+
 def _module_snapshot(module_name: str) -> dict[str, object]:
-    return {"exports": list(_exports(module_name))}
+    return {"exports": list(_v1_exports(module_name))}
 
 
 def _signature_snapshot() -> dict[str, str]:
@@ -198,7 +205,7 @@ def _protocol_snapshot() -> dict[str, object]:
 def _exception_snapshot() -> dict[str, list[str]]:
     module = importlib.import_module("pytransformkit.errors")
     result: dict[str, list[str]] = {}
-    for name in _exports("pytransformkit.errors"):
+    for name in _v1_exports("pytransformkit.errors"):
         value = getattr(module, name)
         if not inspect.isclass(value) or not issubclass(value, BaseException):
             continue

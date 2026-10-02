@@ -82,8 +82,7 @@ def validate(root: Path, manifest_path: Path) -> list[str]:
     current_version = project.get("version")
     if not isinstance(expected_version, str) or not isinstance(current_version, str):
         errors.append(
-            "project version drift: project and baseline versions "
-            "must be strings"
+            "project version drift: project and baseline versions must be strings"
         )
     elif not _preserves_release_line(current_version, expected_version):
         errors.append(
@@ -105,8 +104,7 @@ def validate(root: Path, manifest_path: Path) -> list[str]:
     missing_extras = sorted(expected_extras - actual_extras)
     if missing_extras:
         errors.append(
-            "extra-name drift: frozen V1 extras disappeared: "
-            f"{missing_extras!r}"
+            f"extra-name drift: frozen V1 extras disappeared: {missing_extras!r}"
         )
 
     workflow_path = root / ".github" / "workflows" / "ci.yml"

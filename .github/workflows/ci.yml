@@ -269,10 +269,12 @@ jobs:
       - name: Install security qualification dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev,io]"
-      - name: Run LOT-26 API and security contracts
+          pip install -e ".[dev,io,yaml]"
+      - name: Run API and security contracts
         run: |
           pytest tests/contract/api tests/contract/security \
+            tests/unit/schema_io/test_yaml_parser.py \
+            tests/architecture/test_schema_io_boundaries.py \
             tests/contract/serialization/test_security_and_migrations.py \
             tests/contract/io -ra
 

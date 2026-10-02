@@ -80,9 +80,7 @@ _STRUCTURED_TYPE_NAMES = (
     "struct",
     "map",
 )
-_ALL_TYPE_NAMES = tuple(
-    dict.fromkeys((*_SIMPLE_TYPE_NAMES, *_STRUCTURED_TYPE_NAMES))
-)
+_ALL_TYPE_NAMES = tuple(dict.fromkeys((*_SIMPLE_TYPE_NAMES, *_STRUCTURED_TYPE_NAMES)))
 
 _BOOL_PATTERN = re.compile(r"^(?:true|True|TRUE|false|False|FALSE)$")
 _INT_PATTERN = re.compile(r"^[-+]?(?:0|[1-9][0-9]*)$")
@@ -166,13 +164,9 @@ class DeclarativeSafeLoader:
             "tag:yaml.org,2002:null",
             "tag:yaml.org,2002:timestamp",
         }
-        for initial, resolvers in tuple(
-            loader_type.yaml_implicit_resolvers.items()
-        ):
+        for initial, resolvers in tuple(loader_type.yaml_implicit_resolvers.items()):
             loader_type.yaml_implicit_resolvers[initial] = [
-                (tag, pattern)
-                for tag, pattern in resolvers
-                if tag not in removed_tags
+                (tag, pattern) for tag, pattern in resolvers if tag not in removed_tags
             ]
 
         loader_type.add_implicit_resolver(
@@ -277,9 +271,7 @@ class DeclarativeSafeLoader:
                     ),
                 )
 
-            values = [
-                loader.construct_object(child, deep=deep) for child in node.value
-            ]
+            values = [loader.construct_object(child, deep=deep) for child in node.value]
             loader._ptk_sequence_starts[id(values)] = _position(node.start_mark)
             loader._ptk_item_marks[id(values)] = [
                 _position(child.start_mark) for child in node.value
@@ -1569,11 +1561,9 @@ class _DeclarativeDecoder:
         position: tuple[int, int] | None = None
 
         if mapping is not None and key is not None:
-            marks = (
-                self._marks.value_marks
-                if value
-                else self._marks.key_marks
-            ).get(id(mapping), {})
+            marks = (self._marks.value_marks if value else self._marks.key_marks).get(
+                id(mapping), {}
+            )
             try:
                 position = marks.get(key)
             except TypeError:

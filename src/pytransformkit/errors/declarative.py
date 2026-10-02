@@ -27,9 +27,7 @@ class DeclarativeErrorContext:
                 if not isinstance(text_value, str):
                     raise TypeError(f"{text_name} must be a string or None.")
                 if not text_value.strip():
-                    raise ValueError(
-                        f"{text_name} must contain non-whitespace text."
-                    )
+                    raise ValueError(f"{text_name} must contain non-whitespace text.")
 
         for position_name, position_value in (
             ("line", self.line),

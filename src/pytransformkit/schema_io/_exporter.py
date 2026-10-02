@@ -78,12 +78,10 @@ class SchemaDefinitionExporter:
             )
 
         if field.description is not None and (
-            not isinstance(field.description, str)
-            or not field.description.strip()
+            not isinstance(field.description, str) or not field.description.strip()
         ):
             raise DeclarativeSchemaExportError(
-                "Canonical Field description must be a non-empty string "
-                "when present.",
+                "Canonical Field description must be a non-empty string when present.",
                 context=_context(source, f"{object_path}.description"),
             )
 

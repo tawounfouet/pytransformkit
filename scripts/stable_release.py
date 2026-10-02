@@ -52,7 +52,7 @@ def _python_matrix(workflow: str) -> list[str]:
 
 
 def _version_core(value: str) -> tuple[int, int, int]:
-    match = re.match(r"^(\\d+)\\.(\\d+)\\.(\\d+)", value)
+    match = re.match(r"^(\d+)\.(\d+)\.(\d+)", value)
     if match is None:
         raise ValueError(f"Unsupported project version {value!r}.")
     return (
@@ -69,9 +69,7 @@ def _preserves_release_line(current: str, baseline: str) -> bool:
         return False
     if current_core < baseline_core:
         return False
-    if current_core == baseline_core and current != baseline:
-        return False
-    return True
+    return not (current_core == baseline_core and current != baseline)
 
 
 def validate(root: Path, manifest_path: Path) -> list[str]:
@@ -101,7 +99,8 @@ def validate(root: Path, manifest_path: Path) -> list[str]:
     current_version = project.get("version")
     if not isinstance(expected_version, str) or not isinstance(current_version, str):
         errors.append(
-            "stable project version drift: project and baseline versions must be strings"
+            "stable project version drift: project and baseline versions "
+            "must be strings"
         )
     elif not _preserves_release_line(current_version, expected_version):
         errors.append(

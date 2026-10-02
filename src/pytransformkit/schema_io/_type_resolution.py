@@ -156,8 +156,7 @@ class DeclarativeTypeExporter:
         """Export one canonical type recursively using the closed V1 mapping."""
         if type(data_type) not in _SUPPORTED_DATA_TYPES:
             raise DeclarativeSchemaExportError(
-                "Unsupported canonical DataType subclass "
-                f"{type(data_type).__name__!r}."
+                f"Unsupported canonical DataType subclass {type(data_type).__name__!r}."
             )
 
         if isinstance(data_type, StringType):

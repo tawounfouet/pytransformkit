@@ -16,8 +16,8 @@ from pytransformkit.domain.data import (
     StringType,
     StructField,
     StructType,
-    TimeType,
     TimestampType,
+    TimeType,
     UnknownType,
 )
 from pytransformkit.errors import (
@@ -37,8 +37,8 @@ from pytransformkit.schema_io._model import (
     StringTypeDefinition,
     StructFieldDefinition,
     StructTypeDefinition,
-    TimeTypeDefinition,
     TimestampTypeDefinition,
+    TimeTypeDefinition,
     TypeDefinition,
     UnknownTypeDefinition,
 )
@@ -203,7 +203,9 @@ class DeclarativeTypeExporter:
             )
         if isinstance(data_type, StructType):
             return StructTypeDefinition(
-                fields=tuple(self._export_struct_field(field) for field in data_type.fields)
+                fields=tuple(
+                    self._export_struct_field(field) for field in data_type.fields
+                )
             )
         if isinstance(data_type, MapType):
             self._require_bool(

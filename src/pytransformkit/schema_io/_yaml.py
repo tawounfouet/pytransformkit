@@ -13,6 +13,7 @@ from pytransformkit.errors import (
     DeclarativeSchemaDependencyError,
     DeclarativeSchemaDuplicateKeyError,
     DeclarativeSchemaError,
+    DeclarativeSchemaExportError,
     DeclarativeSchemaLimitError,
     DeclarativeSchemaParseError,
     DeclarativeSchemaTypeError,
@@ -1629,3 +1630,231 @@ def _bounded_key(key: object) -> str:
     if len(rendered) <= 256:
         return rendered
     return rendered[:253] + "..."
+
+
+
+class DeclarativeSafeDumper:
+    """Factory for a local SafeDumper with canonical no-alias formatting."""
+
+    @staticmethod
+    def build(yaml_module: Any) -> Any:
+        def ignore_aliases(self: Any, data: object) -> bool:
+            return True
+
+        def increase_indent(
+            self: Any,
+            flow: bool = False,
+            indentless: bool = False,
+        ) -> Any:
+            return yaml_module.SafeDumper.increase_indent(
+                self,
+                flow,
+                False,
+            )
+
+        return type(
+            "DeclarativeSafeDumper",
+            (yaml_module.SafeDumper,),
+            {
+                "ignore_aliases": ignore_aliases,
+                "increase_indent": increase_indent,
+            },
+        )
+
+
+class YamlSchemaEmitter:
+    """Emit validated SchemaDocument values as deterministic canonical YAML."""
+
+    def emit(
+        self,
+        document: SchemaDocument,
+        *,
+        multi_schema: bool | None = None,
+    ) -> str:
+        """Emit one canonical declarative V1 YAML document."""
+        if type(document) is not SchemaDocument:
+            raise DeclarativeSchemaExportError(
+                "YamlSchemaEmitter requires a SchemaDocument."
+            )
+        if document.version != 1:
+            raise DeclarativeSchemaExportError(
+                "YamlSchemaEmitter supports declarative version 1 only."
+            )
+
+        use_multi_schema = (
+            len(document.schemas) != 1
+            if multi_schema is None
+            else multi_schema
+        )
+        if not use_multi_schema and len(document.schemas) != 1:
+            raise DeclarativeSchemaExportError(
+                "Single-schema YAML emission requires exactly one schema."
+            )
+
+        plain = self._encode_document(
+            document,
+            multi_schema=use_multi_schema,
+        )
+        yaml_module = _load_yaml_module()
+        dumper_type = DeclarativeSafeDumper.build(yaml_module)
+
+        try:
+            emitted = yaml_module.dump(
+                plain,
+                Dumper=dumper_type,
+                allow_unicode=True,
+                default_flow_style=False,
+                explicit_end=False,
+                explicit_start=False,
+                indent=2,
+                sort_keys=False,
+                width=1_000_000,
+            )
+        except yaml_module.YAMLError as exc:
+            raise DeclarativeSchemaExportError(
+                "Canonical declarative YAML emission failed."
+            ) from exc
+
+        if not emitted.endswith("\n"):
+            emitted += "\n"
+        return emitted
+
+    def _encode_document(
+        self,
+        document: SchemaDocument,
+        *,
+        multi_schema: bool,
+    ) -> dict[str, object]:
+        root: dict[str, object] = {"version": 1}
+
+        if not multi_schema:
+            root["schema"] = self._encode_single_schema(document.schemas[0])
+            return root
+
+        schemas: dict[str, object] = {}
+        for schema in document.schemas:
+            schemas[schema.name] = self._encode_schema_body(schema)
+        root["schemas"] = schemas
+        return root
+
+    def _encode_single_schema(
+        self,
+        definition: SchemaDefinition,
+    ) -> dict[str, object]:
+        return {
+            "name": definition.name,
+            "fields": [
+                self._encode_field(field)
+                for field in definition.fields
+            ],
+        }
+
+    def _encode_schema_body(
+        self,
+        definition: SchemaDefinition,
+    ) -> dict[str, object]:
+        return {
+            "fields": [
+                self._encode_field(field)
+                for field in definition.fields
+            ],
+        }
+
+    def _encode_field(
+        self,
+        definition: FieldDefinition,
+    ) -> dict[str, object]:
+        field: dict[str, object] = {
+            "name": definition.name,
+            "type": self._encode_type(definition.data_type),
+            "nullable": definition.nullable,
+        }
+        if definition.description is not None:
+            field["description"] = definition.description
+        return field
+
+    def _encode_struct_field(
+        self,
+        definition: StructFieldDefinition,
+    ) -> dict[str, object]:
+        return {
+            "name": definition.name,
+            "type": self._encode_type(definition.data_type),
+            "nullable": definition.nullable,
+        }
+
+    def _encode_type(
+        self,
+        definition: TypeDefinition,
+    ) -> object:
+        if isinstance(definition, StringTypeDefinition):
+            return "string"
+        if isinstance(definition, BooleanTypeDefinition):
+            return "boolean"
+        if isinstance(definition, IntegerTypeDefinition):
+            prefix = "int" if definition.signed else "uint"
+            return f"{prefix}{definition.bits}"
+        if isinstance(definition, FloatTypeDefinition):
+            return f"float{definition.bits}"
+        if isinstance(definition, DecimalTypeDefinition):
+            return {
+                "decimal": {
+                    "precision": definition.precision,
+                    "scale": definition.scale,
+                }
+            }
+        if isinstance(definition, BinaryTypeDefinition):
+            return "binary"
+        if isinstance(definition, DateTypeDefinition):
+            return "date"
+        if isinstance(definition, TimeTypeDefinition):
+            if definition.unit == "us":
+                return "time"
+            return {"time": {"unit": definition.unit}}
+        if isinstance(definition, TimestampTypeDefinition):
+            if definition.unit == "us" and definition.timezone is None:
+                return "timestamp"
+            timestamp: dict[str, object] = {"unit": definition.unit}
+            if definition.timezone is not None:
+                timestamp["timezone"] = definition.timezone
+            return {"timestamp": timestamp}
+        if isinstance(definition, DurationTypeDefinition):
+            if definition.unit == "us":
+                return "duration"
+            return {"duration": {"unit": definition.unit}}
+        if isinstance(definition, UnknownTypeDefinition):
+            return "unknown"
+        if isinstance(definition, ListTypeDefinition):
+            return {
+                "list": {
+                    "element": {
+                        "type": self._encode_type(definition.element_type),
+                    },
+                    "element_nullable": definition.element_nullable,
+                }
+            }
+        if isinstance(definition, StructTypeDefinition):
+            return {
+                "struct": {
+                    "fields": [
+                        self._encode_struct_field(field)
+                        for field in definition.fields
+                    ]
+                }
+            }
+        if isinstance(definition, MapTypeDefinition):
+            return {
+                "map": {
+                    "key": {
+                        "type": self._encode_type(definition.key_type),
+                    },
+                    "value": {
+                        "type": self._encode_type(definition.value_type),
+                    },
+                    "value_nullable": definition.value_nullable,
+                }
+            }
+
+        raise DeclarativeSchemaExportError(
+            "Unsupported declarative TypeDefinition during YAML emission."
+        )

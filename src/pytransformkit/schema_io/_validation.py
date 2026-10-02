@@ -157,13 +157,6 @@ class SchemaDefinitionValidator:
                 label="Field name",
             )
 
-            self._validate_non_blank_text(
-                field.name,
-                path=f"{field_path}.name",
-                source=source,
-                label="Struct field name",
-            )
-
             first_field_index = first_field_indexes.get(field.name)
             if first_field_index is not None:
                 raise DeclarativeSchemaDuplicateFieldError(
@@ -423,6 +416,13 @@ class SchemaDefinitionValidator:
                     path=field_path,
                     source=source,
                 )
+
+            self._validate_non_blank_text(
+                field.name,
+                path=f"{field_path}.name",
+                source=source,
+                label="Struct field name",
+            )
 
             first_field_index = first_field_indexes.get(field.name)
             if first_field_index is not None:

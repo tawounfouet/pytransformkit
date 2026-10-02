@@ -229,12 +229,13 @@ def _extras_snapshot(project_file: Path) -> dict[str, list[str]]:
     with project_file.open("rb") as stream:
         project = tomllib.load(stream)["project"]
     extras = project["optional-dependencies"]
-    available = tuple(sorted(extras))
+    available = set(extras)
     expected = set(STABLE_RUNTIME_EXTRAS) | set(TOOLING_EXTRAS)
-    if set(available) != expected:
+    missing = sorted(expected - available)
+    if missing:
         raise RuntimeError(
-            "Optional extra names drifted before snapshot creation: "
-            f"expected={sorted(expected)!r}, actual={list(available)!r}."
+            "Frozen V1 optional extra names disappeared: "
+            f"missing={missing!r}, actual={sorted(available)!r}."
         )
     return {
         "stable_runtime": list(STABLE_RUNTIME_EXTRAS),

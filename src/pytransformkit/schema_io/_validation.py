@@ -30,7 +30,6 @@ from pytransformkit.schema_io._model import (
     StructTypeDefinition,
     TimestampTypeDefinition,
     TimeTypeDefinition,
-    TypeDefinition,
     UnknownTypeDefinition,
 )
 

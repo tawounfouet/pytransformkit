@@ -332,7 +332,6 @@ def test_direct_emitter_auto_selects_multi_form_for_many_definitions() -> None:
     assert emitted.startswith("version: 1\nschemas:\n")
 
 
-
 class _InvalidDocumentExporter(SchemaDocumentExporter):
     def export_single(
         self,

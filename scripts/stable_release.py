@@ -51,6 +51,27 @@ def _python_matrix(workflow: str) -> list[str]:
     return re.findall(r'"([^"]+)"', match.group(1))
 
 
+def _version_core(value: str) -> tuple[int, int, int]:
+    match = re.match(r"^(\d+)\.(\d+)\.(\d+)", value)
+    if match is None:
+        raise ValueError(f"Unsupported project version {value!r}.")
+    return (
+        int(match.group(1)),
+        int(match.group(2)),
+        int(match.group(3)),
+    )
+
+
+def _preserves_release_line(current: str, baseline: str) -> bool:
+    current_core = _version_core(current)
+    baseline_core = _version_core(baseline)
+    if current_core[0] != baseline_core[0]:
+        return False
+    if current_core < baseline_core:
+        return False
+    return not (current_core == baseline_core and current != baseline)
+
+
 def validate(root: Path, manifest_path: Path) -> list[str]:
     manifest = _load_json(manifest_path)
     errors: list[str] = []
@@ -75,10 +96,17 @@ def validate(root: Path, manifest_path: Path) -> list[str]:
         project = tomllib.load(stream)["project"]
 
     expected_version = manifest.get("project_version")
-    if project.get("version") != expected_version:
+    current_version = project.get("version")
+    if not isinstance(expected_version, str) or not isinstance(current_version, str):
+        errors.append(
+            "stable project version drift: project and baseline versions "
+            "must be strings"
+        )
+    elif not _preserves_release_line(current_version, expected_version):
         errors.append(
             "stable project version drift: "
-            f"expected {expected_version!r}, got {project.get('version')!r}"
+            f"expected frozen baseline {expected_version!r} or a later compatible "
+            f"1.x version, got {current_version!r}"
         )
 
     classifiers = set(project.get("classifiers", []))

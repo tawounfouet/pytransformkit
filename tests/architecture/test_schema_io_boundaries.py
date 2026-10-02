@@ -172,3 +172,60 @@ def test_schema_compiler_has_no_yaml_engine_plugin_or_io_dependencies() -> None:
             violations.append(f"{compiler_path}: forbidden import {module}")
 
     assert violations == []
+
+
+def test_schema_io_never_imports_engine_or_plugin_packages() -> None:
+    forbidden_prefixes = (
+        "pytransformkit.engines",
+        "pytransformkit.plugins",
+    )
+    violations: list[str] = []
+
+    for path in _python_files(SCHEMA_IO_ROOT):
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for node in ast.walk(tree):
+            modules: list[str] = []
+            if isinstance(node, ast.Import):
+                modules.extend(alias.name for alias in node.names)
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                modules.append(node.module)
+
+            for module in modules:
+                if module.startswith(forbidden_prefixes):
+                    violations.append(f"{path}: forbidden import {module}")
+
+    assert violations == []
+
+
+def test_schema_io_internal_pipeline_has_no_network_or_secondary_io_imports() -> None:
+    forbidden_top_level = {
+        "http",
+        "os",
+        "pathlib",
+        "requests",
+        "socket",
+        "urllib",
+    }
+    violations: list[str] = []
+
+    for path in _python_files(SCHEMA_IO_ROOT):
+        if path.name == "_api.py":
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for node in ast.walk(tree):
+            modules: list[str] = []
+            if isinstance(node, ast.Import):
+                modules.extend(alias.name for alias in node.names)
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                modules.append(node.module)
+
+            for module in modules:
+                top_level = module.split(".", maxsplit=1)[0]
+                if top_level in forbidden_top_level:
+                    violations.append(f"{path}: forbidden import {module}")
+
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+                if node.func.id == "open":
+                    violations.append(f"{path}: forbidden call open(...)")
+
+    assert violations == []

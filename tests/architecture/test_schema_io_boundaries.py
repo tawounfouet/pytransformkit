@@ -141,3 +141,34 @@ def test_semantic_validator_has_no_parser_domain_engine_or_io_dependencies() -> 
             violations.append(f"{validator_path}: forbidden import {module}")
 
     assert violations == []
+
+
+def test_schema_compiler_has_no_yaml_engine_plugin_or_io_dependencies() -> None:
+    compiler_path = SCHEMA_IO_ROOT / "_compiler.py"
+    forbidden_top_level = {
+        "yaml",
+        "pandas",
+        "polars",
+        "pyarrow",
+        "duckdb",
+        "pathlib",
+        "os",
+        "urllib",
+        "requests",
+        "importlib",
+    }
+    forbidden_internal_prefixes = (
+        "pytransformkit.infrastructure",
+        "pytransformkit.engines",
+        "pytransformkit.plugins",
+    )
+    violations: list[str] = []
+
+    for module in _module_level_imports(compiler_path):
+        top_level = module.split(".", maxsplit=1)[0]
+        if top_level in forbidden_top_level or module.startswith(
+            forbidden_internal_prefixes
+        ):
+            violations.append(f"{compiler_path}: forbidden import {module}")
+
+    assert violations == []

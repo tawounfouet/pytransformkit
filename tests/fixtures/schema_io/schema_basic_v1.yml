@@ -1,0 +1,11 @@
+version: 1
+schema:
+  name: customers
+  fields:
+    - name: customer_id
+      type: int64
+      nullable: false
+    - name: status
+      type: string
+      nullable: true
+      description: Customer status

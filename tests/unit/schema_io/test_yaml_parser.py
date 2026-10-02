@@ -370,7 +370,9 @@ def test_explicit_and_python_specific_tags_are_rejected(yaml_text: str) -> None:
     assert str(error.value.code) == "PTK-DECL-001"
 
 
-def test_python_object_tag_never_constructs_object(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_python_object_tag_never_constructs_object(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     sentinel = {"called": False}
 
     def fail_if_called(*args: object, **kwargs: object) -> None:
@@ -565,7 +567,7 @@ def test_payload_limit_is_enforced_on_utf8_bytes() -> None:
 
     assert error.value.limit_name == "payload_bytes"
     assert error.value.limit == 8
-    assert error.value.actual == len("version: 1".encode())
+    assert error.value.actual == len(b"version: 1")
 
 
 def test_minimal_valid_document_respects_exact_depth_boundary() -> None:

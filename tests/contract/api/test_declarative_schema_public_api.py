@@ -75,7 +75,9 @@ def test_schema_io_functions_are_not_promoted_to_root() -> None:
 
 
 def test_stable_public_signatures_are_frozen() -> None:
-    assert str(inspect.signature(schema_io.load_schema)) == "(path: 'str | os.PathLike[str]') -> 'Schema'"
+    assert str(inspect.signature(schema_io.load_schema)) == (
+        "(path: 'str | os.PathLike[str]') -> 'Schema'"
+    )
     assert str(inspect.signature(schema_io.loads_schema)) == (
         "(text: 'str', *, source: 'str | None' = None) -> 'Schema'"
     )

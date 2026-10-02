@@ -1,0 +1,34 @@
+version: 1
+schema:
+  name: events
+  fields:
+    - name: default_time
+      type: time
+      nullable: true
+    - name: ns_time
+      type:
+        time:
+          unit: ns
+      nullable: false
+    - name: default_timestamp
+      type: timestamp
+      nullable: true
+    - name: utc_timestamp
+      type:
+        timestamp:
+          unit: us
+          timezone: UTC
+      nullable: false
+    - name: ns_timestamp
+      type:
+        timestamp:
+          unit: ns
+      nullable: true
+    - name: default_duration
+      type: duration
+      nullable: true
+    - name: seconds_duration
+      type:
+        duration:
+          unit: s
+      nullable: false

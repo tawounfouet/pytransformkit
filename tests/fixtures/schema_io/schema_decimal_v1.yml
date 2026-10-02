@@ -1,0 +1,11 @@
+version: 1
+schema:
+  name: money
+  fields:
+    - name: amount
+      type:
+        decimal:
+          precision: 38
+          scale: 9
+      nullable: false
+      description: High precision amount

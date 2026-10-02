@@ -1,0 +1,26 @@
+version: 1
+schemas:
+  customers:
+    fields:
+      - name: customer_id
+        type: int64
+        nullable: false
+  orders:
+    fields:
+      - name: order_id
+        type: int64
+        nullable: false
+      - name: customer_id
+        type: int64
+        nullable: false
+  payments:
+    fields:
+      - name: payment_id
+        type: string
+        nullable: false
+      - name: amount
+        type:
+          decimal:
+            precision: 18
+            scale: 2
+        nullable: false

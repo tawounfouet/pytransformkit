@@ -1,0 +1,29 @@
+version: 1
+schema:
+  name: nested
+  fields:
+    - name: profiles
+      type:
+        list:
+          element:
+            type:
+              struct:
+                fields:
+                  - name: customer_id
+                    type: int64
+                    nullable: false
+                  - name: attributes
+                    type:
+                      map:
+                        key:
+                          type: string
+                        value:
+                          type:
+                            list:
+                              element:
+                                type: string
+                              element_nullable: false
+                        value_nullable: false
+                    nullable: true
+          element_nullable: false
+      nullable: false

@@ -111,7 +111,9 @@ def test_environment_looking_scalar_is_literal_and_never_resolved(
     monkeypatch.setenv("PTK_DECL_SECRET", "must-not-be-read")
 
     def forbidden_getenv(*args: object, **kwargs: object) -> object:
-        raise AssertionError(\n            "declarative parsing must not resolve environment variables"\n        )
+        raise AssertionError(
+            "declarative parsing must not resolve environment variables"
+        )
 
     monkeypatch.setattr(os, "getenv", forbidden_getenv)
 

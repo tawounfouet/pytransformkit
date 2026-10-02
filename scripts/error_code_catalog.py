@@ -59,6 +59,35 @@ def build_catalogue() -> dict[str, object]:
     }
 
 
+def _baseline_mismatches(
+    expected: dict[str, object],
+    actual: dict[str, object],
+) -> list[str]:
+    mismatches: list[str] = []
+
+    for key in ("catalogue_version", "contract"):
+        if actual.get(key) != expected.get(key):
+            mismatches.append(
+                f"{key} changed: expected={expected.get(key)!r}, "
+                f"actual={actual.get(key)!r}"
+            )
+
+    expected_entries = expected.get("entries")
+    actual_entries = actual.get("entries")
+    if not isinstance(expected_entries, dict) or not isinstance(actual_entries, dict):
+        return [*mismatches, "error catalogue entries must be mappings"]
+
+    for name, expected_entry in expected_entries.items():
+        actual_entry = actual_entries.get(name)
+        if actual_entry != expected_entry:
+            mismatches.append(
+                f"{name} changed: expected={expected_entry!r}, "
+                f"actual={actual_entry!r}"
+            )
+
+    return mismatches
+
+
 def _arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
@@ -81,14 +110,17 @@ def main() -> int:
         return 0
 
     expected = json.loads(args.check.read_text(encoding="utf-8"))
-    if actual == expected:
+    mismatches = _baseline_mismatches(expected, actual)
+    if not mismatches:
         print("V1 error catalogue: PASS")
         return 0
 
     print("V1 error catalogue: FAIL", file=sys.stderr)
-    print("--- expected", file=sys.stderr)
+    for mismatch in mismatches:
+        print(f"- {mismatch}", file=sys.stderr)
+    print("--- expected baseline", file=sys.stderr)
     print(json.dumps(expected, indent=2, sort_keys=True), file=sys.stderr)
-    print("--- actual", file=sys.stderr)
+    print("--- actual catalogue", file=sys.stderr)
     print(json.dumps(actual, indent=2, sort_keys=True), file=sys.stderr)
     return 1
 

@@ -1682,9 +1682,7 @@ class YamlSchemaEmitter:
             )
 
         use_multi_schema = (
-            len(document.schemas) != 1
-            if multi_schema is None
-            else multi_schema
+            len(document.schemas) != 1 if multi_schema is None else multi_schema
         )
         if not use_multi_schema and len(document.schemas) != 1:
             raise DeclarativeSchemaExportError(
@@ -1743,10 +1741,7 @@ class YamlSchemaEmitter:
     ) -> dict[str, object]:
         return {
             "name": definition.name,
-            "fields": [
-                self._encode_field(field)
-                for field in definition.fields
-            ],
+            "fields": [self._encode_field(field) for field in definition.fields],
         }
 
     def _encode_schema_body(
@@ -1754,10 +1749,7 @@ class YamlSchemaEmitter:
         definition: SchemaDefinition,
     ) -> dict[str, object]:
         return {
-            "fields": [
-                self._encode_field(field)
-                for field in definition.fields
-            ],
+            "fields": [self._encode_field(field) for field in definition.fields],
         }
 
     def _encode_field(
@@ -1837,8 +1829,7 @@ class YamlSchemaEmitter:
             return {
                 "struct": {
                     "fields": [
-                        self._encode_struct_field(field)
-                        for field in definition.fields
+                        self._encode_struct_field(field) for field in definition.fields
                     ]
                 }
             }

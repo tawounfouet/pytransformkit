@@ -660,7 +660,7 @@ class _DeclarativeDecoder:
                 path=f"schemas.{schema_name}",
                 mapping=schemas_mapping,
                 key=schema_name,
-                value=False,
+                use_value_mark=False,
                 label="Schema name",
             )
             schemas.append(
@@ -695,7 +695,7 @@ class _DeclarativeDecoder:
                 path=f"{path}.name",
                 mapping=mapping,
                 key="name",
-                value=True,
+                use_value_mark=True,
                 label="Schema name",
             )
         else:
@@ -785,7 +785,7 @@ class _DeclarativeDecoder:
                 path=f"{path}.description",
                 mapping=mapping,
                 key="description",
-                value=True,
+                use_value_mark=True,
                 label="Field description",
             )
 
@@ -1094,7 +1094,7 @@ class _DeclarativeDecoder:
                 path=f"{path}.timezone",
                 mapping=mapping,
                 key="timezone",
-                value=True,
+                use_value_mark=True,
                 label="Timestamp timezone",
                 type_error=True,
             )
@@ -1320,16 +1320,16 @@ class _DeclarativeDecoder:
 
     def _require_non_blank_string(
         self,
-        value: object,
+        raw_value: object,
         *,
         path: str,
         mapping: dict[object, object],
         key: object,
-        value: bool,
+        use_value_mark: bool,
         label: str,
         type_error: bool = False,
     ) -> str:
-        if not isinstance(value, str) or not value.strip():
+        if not isinstance(raw_value, str) or not raw_value.strip():
             message = f"{label} must be a non-empty string."
             if type_error:
                 self._raise_type_error(
@@ -1344,10 +1344,10 @@ class _DeclarativeDecoder:
                     path=path,
                     mapping=mapping,
                     key=key,
-                    value=value,
+                    value=use_value_mark,
                 ),
             )
-        return value
+        return raw_value
 
     def _require_mapping(
         self,

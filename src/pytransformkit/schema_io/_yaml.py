@@ -1632,7 +1632,6 @@ def _bounded_key(key: object) -> str:
     return rendered[:253] + "..."
 
 
-
 class DeclarativeSafeDumper:
     """Factory for a local SafeDumper with canonical no-alias formatting."""
 

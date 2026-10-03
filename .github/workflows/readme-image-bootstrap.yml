@@ -39,13 +39,13 @@ jobs:
               "PyTransformKit is an engine-agnostic Python framework for defining typed, "
               "composable data transformations independently from their physical execution engine.\n"
           )
-          block = """
-<p align="center">
-  <img src="docs/assets/pytransformkit-framework-overview.jpg"
-       alt="PyTransformKit framework overview"
-       width="100%">
-</p>
-"""
+          block = (
+              "\n<p align=\"center\">\n"
+              "  <img src=\"docs/assets/pytransformkit-framework-overview.jpg\"\n"
+              "       alt=\"PyTransformKit framework overview\"\n"
+              "       width=\"100%\">\n"
+              "</p>\n"
+          )
           if "docs/assets/pytransformkit-framework-overview.jpg" not in text:
               if anchor not in text:
                   raise SystemExit("README insertion anchor not found")

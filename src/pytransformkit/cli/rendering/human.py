@@ -19,7 +19,6 @@ from pytransformkit.cli.models.reports import (
 )
 from pytransformkit.cli.rendering.tables import build_table
 
-
 class HumanRenderer:
     """Render safe, copyable human output through explicit Rich consoles."""
 
@@ -103,7 +102,7 @@ class HumanRenderer:
         *,
         include_document: bool = False,
     ) -> None:
-        """Render one stable/candidate contract inspection."""
+        """Render one stable/contract inspection."""
         contract = report.contract
         self.write(f"Contract: {contract.id}")
         self.write(f"Status: {contract.status.upper()}")
@@ -258,6 +257,5 @@ class HumanRenderer:
                 markup=False,
                 highlight=False,
             )
-
 
 __all__ = ["HumanRenderer"]

@@ -341,3 +341,38 @@ def test_remote_uri_credentials_are_redacted_from_json_error_path() -> None:
     assert error["category"] == "unsupported_operation"
     assert "user:pass" not in error["path"]
     assert REDACTED in error["path"]
+
+
+
+def test_schema_directory_is_rejected_without_recursive_discovery(
+    tmp_path: Path,
+) -> None:
+    _write(tmp_path / "nested.yml")
+
+    result = runner.invoke(app, ["schema", "validate", str(tmp_path)])
+
+    assert result.exit_code == 12
+    assert "nested.yml" not in result.stdout
+    assert (tmp_path / "nested.yml").exists()
+
+
+def test_permission_denied_maps_to_filesystem_error_without_traceback(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    source = _write(tmp_path / "schema.yml")
+
+    def denied(*args: object, **kwargs: object) -> object:
+        raise PermissionError("permission denied by LOT-56 test")
+
+    monkeypatch.setattr(schema_service, "load_schema", denied)
+
+    result = runner.invoke(
+        app,
+        ["schema", "validate", str(source), "--no-color"],
+    )
+
+    assert result.exit_code == 12
+    assert result.stdout == ""
+    assert "permission denied" in result.stderr
+    assert "Traceback" not in result.stderr

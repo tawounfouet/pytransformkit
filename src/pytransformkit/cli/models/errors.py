@@ -23,6 +23,7 @@ class ErrorCategory(StrEnum):
     INTERRUPTED = "interrupted"
     BROKEN_PIPE = "broken_pipe"
 
+
 @dataclass(frozen=True, slots=True)
 class CLIErrorReport:
     """Safe, renderer-neutral description of a CLI failure."""
@@ -66,5 +67,6 @@ class CLIErrorReport:
         if self.details is not None:
             payload["details"] = dict(self.details)
         return payload
+
 
 __all__ = ["CLIErrorReport", "ErrorCategory"]

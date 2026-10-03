@@ -242,3 +242,39 @@ def test_engines_service_uses_conformance_authority() -> None:
         not module.startswith("pytransformkit.application.execution")
         for module in imports
     )
+
+
+
+def test_contract_inspection_is_offline_and_plugin_safe() -> None:
+    contract_paths = (
+        CLI_ROOT / "commands" / "contract.py",
+        CLI_ROOT / "services" / "contracts.py",
+    )
+    forbidden_prefixes = (
+        "http",
+        "requests",
+        "socket",
+        "urllib.request",
+        "subprocess",
+        "pytransformkit.plugins",
+        "pytransformkit.adapters",
+        "pytransformkit.infrastructure.engines",
+    )
+    violations: list[str] = []
+
+    for path in contract_paths:
+        for module in _imports(path):
+            if module.startswith(forbidden_prefixes):
+                violations.append(f"{path}: forbidden import {module}")
+
+    assert violations == []
+
+
+def test_contract_service_uses_packaged_resources_not_checkout_paths() -> None:
+    service_path = CLI_ROOT / "services" / "contracts.py"
+    source = service_path.read_text(encoding="utf-8")
+
+    assert "from importlib import resources" in source
+    assert 'Path("contracts")' not in source
+    assert "Path.cwd()" not in source
+    assert "git " not in source.lower()

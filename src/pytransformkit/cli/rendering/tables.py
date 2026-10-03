@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Iterable, Sequence
 
 from rich.table import Table
+from rich.text import Text
 
 
 def build_table(
@@ -17,7 +18,7 @@ def build_table(
     for column in columns:
         table.add_column(column)
     for row in rows:
-        table.add_row(*row)
+        table.add_row(*(Text(value) for value in row))
     return table
 
 

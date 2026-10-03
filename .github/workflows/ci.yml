@@ -595,7 +595,7 @@ jobs:
           retention-days: 30
 
 
-  cli-bootstrap-contract:
+  cli-foundations-contract:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -607,10 +607,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev,cli]"
-      - name: Run LOT-44 CLI tests
+      - name: Run LOT-45 CLI tests
         run: |
-          pytest tests/unit/cli/test_cli_bootstrap.py \
-            tests/contract/cli/test_bootstrap_contract.py -ra
+          pytest tests/unit/cli \
+            tests/contract/cli \
+            tests/architecture/test_cli_boundaries.py -ra
       - name: Build LOT-44 wheel
         run: |
           python -m build --wheel

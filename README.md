@@ -4,6 +4,12 @@
 
 PyTransformKit is an engine-agnostic Python framework for defining typed, composable data transformations independently from their physical execution engine.
 
+<p align="center">
+  <img src="docs/assets/pytransformkit-framework-overview.jpg"
+       alt="PyTransformKit framework overview"
+       width="100%">
+</p>
+
 > Status: **PyTransformKit 1.1.0 is stable.** The Declarative Schema authoring surface is release-qualified while the frozen V1 compatibility and wire contracts remain preserved.
 
 ## Goals

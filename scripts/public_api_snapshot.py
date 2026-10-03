@@ -111,7 +111,37 @@ CODECS = (
 )
 
 STABLE_RUNTIME_EXTRAS = ("duckdb", "io", "pandas", "polars", "pyarrow")
+V1_1_STABLE_RUNTIME_ADDITIONS = ("yaml",)
 TOOLING_EXTRAS = ("dev", "performance")
+
+V1_1_ADDITIVE_MODULES = ("pytransformkit.schema_io",)
+V1_1_SIGNATURE_TARGETS = (
+    ("pytransformkit.schema_io", "load_schema"),
+    ("pytransformkit.schema_io", "loads_schema"),
+    ("pytransformkit.schema_io", "load_schemas"),
+    ("pytransformkit.schema_io", "loads_schemas"),
+    ("pytransformkit.schema_io", "dump_schema"),
+    ("pytransformkit.schema_io", "dumps_schema"),
+    ("pytransformkit.schema_io", "dump_schemas"),
+    ("pytransformkit.schema_io", "dumps_schemas"),
+)
+V1_1_DECLARATIVE_EXCEPTIONS = (
+    "DeclarativeSchemaError",
+    "DeclarativeSchemaParseError",
+    "DeclarativeSchemaVersionError",
+    "DeclarativeSchemaValidationError",
+    "DeclarativeSchemaUnknownPropertyError",
+    "DeclarativeSchemaTypeError",
+    "DeclarativeSchemaDuplicateKeyError",
+    "DeclarativeSchemaDuplicateFieldError",
+    "DeclarativeSchemaDuplicateSchemaError",
+    "DeclarativeSchemaCardinalityError",
+    "DeclarativeSchemaDependencyError",
+    "DeclarativeSchemaIOError",
+    "DeclarativeSchemaExportError",
+    "DeclarativeSchemaLimitError",
+)
+V1_1_DECLARATIVE_SUPPORTING_VALUES = ("DeclarativeErrorContext",)
 LEGACY_ROOT_NAMES = (
     "CredentialReference",
     "EngineRegistry",
@@ -159,9 +189,11 @@ def _module_snapshot(module_name: str) -> dict[str, object]:
     return {"exports": list(_v1_exports(module_name))}
 
 
-def _signature_snapshot() -> dict[str, str]:
+def _signature_snapshot(
+    targets: tuple[tuple[str, str], ...] = SIGNATURE_TARGETS,
+) -> dict[str, str]:
     result: dict[str, str] = {}
-    for module_name, symbol_name in SIGNATURE_TARGETS:
+    for module_name, symbol_name in targets:
         value = getattr(importlib.import_module(module_name), symbol_name)
         signature = _signature(value)
         if signature is None:
@@ -289,6 +321,89 @@ def build_snapshot(project_file: Path) -> dict[str, object]:
     }
 
 
+def _direct_exception_parent(name: str) -> str:
+    module = importlib.import_module("pytransformkit.errors")
+    value = getattr(module, name)
+    if not inspect.isclass(value) or not issubclass(value, BaseException):
+        raise RuntimeError(f"{name} is not a public exception type.")
+    return value.__bases__[0].__name__
+
+
+def build_v1_1_successor_manifest(
+    project_file: Path,
+    baseline_file: Path,
+) -> dict[str, object]:
+    """Freeze additive 1.1 API while proving the 1.0 baseline is unchanged."""
+    baseline = json.loads(baseline_file.read_text(encoding="utf-8"))
+    current_v1 = freeze_manifest(build_snapshot(project_file))
+    if current_v1 != baseline:
+        raise RuntimeError(
+            "Cannot freeze 1.1: the existing V1 public API baseline has drifted."
+        )
+
+    schema_io_exports = list(_exports("pytransformkit.schema_io"))
+    errors_module = importlib.import_module("pytransformkit.errors")
+    error_exports = set(_exports("pytransformkit.errors"))
+
+    missing_errors = sorted(
+        name for name in V1_1_DECLARATIVE_EXCEPTIONS if name not in error_exports
+    )
+    missing_values = sorted(
+        name for name in V1_1_DECLARATIVE_SUPPORTING_VALUES if name not in error_exports
+    )
+    if missing_errors or missing_values:
+        raise RuntimeError(
+            "Declarative public error surface is incomplete: "
+            f"missing_errors={missing_errors!r}, missing_values={missing_values!r}."
+        )
+
+    for name in (*V1_1_DECLARATIVE_EXCEPTIONS, *V1_1_DECLARATIVE_SUPPORTING_VALUES):
+        if not hasattr(errors_module, name):
+            raise RuntimeError(f"pytransformkit.errors is missing {name!r}.")
+
+    with project_file.open("rb") as stream:
+        project = tomllib.load(stream)["project"]
+    available_extras = set(project["optional-dependencies"])
+    missing_extras = sorted(set(V1_1_STABLE_RUNTIME_ADDITIONS) - available_extras)
+    if missing_extras:
+        raise RuntimeError(f"Missing stable 1.1 runtime extras: {missing_extras!r}.")
+
+    baseline_extras = list(baseline["extras"]["stable_runtime"])
+    stable_runtime_extras = [
+        *baseline_extras,
+        *V1_1_STABLE_RUNTIME_ADDITIONS,
+    ]
+
+    return {
+        "snapshot_version": 2,
+        "framework_line": "1.1.x",
+        "predecessor": "contracts/public_api_v1.json",
+        "v1_baseline_category_hashes": baseline["category_hashes"],
+        "unchanged_v1": {
+            "root_exports": baseline["root_exports"],
+            "root_legacy_compatibility": baseline["root_legacy_compatibility"],
+            "engine_ids": baseline["engine_ids"],
+            "wire_contracts": baseline["wire_contracts"],
+            "stable_runtime_extras": baseline_extras,
+        },
+        "additions": {
+            "modules": {
+                module_name: {"exports": list(_exports(module_name))}
+                for module_name in V1_1_ADDITIVE_MODULES
+            },
+            "signatures": _signature_snapshot(V1_1_SIGNATURE_TARGETS),
+            "exception_hierarchy": {
+                name: _direct_exception_parent(name)
+                for name in V1_1_DECLARATIVE_EXCEPTIONS
+            },
+            "supporting_values": list(V1_1_DECLARATIVE_SUPPORTING_VALUES),
+            "stable_runtime_extras": list(V1_1_STABLE_RUNTIME_ADDITIONS),
+        },
+        "stable_runtime_extras": stable_runtime_extras,
+        "schema_io_exports": schema_io_exports,
+    }
+
+
 def _category_digest(value: object) -> str:
     payload = json.dumps(
         value,
@@ -338,13 +453,27 @@ def _arguments() -> argparse.Namespace:
         type=Path,
         default=Path("pyproject.toml"),
     )
+    parser.add_argument(
+        "--line",
+        choices=("1.0", "1.1"),
+        default="1.0",
+    )
+    parser.add_argument(
+        "--baseline",
+        type=Path,
+        default=Path("contracts/public_api_v1.json"),
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = _arguments()
-    snapshot = build_snapshot(args.project)
-    actual = freeze_manifest(snapshot)
+    if args.line == "1.0":
+        actual = freeze_manifest(build_snapshot(args.project))
+        pass_message = "Public API freeze: PASS"
+    else:
+        actual = build_v1_1_successor_manifest(args.project, args.baseline)
+        pass_message = "Public API 1.1 successor freeze: PASS"
 
     if args.write is not None:
         args.write.parent.mkdir(parents=True, exist_ok=True)
@@ -357,18 +486,19 @@ def main() -> int:
 
     expected = json.loads(args.check.read_text(encoding="utf-8"))
     if actual == expected:
-        print("Public API freeze: PASS")
+        print(pass_message)
         return 0
 
-    expected_hashes = expected.get("category_hashes", {})
-    actual_hashes = actual.get("category_hashes", {})
-    changed = sorted(
-        name
-        for name in set(expected_hashes) | set(actual_hashes)
-        if expected_hashes.get(name) != actual_hashes.get(name)
-    )
     print("Public API freeze: FAIL", file=sys.stderr)
-    print(f"Changed categories: {changed!r}", file=sys.stderr)
+    if args.line == "1.0":
+        expected_hashes = expected.get("category_hashes", {})
+        actual_hashes = actual.get("category_hashes", {})
+        changed = sorted(
+            name
+            for name in set(expected_hashes) | set(actual_hashes)
+            if expected_hashes.get(name) != actual_hashes.get(name)
+        )
+        print(f"Changed categories: {changed!r}", file=sys.stderr)
     print("--- expected manifest", file=sys.stderr)
     print(json.dumps(expected, indent=2, sort_keys=True), file=sys.stderr)
     print("--- actual manifest", file=sys.stderr)

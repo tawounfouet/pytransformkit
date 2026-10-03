@@ -59,6 +59,43 @@ def build_catalogue() -> dict[str, object]:
     }
 
 
+def build_v1_1_catalogue(baseline_file: Path) -> dict[str, object]:
+    """Build the exact 1.1 successor while preserving every V1 entry."""
+    baseline = json.loads(baseline_file.read_text(encoding="utf-8"))
+    current = build_catalogue()
+    mismatches = _baseline_mismatches(baseline, current)
+    if mismatches:
+        raise RuntimeError(
+            "Cannot freeze 1.1 error catalogue because V1 entries drifted: "
+            + "; ".join(mismatches)
+        )
+
+    entries = current["entries"]
+    if not isinstance(entries, dict):
+        raise RuntimeError("Error catalogue entries must be a mapping.")
+
+    expected_declarative_codes = {f"PTK-DECL-{index:03d}" for index in range(14)}
+    actual_declarative_codes = {
+        entry["code"]
+        for name, entry in entries.items()
+        if name.startswith("DeclarativeSchema")
+    }
+    if actual_declarative_codes != expected_declarative_codes:
+        raise RuntimeError(
+            "Declarative error code set is incomplete or unexpected: "
+            f"expected={sorted(expected_declarative_codes)!r}, "
+            f"actual={sorted(actual_declarative_codes)!r}."
+        )
+
+    return {
+        "catalogue_version": 2,
+        "contract": "pytransformkit.errors.v1",
+        "framework_line": "1.1.x",
+        "predecessor": "contracts/error_codes_v1.json",
+        "entries": entries,
+    }
+
+
 def _baseline_mismatches(
     expected: dict[str, object],
     actual: dict[str, object],
@@ -92,12 +129,27 @@ def _arguments() -> argparse.Namespace:
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--write", type=Path)
     group.add_argument("--check", type=Path)
+    parser.add_argument(
+        "--line",
+        choices=("1.0", "1.1"),
+        default="1.0",
+    )
+    parser.add_argument(
+        "--baseline",
+        type=Path,
+        default=Path("contracts/error_codes_v1.json"),
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = _arguments()
-    actual = build_catalogue()
+    if args.line == "1.0":
+        actual = build_catalogue()
+        pass_message = "V1 error catalogue: PASS"
+    else:
+        actual = build_v1_1_catalogue(args.baseline)
+        pass_message = "V1.1 error catalogue: PASS"
 
     if args.write is not None:
         args.write.parent.mkdir(parents=True, exist_ok=True)
@@ -105,16 +157,22 @@ def main() -> int:
             json.dumps(actual, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
-        print(f"Wrote V1 error catalogue to {args.write}")
+        print(f"Wrote error catalogue to {args.write}")
         return 0
 
     expected = json.loads(args.check.read_text(encoding="utf-8"))
-    mismatches = _baseline_mismatches(expected, actual)
-    if not mismatches:
-        print("V1 error catalogue: PASS")
-        return 0
+    if args.line == "1.0":
+        mismatches = _baseline_mismatches(expected, actual)
+        if not mismatches:
+            print(pass_message)
+            return 0
+    else:
+        mismatches = []
+        if actual == expected:
+            print(pass_message)
+            return 0
 
-    print("V1 error catalogue: FAIL", file=sys.stderr)
+    print("Error catalogue: FAIL", file=sys.stderr)
     for mismatch in mismatches:
         print(f"- {mismatch}", file=sys.stderr)
     print("--- expected baseline", file=sys.stderr)

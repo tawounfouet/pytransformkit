@@ -40,7 +40,6 @@ def test_main_without_cli_dependencies_is_controlled(
 def test_main_returns_broken_pipe_exit_for_epipe_from_click_boundary(
     monkeypatch,
 ) -> None:
-    pytest.importorskip("click")
     pytest.importorskip("typer")
     pytest.importorskip("rich")
     monkeypatch.setattr(bootstrap, "_missing_cli_dependencies", lambda: ())

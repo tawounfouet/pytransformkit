@@ -160,6 +160,12 @@ def test_security_and_filesystem_guarantees_are_frozen_fail_closed() -> None:
         "implicit_include": False,
         "env_expansion": False,
         "plugin_command_injection": False,
+        "implicit_plugin_activation": False,
         "project_discovery": False,
         "shell_execution": False,
+        "secret_redaction": True,
+        "debug_redaction": True,
+        "atomic_replacement": True,
+        "temporary_cleanup": True,
+        "interrupt_before_commit_preserves_destination": True,
     }

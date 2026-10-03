@@ -44,6 +44,8 @@ def _assert_common_surface() -> None:
     assert version("pytransformkit") == pytransformkit.__version__
     assert schema_io.__all__ == _EXPECTED_EXPORTS
     assert set(_EXPECTED_EXPORTS).isdisjoint(pytransformkit.__all__)
+    for engine_dependency in ("pandas", "polars", "pyarrow", "duckdb"):
+        assert importlib.util.find_spec(engine_dependency) is None, engine_dependency
     _assert_distribution_metadata()
 
 

@@ -64,6 +64,78 @@ class DoctorCheck:
         return payload
 
 
+
+
+@dataclass(frozen=True, slots=True)
+class EngineSummaryReport:
+    """One official engine's installation and qualification summary."""
+
+    id: str
+    installed: bool
+    qualification: str
+    version: str | None = None
+    missing_dependencies: tuple[str, ...] = ()
+    detail: str | None = None
+
+    def to_data(self) -> dict[str, object]:
+        """Return the machine-facing engine summary payload."""
+        payload: dict[str, object] = {
+            "id": self.id,
+            "installed": self.installed,
+            "qualification": self.qualification,
+        }
+        if self.version is not None:
+            payload["version"] = self.version
+        if self.missing_dependencies:
+            payload["missing_dependencies"] = list(self.missing_dependencies)
+        if self.detail is not None:
+            payload["detail"] = self.detail
+        return payload
+
+
+@dataclass(frozen=True, slots=True)
+class EngineListReport:
+    """Deterministic list of official engine summaries."""
+
+    engines: tuple[EngineSummaryReport, ...]
+
+    def to_data(self) -> ReportData:
+        """Return the machine-facing engine list payload."""
+        return {"engines": [engine.to_data() for engine in self.engines]}
+
+
+@dataclass(frozen=True, slots=True)
+class EngineConformanceDimensionReport:
+    """One published conformance dimension for an official engine."""
+
+    name: str
+    status: str
+
+    def to_data(self) -> dict[str, object]:
+        """Return the machine-facing conformance dimension payload."""
+        return {"name": self.name, "status": self.status}
+
+
+@dataclass(frozen=True, slots=True)
+class EngineInspectionReport:
+    """Detailed static inspection of one official engine."""
+
+    engine: EngineSummaryReport
+    mandatory_for_v1: bool
+    capabilities: tuple[str, ...]
+    conformance: tuple[EngineConformanceDimensionReport, ...]
+
+    def to_data(self) -> ReportData:
+        """Return the machine-facing engine inspection payload."""
+        payload = self.engine.to_data()
+        payload["mandatory_for_v1"] = self.mandatory_for_v1
+        payload["capabilities"] = list(self.capabilities)
+        payload["conformance"] = [
+            dimension.to_data() for dimension in self.conformance
+        ]
+        return payload
+
+
 @dataclass(frozen=True, slots=True)
 class SchemaValidationReport:
     """Result of validating one explicit declarative schema file."""
@@ -146,6 +218,10 @@ __all__ = [
     "DoctorCheckStatus",
     "DoctorReport",
     "DoctorStatus",
+    "EngineConformanceDimensionReport",
+    "EngineInspectionReport",
+    "EngineListReport",
+    "EngineSummaryReport",
     "ReportData",
     "SchemaFieldInspection",
     "SchemaInspectionReport",

@@ -346,6 +346,84 @@ jobs:
             tests/contract/api/test_declarative_schema_compatibility_freeze.py \
             tests/unit/application/extensions/test_compatibility.py -ra
 
+  declarative-schema-contract:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Build declarative wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build --wheel
+      - name: Install wheel with yaml extra
+        run: |
+          python -m venv .declarative-wheel-venv
+          .declarative-wheel-venv/bin/python -m pip install --upgrade pip
+          WHEEL="$(realpath "$(find dist -maxdepth 1 -name '*.whl' -print -quit)")"
+          .declarative-wheel-venv/bin/python -m pip install             "pytransformkit[yaml] @ file://${WHEEL}"
+          .declarative-wheel-venv/bin/python -m pip check
+      - name: Run installed-wheel declarative smoke
+        run: |
+          .declarative-wheel-venv/bin/python scripts/declarative_artifact_smoke.py             --mode yaml
+      - name: Verify installed-wheel 1.1 contracts
+        run: |
+          .declarative-wheel-venv/bin/python scripts/public_api_snapshot.py             --line 1.1             --check contracts/public_api_v1_1.json
+          .declarative-wheel-venv/bin/python scripts/error_code_catalog.py             --line 1.1             --check contracts/error_codes_v1_1.json
+
+  declarative-artifact-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Build wheel and sdist
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
+      - name: Qualify core wheel without yaml
+        run: |
+          python -m venv .declarative-wheel-core
+          .declarative-wheel-core/bin/python -m pip install --upgrade pip
+          WHEEL="$(realpath "$(find dist -maxdepth 1 -name '*.whl' -print -quit)")"
+          .declarative-wheel-core/bin/python -m pip install "${WHEEL}"
+          .declarative-wheel-core/bin/python -m pip check
+          .declarative-wheel-core/bin/python scripts/declarative_artifact_smoke.py             --mode core
+      - name: Qualify wheel yaml extra
+        run: |
+          python -m venv .declarative-wheel-yaml
+          .declarative-wheel-yaml/bin/python -m pip install --upgrade pip
+          WHEEL="$(realpath "$(find dist -maxdepth 1 -name '*.whl' -print -quit)")"
+          .declarative-wheel-yaml/bin/python -m pip install             "pytransformkit[yaml] @ file://${WHEEL}"
+          .declarative-wheel-yaml/bin/python -m pip check
+          .declarative-wheel-yaml/bin/python scripts/declarative_artifact_smoke.py             --mode yaml
+      - name: Qualify core sdist without yaml
+        run: |
+          python -m venv .declarative-sdist-core
+          .declarative-sdist-core/bin/python -m pip install --upgrade pip
+          SDIST="$(realpath "$(find dist -maxdepth 1 -name '*.tar.gz' -print -quit)")"
+          .declarative-sdist-core/bin/python -m pip install "${SDIST}"
+          .declarative-sdist-core/bin/python -m pip check
+          .declarative-sdist-core/bin/python scripts/declarative_artifact_smoke.py             --mode core
+      - name: Qualify sdist yaml extra
+        run: |
+          python -m venv .declarative-sdist-yaml
+          .declarative-sdist-yaml/bin/python -m pip install --upgrade pip
+          SDIST="$(realpath "$(find dist -maxdepth 1 -name '*.tar.gz' -print -quit)")"
+          .declarative-sdist-yaml/bin/python -m pip install             "pytransformkit[yaml] @ file://${SDIST}"
+          .declarative-sdist-yaml/bin/python -m pip check
+          .declarative-sdist-yaml/bin/python scripts/declarative_artifact_smoke.py             --mode yaml
+          .declarative-sdist-yaml/bin/python scripts/public_api_snapshot.py             --line 1.1             --check contracts/public_api_v1_1.json
+          .declarative-sdist-yaml/bin/python scripts/error_code_catalog.py             --line 1.1             --check contracts/error_codes_v1_1.json
+
   release-qualification-contract:
     runs-on: ubuntu-latest
     steps:

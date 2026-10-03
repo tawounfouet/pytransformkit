@@ -92,6 +92,7 @@ from pytransformkit.infrastructure.engines.pandas.quality import PandasQualityEv
 from pytransformkit.infrastructure.engines.pandas.types import PandasTypeMapper
 from pytransformkit.infrastructure.engines.pandas.windows import PandasWindowCompiler
 
+
 class PandasAdapter:
     """Reference eager adapter implementing PyTransformKit semantics."""
 

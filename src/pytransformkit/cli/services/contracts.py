@@ -21,7 +21,6 @@ class _ContractSpec:
     version: str
     description: str
 
-
 _CONTRACT_SPECS: tuple[_ContractSpec, ...] = (
     _ContractSpec(
         id="public-api",
@@ -50,7 +49,7 @@ _CONTRACT_SPECS: tuple[_ContractSpec, ...] = (
 )
 
 class ContractInspectionService:
-    """Inspect stable/candidate contract metadata from the installed package."""
+    """Inspect stable contract metadata from the installed package."""
 
     def list(self) -> ContractListReport:
         """Return inspectable contracts in deterministic public order."""
@@ -112,6 +111,5 @@ class ContractInspectionService:
             "contract": SchemaCodec.contract,
             "contract_version": SchemaCodec.contract_version,
         }
-
 
 __all__ = ["ContractInspectionService"]

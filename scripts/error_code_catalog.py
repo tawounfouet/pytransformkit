@@ -74,9 +74,7 @@ def build_v1_1_catalogue(baseline_file: Path) -> dict[str, object]:
     if not isinstance(entries, dict):
         raise RuntimeError("Error catalogue entries must be a mapping.")
 
-    expected_declarative_codes = {
-        f"PTK-DECL-{index:03d}" for index in range(14)
-    }
+    expected_declarative_codes = {f"PTK-DECL-{index:03d}" for index in range(14)}
     actual_declarative_codes = {
         entry["code"]
         for name, entry in entries.items()

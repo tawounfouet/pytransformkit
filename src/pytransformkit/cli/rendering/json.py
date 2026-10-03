@@ -13,7 +13,6 @@ from pytransformkit.cli.models.errors import CLIErrorReport
 
 CLI_REPORT_CONTRACT_VERSION = 1
 
-
 class JSONRenderer:
     """Serialize CLI reports using the candidate CLI v1 envelope."""
 
@@ -59,6 +58,5 @@ class JSONRenderer:
             )
             + "\n"
         )
-
 
 __all__ = ["CLI_REPORT_CONTRACT_VERSION", "JSONRenderer"]

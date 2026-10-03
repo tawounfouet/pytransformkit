@@ -30,9 +30,14 @@ def _installed(module: str) -> bool:
 
 
 def _ptk() -> str:
+    executable_name = "ptk.exe" if sys.platform == "win32" else "ptk"
+    sibling = Path(sys.executable).with_name(executable_name)
+    if sibling.is_file():
+        return str(sibling)
+
     executable = shutil.which("ptk")
     if executable is None:
-        raise AssertionError("Installed console script 'ptk' is not available on PATH.")
+        raise AssertionError("Installed console script 'ptk' is not available.")
     return executable
 
 
@@ -61,7 +66,7 @@ def _assert_version_identity() -> None:
     payload = json.loads(result.stdout)
     assert payload["ok"] is True
     assert payload["command"] == "version"
-    assert payload["data"]["pytransformkit_version"] == installed
+    assert payload["data"]["pytransformkit"] == installed
 
 
 def _assert_common_cli() -> None:

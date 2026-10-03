@@ -19,6 +19,7 @@ from pytransformkit.cli.rendering.json import JSONRenderer
 from pytransformkit.cli.services.schema import SchemaCLIService
 
 VALIDATE_COMMAND_ID = "schema.validate"
+INSPECT_COMMAND_ID = "schema.inspect"
 
 schema_app = typer.Typer(
     name="schema",
@@ -55,10 +56,11 @@ def _context(
         raise typer.BadParameter(str(exc)) from exc
 
 
-def _render_validate_error(
+def _render_schema_error(
     exc: BaseException,
     *,
     path: str,
+    command: str,
     context: CLIContext,
 ) -> ExitCode:
     report = error_report_from_exception(exc, path=path)
@@ -66,7 +68,7 @@ def _render_validate_error(
     if context.output_mode is OutputMode.JSON:
         typer.echo(
             JSONRenderer().render_error(
-                command=VALIDATE_COMMAND_ID,
+                command=command,
                 error=report,
             ),
             nl=False,
@@ -106,9 +108,10 @@ def render_schema_validate(
     try:
         report = SchemaCLIService().validate(path_text)
     except (Exception, KeyboardInterrupt) as exc:
-        return _render_validate_error(
+        return _render_schema_error(
             exc,
             path=path_text,
+            command=VALIDATE_COMMAND_ID,
             context=context,
         )
 
@@ -126,6 +129,56 @@ def render_schema_validate(
             stdout=consoles.stdout,
             stderr=consoles.stderr,
         ).render_schema_validation(report)
+
+    return ExitCode.SUCCESS
+
+
+def render_schema_inspect(
+    path: str,
+    *,
+    json_output: bool = False,
+    quiet: bool = False,
+    verbose: bool = False,
+    debug: bool = False,
+    no_color: bool = False,
+) -> ExitCode:
+    """Inspect one explicit local schema and render the result."""
+    context = _context(
+        json_output=json_output,
+        quiet=quiet,
+        verbose=verbose,
+        debug=debug,
+        no_color=no_color,
+    )
+    path_text = str(path)
+
+    try:
+        report = SchemaCLIService().inspect(path_text)
+    except (Exception, KeyboardInterrupt) as exc:
+        return _render_schema_error(
+            exc,
+            path=path_text,
+            command=INSPECT_COMMAND_ID,
+            context=context,
+        )
+
+    if context.output_mode is OutputMode.JSON:
+        typer.echo(
+            JSONRenderer().render_success(
+                command=INSPECT_COMMAND_ID,
+                data=report.to_data(),
+            ),
+            nl=False,
+        )
+    elif not context.quiet:
+        consoles = create_console_pair(color=context.color)
+        HumanRenderer(
+            stdout=consoles.stdout,
+            stderr=consoles.stderr,
+        ).render_schema_inspection(
+            report,
+            include_details=context.verbose or context.debug,
+        )
 
     return ExitCode.SUCCESS
 
@@ -175,8 +228,56 @@ def validate_command(
         raise typer.Exit(code=int(exit_code))
 
 
+@schema_app.command("inspect")
+def inspect_command(
+    path: str = typer.Argument(
+        ...,
+        help="Explicit local declarative schema file.",
+    ),
+    json_output: bool = typer.Option(
+        False,
+        "--json",
+        help="Emit the CLI v1 machine-readable report.",
+    ),
+    quiet: bool = typer.Option(
+        False,
+        "--quiet",
+        help="Suppress successful human output.",
+    ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        help="Include structured type details in human output.",
+    ),
+    debug: bool = typer.Option(
+        False,
+        "--debug",
+        help="Include technical diagnostics for internal errors.",
+    ),
+    no_color: bool = typer.Option(
+        False,
+        "--no-color",
+        help="Disable ANSI color in human output.",
+    ),
+) -> None:
+    """Inspect one local declarative schema file."""
+    exit_code = render_schema_inspect(
+        path,
+        json_output=json_output,
+        quiet=quiet,
+        verbose=verbose,
+        debug=debug,
+        no_color=no_color,
+    )
+    if exit_code is not ExitCode.SUCCESS:
+        raise typer.Exit(code=int(exit_code))
+
+
 __all__ = [
+    "INSPECT_COMMAND_ID",
     "VALIDATE_COMMAND_ID",
+    "inspect_command",
+    "render_schema_inspect",
     "render_schema_validate",
     "schema_app",
     "validate_command",

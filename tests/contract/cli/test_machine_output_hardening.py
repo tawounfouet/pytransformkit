@@ -129,9 +129,6 @@ def test_debug_does_not_change_successful_human_stdout() -> None:
     assert debug.stdout == normal.stdout
 
 
-
-
-
 def test_human_semantic_option_error_uses_stderr_without_traceback() -> None:
     result = runner.invoke(
         app,

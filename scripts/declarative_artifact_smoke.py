@@ -56,9 +56,7 @@ def _core_only_smoke() -> None:
     assert importlib.util.find_spec("yaml") is None
 
     try:
-        schema_io.loads_schema(
-            "version: 1\nschema:\n  name: empty\n  fields: []\n"
-        )
+        schema_io.loads_schema("version: 1\nschema:\n  name: empty\n  fields: []\n")
     except DeclarativeSchemaDependencyError as error:
         assert str(error.error_code) == "PTK-DECL-010"
         assert error.extra_name == "yaml"

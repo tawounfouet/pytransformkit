@@ -10,7 +10,7 @@ PyTransformKit is an engine-agnostic Python framework for defining typed, compos
        width="100%">
 </p>
 
-> Status: **PyTransformKit 1.1.0 is stable.** The Declarative Schema authoring surface is release-qualified while the frozen V1 compatibility and wire contracts remain preserved.
+> Status: **PyTransformKit 1.1.0 is stable.** The 1.2 Developer CLI is in release-candidate qualification. The frozen V1, Declarative Schema 1.1, wire and compatibility contracts remain preserved.
 
 ## Goals
 
@@ -226,6 +226,66 @@ and
 `docs/specifications/42_PYTRANSFORMKIT_DECLARATIVE_SCHEMA_REFERENCE_EXAMPLES.md`
 for the complete guide and executable examples.
 
+## Developer CLI (1.2 release candidate)
+
+PyTransformKit 1.2 adds the optional `ptk` developer CLI while keeping the
+core package free of mandatory runtime dependencies.
+
+Install the CLI alone:
+
+~~~bash
+pip install "pytransformkit[cli]"
+~~~
+
+Install the CLI with Declarative Schema YAML support:
+
+~~~bash
+pip install "pytransformkit[cli,yaml]"
+~~~
+
+The frozen CLI v1 command tree is:
+
+~~~text
+ptk
+├── version
+├── doctor
+├── schema
+│   ├── validate
+│   ├── inspect
+│   ├── format
+│   └── convert
+├── engines
+│   ├── list
+│   └── inspect
+└── contract
+    └── inspect
+~~~
+
+Typical commands:
+
+~~~bash
+ptk version
+ptk doctor --json
+ptk schema validate schemas/customers.yml
+ptk schema inspect schemas/customers.yml --json
+ptk schema format schemas/customers.yml
+ptk schema convert schemas/customers.yml --to json --output customers.json
+ptk engines list
+ptk contract inspect cli --json
+~~~
+
+The CLI is local and fail-closed: no URL loading, recursive discovery, implicit
+environment expansion, plugin activation, shell execution or silent overwrite.
+Authorized writes are atomic and diagnostics redact common credential-bearing
+forms.
+
+Shell-completion installer options are intentionally not part of CLI contract
+v1. The 1.2 release keeps `--install-completion` and
+`--show-completion` disabled.
+
+See `docs/CLI_GETTING_STARTED.md` for the walkthrough and
+`docs/CLI_REFERENCE.md` for the frozen command/option contract.
+
 ## Quick example
 
 ~~~python
@@ -291,7 +351,9 @@ Current status:
 
 - V1 stable line: **LOT-00 → LOT-28 complete**;
 - Declarative Schema 1.1 line: **LOT-29 → LOT-43 complete**;
-- current stable package: **1.1.0**.
+- Developer CLI 1.2 line: **LOT-44 → LOT-58 complete; LOT-59 stable release closure pending**;
+- current stable package: **1.1.0**;
+- current 1.2 release-candidate checkpoint: **1.2.0rc3**.
 
 ## Development
 
@@ -333,6 +395,9 @@ Start with:
 - `docs/GETTING_STARTED.md` — canonical transformation authoring and execution path;
 - `docs/specifications/41_PYTRANSFORMKIT_DECLARATIVE_SCHEMA_GETTING_STARTED.md` — declarative Schema quick start;
 - `docs/specifications/42_PYTRANSFORMKIT_DECLARATIVE_SCHEMA_REFERENCE_EXAMPLES.md` — declarative Schema reference examples;
+- `docs/CLI_GETTING_STARTED.md` — PyTransformKit 1.2 developer CLI walkthrough;
+- `docs/CLI_REFERENCE.md` — frozen CLI v1 command, option, output, exit and security reference;
+- `docs/RELEASE_NOTES_1_2_0.md` — prepared 1.2 stable release notes;
 - `docs/ENGINE_CONFORMANCE_MATRIX.md` — published engine stability and semantic qualification matrix;
 - `benchmarks/README.md` — LOT-25 performance harness, budgets and qualified `0.7.0` baseline;
 - `notebooks/00 - Local Experimentation.ipynb` — interactive first experiment;

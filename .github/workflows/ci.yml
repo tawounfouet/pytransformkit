@@ -987,7 +987,7 @@ jobs:
           test -f docs/RELEASE_NOTES_1_2_0.md
           grep -F 'docs/CLI_GETTING_STARTED.md' README.md
           grep -F 'docs/CLI_REFERENCE.md' README.md
-          grep -F '## [1.2.0] - Unreleased' CHANGELOG.md
+          grep -F '## [1.2.0] - 2026-10-03' CHANGELOG.md
       - name: Build documentation qualification wheel
         run: |
           python -m build --wheel

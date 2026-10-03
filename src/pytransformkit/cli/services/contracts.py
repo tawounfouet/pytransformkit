@@ -22,6 +22,7 @@ class _ContractSpec:
     version: str
     description: str
 
+
 _CONTRACT_SPECS: tuple[_ContractSpec, ...] = (
     _ContractSpec(
         id="public-api",
@@ -48,6 +49,7 @@ _CONTRACT_SPECS: tuple[_ContractSpec, ...] = (
         description="Frozen PyTransformKit 1.2 CLI public contract.",
     ),
 )
+
 
 class ContractInspectionService:
     """Inspect stable contract metadata from the installed package."""
@@ -112,5 +114,6 @@ class ContractInspectionService:
             "contract": SchemaCodec.contract,
             "contract_version": SchemaCodec.contract_version,
         }
+
 
 __all__ = ["ContractInspectionService"]

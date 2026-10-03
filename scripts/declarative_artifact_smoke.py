@@ -32,7 +32,9 @@ def _assert_distribution_metadata() -> None:
     yaml_requirements = [
         line
         for line in requirement_lines
-        if line.lower().startswith("pyyaml") and 'extra == "yaml"' in line
+        if line.lower().startswith("pyyaml")
+        and "extra ==" in line
+        and "yaml" in line.lower()
     ]
     assert len(yaml_requirements) == 1, requirement_lines
 

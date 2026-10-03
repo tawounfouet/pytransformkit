@@ -59,7 +59,7 @@ def test_schema_format_help_is_available() -> None:
     result = runner.invoke(app, ["schema", "format", "--help"])
 
     assert result.exit_code == 0
-    plain = re.sub(r"\x1b\\[[0-9;]*m", "", result.stdout)
+    plain = re.sub(r"\x1b\[[0-9;]*m", "", result.stdout)
     assert "Format one local declarative schema file" in plain
     assert "--write" in plain
 

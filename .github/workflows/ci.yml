@@ -550,6 +550,50 @@ jobs:
           pytest tests/contract/release/test_stable_release.py \
             tests/contract/release/test_backward_compatibility.py -ra
 
+  stable-declarative-release-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install stable declarative release dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,yaml]" twine
+      - name: Verify V1 and V1.1 stable release freezes
+        run: |
+          python scripts/stable_release.py \
+            --check contracts/stable_release_v1.json
+          python scripts/stable_release.py \
+            --check contracts/stable_release_v1_1.json
+      - name: Run stable declarative release contracts
+        run: |
+          pytest tests/contract/release/test_stable_release.py \
+            tests/contract/api/test_declarative_schema_compatibility_freeze.py \
+            tests/contract/schema_io/test_round_trip_wire_bridge.py \
+            tests/contract/security/test_declarative_schema_security_boundary.py -ra
+      - name: Build and validate stable distributions
+        run: |
+          python -m build
+          python -m twine check dist/*
+          test -n "$(find dist -maxdepth 1 -name '*.whl' -print -quit)"
+          test -n "$(find dist -maxdepth 1 -name '*.tar.gz' -print -quit)"
+      - name: Record stable artifact SHA-256
+        run: |
+          sha256sum dist/* | sort > stable-artifact-sha256.txt
+          cat stable-artifact-sha256.txt
+      - name: Upload stable artifact evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytransformkit-stable-release-evidence
+          path: |
+            dist/
+            stable-artifact-sha256.txt
+          if-no-files-found: error
+          retention-days: 30
+
   build:
     runs-on: ubuntu-latest
     steps:

@@ -197,10 +197,11 @@ def _round_trip_and_wire(schema: Schema) -> None:
     assert loads_schema(yaml_text) == schema
     assert dumps_schema(loads_schema(yaml_text), name="customers") == yaml_text
 
-    wire = SchemaCodec.to_json(schema)
-    assert SchemaCodec.from_json(wire) == schema
-    assert SchemaCodec.contract == "pytransformkit.schema"
-    assert SchemaCodec.contract_version == 1
+    codec = SchemaCodec()
+    wire = codec.to_json(schema)
+    assert codec.from_json(wire) == schema
+    assert codec.contract == "pytransformkit.schema"
+    assert codec.contract_version == 1
 
 
 def _typed_error() -> None:

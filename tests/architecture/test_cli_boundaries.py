@@ -113,10 +113,7 @@ def test_schema_service_uses_public_schema_io_api_only() -> None:
     imports = _imports(schema_service)
 
     assert "pytransformkit.schema_io" in imports
-    assert all(
-        not module.startswith("pytransformkit.schema_io.")
-        for module in imports
-    )
+    assert all(not module.startswith("pytransformkit.schema_io.") for module in imports)
 
 
 def test_schema_validate_path_has_no_network_dependency() -> None:

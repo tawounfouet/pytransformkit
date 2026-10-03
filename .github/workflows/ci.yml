@@ -595,7 +595,7 @@ jobs:
           retention-days: 30
 
 
-  cli-foundations-contract:
+  cli-version-contract:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -607,12 +607,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev,cli]"
-      - name: Run LOT-45 CLI tests
+      - name: Run LOT-46 CLI tests
         run: |
           pytest tests/unit/cli \
             tests/contract/cli \
             tests/architecture/test_cli_boundaries.py -ra
-      - name: Build LOT-44 wheel
+      - name: Build LOT-46 wheel
         run: |
           python -m build --wheel
       - name: Qualify core wheel without CLI extra
@@ -648,6 +648,8 @@ jobs:
           .cli-extra-venv/bin/python -m pip check
           .cli-extra-venv/bin/ptk --help
           .cli-extra-venv/bin/ptk version
+          .cli-extra-venv/bin/ptk version --json
+          .cli-extra-venv/bin/ptk --version
           .cli-extra-venv/bin/python -m pytransformkit.cli --help
 
   build:

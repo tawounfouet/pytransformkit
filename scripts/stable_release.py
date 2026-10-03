@@ -211,9 +211,7 @@ def _validate_v1_1(root: Path, manifest_path: Path) -> list[str]:
     ):
         errors.append("release_candidate_main_commit must be a 40-character SHA")
 
-    predecessor_path = root / str(
-        manifest.get("predecessor_stable_manifest", "")
-    )
+    predecessor_path = root / str(manifest.get("predecessor_stable_manifest", ""))
     if not predecessor_path.is_file():
         errors.append("predecessor stable manifest is missing")
     else:
@@ -254,9 +252,7 @@ def _validate_v1_1(root: Path, manifest_path: Path) -> list[str]:
     if any(value.startswith("pyyaml") for value in core_dependencies):
         errors.append("PyYAML must remain optional and absent from core dependencies")
 
-    workflow = (root / ".github" / "workflows" / "ci.yml").read_text(
-        encoding="utf-8"
-    )
+    workflow = (root / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
     if _python_matrix(workflow) != manifest.get("python_versions", []):
         errors.append("Python CI matrix drifted from the 1.1 stable manifest")
 
@@ -274,9 +270,7 @@ def _validate_v1_1(root: Path, manifest_path: Path) -> list[str]:
         errors.append(f"missing 1.1 stable evidence paths: {missing_paths!r}")
 
     public_v1 = _load_json(root / "contracts" / "public_api_v1.json")
-    public_v1_1 = _load_json(
-        root / str(manifest.get("public_api_contract", ""))
-    )
+    public_v1_1 = _load_json(root / str(manifest.get("public_api_contract", "")))
     if public_v1_1.get("predecessor") != "contracts/public_api_v1.json":
         errors.append("1.1 public API successor predecessor drifted")
     if public_v1_1.get("v1_baseline_category_hashes") != public_v1.get(
@@ -312,9 +306,7 @@ def _validate_v1_1(root: Path, manifest_path: Path) -> list[str]:
         errors.append("SchemaCodec wire contract changed during 1.1 promotion")
 
     errors_v1 = _load_json(root / "contracts" / "error_codes_v1.json")
-    errors_v1_1 = _load_json(
-        root / str(manifest.get("error_catalogue_contract", ""))
-    )
+    errors_v1_1 = _load_json(root / str(manifest.get("error_catalogue_contract", "")))
     if errors_v1_1.get("predecessor") != "contracts/error_codes_v1.json":
         errors.append("1.1 error catalogue predecessor drifted")
 

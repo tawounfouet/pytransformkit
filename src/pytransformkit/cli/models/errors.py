@@ -9,9 +9,8 @@ from types import MappingProxyType
 
 from pytransformkit.cli.exit_codes import ExitCode
 
-
 class ErrorCategory(StrEnum):
-    """Stable candidate error categories for the CLI v1 contract."""
+    """Stable error categories for the CLI v1 contract."""
 
     GENERAL_ERROR = "general_error"
     INVALID_USAGE = "invalid_usage"
@@ -22,7 +21,6 @@ class ErrorCategory(StrEnum):
     INTERNAL_ERROR = "internal_error"
     INTERRUPTED = "interrupted"
     BROKEN_PIPE = "broken_pipe"
-
 
 @dataclass(frozen=True, slots=True)
 class CLIErrorReport:
@@ -67,6 +65,5 @@ class CLIErrorReport:
         if self.details is not None:
             payload["details"] = dict(self.details)
         return payload
-
 
 __all__ = ["CLIErrorReport", "ErrorCategory"]

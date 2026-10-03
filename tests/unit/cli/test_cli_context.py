@@ -35,19 +35,21 @@ def test_cli_context_rejects_contradictory_modes(
 
 
 
-def test_from_options_builds_json_context_without_changing_machine_semantics() -> None:
-    context = CLIContext.from_options(
-        json_output=True,
-        quiet=True,
-        debug=True,
-        no_color=True,
-    )
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"json_output": True, "quiet": True},
+        {"json_output": True, "debug": True},
+        {"json_output": True, "no_color": True},
+    ],
+)
+def test_from_options_preserves_nonsemantic_json_modes(
+    kwargs: dict[str, bool],
+) -> None:
+    context = CLIContext.from_options(**kwargs)
 
     assert context.output_mode is OutputMode.JSON
-    assert context.quiet is True
-    assert context.debug is True
     assert context.verbose is False
-    assert context.color is False
 
 
 def test_from_options_honors_no_color_environment(

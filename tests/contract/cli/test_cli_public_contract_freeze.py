@@ -87,9 +87,7 @@ def test_schema_convert_public_options_are_frozen() -> None:
     assert isinstance(options, list)
 
     public_flags = [
-        option["flags"][0]
-        for option in options
-        if isinstance(option, dict)
+        option["flags"][0] for option in options if isinstance(option, dict)
     ]
     assert public_flags == [
         "--to",

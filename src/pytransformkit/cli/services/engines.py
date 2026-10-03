@@ -112,8 +112,7 @@ class EngineService:
                 missing.append(distribution)
             except Exception as exc:
                 errors.append(
-                    f"{distribution} metadata lookup failed "
-                    f"({type(exc).__name__})."
+                    f"{distribution} metadata lookup failed ({type(exc).__name__})."
                 )
 
         installed = not missing and not errors

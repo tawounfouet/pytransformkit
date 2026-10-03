@@ -56,3 +56,27 @@ def test_cli_context_has_no_project_runtime_dependencies() -> None:
     ]
 
     assert violations == []
+
+
+def test_version_path_has_no_engine_or_schema_io_dependencies() -> None:
+    version_paths = (
+        CLI_ROOT / "commands" / "version.py",
+        CLI_ROOT / "services" / "version.py",
+    )
+    forbidden_prefixes = (
+        "pytransformkit.engines",
+        "pytransformkit.schema_io",
+        "pandas",
+        "polars",
+        "pyarrow",
+        "duckdb",
+        "yaml",
+    )
+    violations: list[str] = []
+
+    for path in version_paths:
+        for module in _imports(path):
+            if module.startswith(forbidden_prefixes):
+                violations.append(f"{path}: forbidden import {module}")
+
+    assert violations == []

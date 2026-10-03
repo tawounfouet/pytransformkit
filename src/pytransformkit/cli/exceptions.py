@@ -11,6 +11,7 @@ from pytransformkit.errors import (
     DeclarativeSchemaError,
     DeclarativeSchemaIOError,
     PyTransformKitError,
+    SerializationError,
 )
 
 
@@ -20,6 +21,14 @@ class CLIUsageError(ValueError):
 
 class CLIUnsupportedOperationError(RuntimeError):
     """Raised for a recognized operation intentionally unsupported by the CLI."""
+
+
+class CLIFileSystemError(OSError):
+    """Raised for CLI-owned filesystem failures with an explicit public path."""
+
+    def __init__(self, path: str | Path, message: str) -> None:
+        self.path = str(path)
+        super().__init__(message)
 
 
 def _public_ptk_code(exc: PyTransformKitError) -> str:
@@ -103,6 +112,23 @@ def error_report_from_exception(
             path=explicit_path or _declarative_path(exc),
         )
 
+    if isinstance(exc, SerializationError):
+        return CLIErrorReport(
+            category=ErrorCategory.INVALID_SCHEMA,
+            message=str(exc),
+            exit_code=ExitCode.INVALID_SCHEMA,
+            code=_public_ptk_code(exc),
+            path=explicit_path,
+        )
+
+    if isinstance(exc, CLIFileSystemError):
+        return CLIErrorReport(
+            category=ErrorCategory.FILESYSTEM_ERROR,
+            message=str(exc),
+            exit_code=ExitCode.FILESYSTEM_ERROR,
+            path=exc.path,
+        )
+
     if isinstance(
         exc,
         (FileNotFoundError, PermissionError, IsADirectoryError, NotADirectoryError),
@@ -141,6 +167,7 @@ def error_report_from_exception(
 
 
 __all__ = [
+    "CLIFileSystemError",
     "CLIUnsupportedOperationError",
     "CLIUsageError",
     "error_report_from_exception",

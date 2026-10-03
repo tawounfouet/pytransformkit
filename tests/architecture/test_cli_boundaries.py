@@ -244,7 +244,6 @@ def test_engines_service_uses_conformance_authority() -> None:
     )
 
 
-
 def test_contract_inspection_is_offline_and_plugin_safe() -> None:
     contract_paths = (
         CLI_ROOT / "commands" / "contract.py",

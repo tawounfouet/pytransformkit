@@ -147,7 +147,11 @@ class DoctorService:
                 else DoctorCheckStatus.INCOMPATIBLE
             ),
             version=self._python_version,
-            detail=None if supported else "Supported Python range is 3.11 through 3.14.",
+            detail=(
+                None
+                if supported
+                else "Supported Python range is 3.11 through 3.14."
+            ),
         )
 
     def _check_cli_dependencies(self) -> DoctorCheck:

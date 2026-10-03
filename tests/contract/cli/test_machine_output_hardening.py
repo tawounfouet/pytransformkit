@@ -129,6 +129,32 @@ def test_debug_does_not_change_successful_human_stdout() -> None:
     assert debug.stdout == normal.stdout
 
 
+
+
+
+def test_human_semantic_option_error_uses_stderr_without_traceback() -> None:
+    result = runner.invoke(
+        app,
+        ["doctor", "--quiet", "--verbose", "--no-color"],
+    )
+
+    assert result.exit_code == 2
+    assert result.stdout == ""
+    assert "--quiet and --verbose cannot be used together" in result.stderr
+    assert "Traceback" not in result.stderr
+
+
+def test_quiet_never_suppresses_fatal_error() -> None:
+    result = runner.invoke(
+        app,
+        ["contract", "inspect", "runtime", "--quiet", "--no-color"],
+    )
+
+    assert result.exit_code == 2
+    assert result.stdout == ""
+    assert "Unknown contract id" in result.stderr
+
+
 def test_debug_internal_error_keeps_json_on_stdout_and_traceback_on_stderr(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -164,6 +190,7 @@ def test_unicode_and_rich_markup_are_literal_in_human_and_json_outputs(
     human = runner.invoke(
         app,
         ["schema", "inspect", str(source), "--no-color"],
+        terminal_width=180,
     )
     machine = runner.invoke(
         app,

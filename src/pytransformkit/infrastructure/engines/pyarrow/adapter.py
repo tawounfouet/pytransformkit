@@ -20,7 +20,8 @@ from pytransformkit.application.execution.results import (
     NamedEngineOutput,
 )
 from pytransformkit.application.ports.engines import PhysicalHandle
-from pytransformkit.domain.engines import EngineCapability, EngineDescriptor
+from pytransformkit.conformance.model import engine_capabilities
+from pytransformkit.domain.engines import EngineDescriptor
 from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
 from pytransformkit.domain.pipelines.plan import LogicalPlan
 from pytransformkit.domain.transformations.base import TransformationSpec
@@ -43,18 +44,6 @@ from pytransformkit.infrastructure.engines.pyarrow.handle import (
     PyArrowDatasetHandle,
 )
 
-_PYARROW_CAPABILITIES = frozenset(
-    {
-        EngineCapability.SELECT,
-        EngineCapability.DROP,
-        EngineCapability.RENAME,
-        EngineCapability.FILTER,
-        EngineCapability.LIMIT,
-        EngineCapability.DERIVE,
-        EngineCapability.SORT,
-    }
-)
-
 
 class PyArrowAdapter:
     """Arrow adapter for the explicitly qualified LOT-18 capability subset."""
@@ -72,7 +61,7 @@ class PyArrowAdapter:
             id="pyarrow",
             name="PyArrow",
             adapter_version=_package_version(),
-            capabilities=_PYARROW_CAPABILITIES,
+            capabilities=engine_capabilities("pyarrow"),
         )
 
     def bind_native(self, value: object) -> PhysicalHandle:

@@ -21,6 +21,7 @@ from pytransformkit.application.execution.results import (
     NamedEngineOutput,
 )
 from pytransformkit.application.ports.engines import PhysicalHandle
+from pytransformkit.conformance.model import engine_capabilities
 from pytransformkit.domain.data.data_types import (
     BooleanType,
     DateType,
@@ -31,7 +32,7 @@ from pytransformkit.domain.data.data_types import (
     TimestampType,
 )
 from pytransformkit.domain.data.schema import Schema
-from pytransformkit.domain.engines import EngineCapability, EngineDescriptor
+from pytransformkit.domain.engines import EngineDescriptor
 from pytransformkit.domain.expressions.aggregate import (
     AggregateExpression,
     AggregateFunction,
@@ -91,43 +92,6 @@ from pytransformkit.infrastructure.engines.pandas.quality import PandasQualityEv
 from pytransformkit.infrastructure.engines.pandas.types import PandasTypeMapper
 from pytransformkit.infrastructure.engines.pandas.windows import PandasWindowCompiler
 
-_PANDAS_CAPABILITIES = frozenset(
-    {
-        EngineCapability.SELECT,
-        EngineCapability.DROP,
-        EngineCapability.RENAME,
-        EngineCapability.FILTER,
-        EngineCapability.LIMIT,
-        EngineCapability.DISTINCT,
-        EngineCapability.CAST,
-        EngineCapability.DERIVE,
-        EngineCapability.SORT,
-        EngineCapability.DEDUPLICATE,
-        EngineCapability.AGGREGATE,
-        EngineCapability.WINDOW,
-        EngineCapability.WINDOW_ROWS_CUMULATIVE,
-        EngineCapability.WINDOW_ROWS_MOVING,
-        EngineCapability.PIVOT,
-        EngineCapability.UNPIVOT,
-        EngineCapability.EXPLODE,
-        EngineCapability.FLATTEN,
-        EngineCapability.NESTED,
-        EngineCapability.TEMPORAL,
-        EngineCapability.DURATION,
-        EngineCapability.QUALITY,
-        EngineCapability.JOIN_INNER,
-        EngineCapability.JOIN_LEFT,
-        EngineCapability.JOIN_RIGHT,
-        EngineCapability.JOIN_FULL,
-        EngineCapability.JOIN_SEMI,
-        EngineCapability.JOIN_ANTI,
-        EngineCapability.JOIN_CROSS,
-        EngineCapability.UNION,
-        EngineCapability.INTERSECT,
-        EngineCapability.EXCEPT,
-    }
-)
-
 
 class PandasAdapter:
     """Reference eager adapter implementing PyTransformKit semantics."""
@@ -149,7 +113,7 @@ class PandasAdapter:
             id="pandas",
             name="Pandas",
             adapter_version=_package_version(),
-            capabilities=_PANDAS_CAPABILITIES,
+            capabilities=engine_capabilities("pandas"),
         )
 
     def bind_native(self, value: object) -> PhysicalHandle:

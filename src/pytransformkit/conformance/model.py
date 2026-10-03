@@ -123,6 +123,74 @@ MANDATORY_V1_CAPABILITIES = frozenset(
     }
 )
 
+PUBLISHED_ENGINE_CAPABILITIES: tuple[
+    tuple[str, frozenset[EngineCapability]],
+    ...,
+] = (
+    ("pandas", MANDATORY_V1_CAPABILITIES),
+    (
+        "polars",
+        MANDATORY_V1_CAPABILITIES | frozenset({EngineCapability.LAZY}),
+    ),
+    (
+        "pyarrow",
+        frozenset(
+            {
+                EngineCapability.SELECT,
+                EngineCapability.DROP,
+                EngineCapability.RENAME,
+                EngineCapability.FILTER,
+                EngineCapability.LIMIT,
+                EngineCapability.DERIVE,
+                EngineCapability.SORT,
+            }
+        ),
+    ),
+    (
+        "duckdb",
+        frozenset(
+            {
+                EngineCapability.SELECT,
+                EngineCapability.DROP,
+                EngineCapability.RENAME,
+                EngineCapability.FILTER,
+                EngineCapability.LIMIT,
+                EngineCapability.DISTINCT,
+                EngineCapability.CAST,
+                EngineCapability.DERIVE,
+                EngineCapability.SORT,
+                EngineCapability.JOIN_INNER,
+                EngineCapability.JOIN_LEFT,
+                EngineCapability.JOIN_RIGHT,
+                EngineCapability.JOIN_FULL,
+                EngineCapability.JOIN_SEMI,
+                EngineCapability.JOIN_ANTI,
+                EngineCapability.JOIN_CROSS,
+                EngineCapability.UNION,
+                EngineCapability.INTERSECT,
+                EngineCapability.EXCEPT,
+                EngineCapability.AGGREGATE,
+                EngineCapability.WINDOW,
+                EngineCapability.WINDOW_ROWS_CUMULATIVE,
+                EngineCapability.WINDOW_ROWS_MOVING,
+                EngineCapability.WINDOW_ROWS_ARBITRARY,
+                EngineCapability.WINDOW_RANGE,
+                EngineCapability.LAZY,
+            }
+        ),
+    ),
+)
+
+
+def engine_capabilities(engine_id: str) -> frozenset[EngineCapability]:
+    """Return the published capability set for one official engine."""
+    if not isinstance(engine_id, str) or not engine_id.strip():
+        raise ValueError("engine_id must not be empty.")
+    for current_id, capabilities in PUBLISHED_ENGINE_CAPABILITIES:
+        if current_id == engine_id:
+            return capabilities
+    raise KeyError(engine_id)
+
 
 def _all(
     status: ConformanceStatus,

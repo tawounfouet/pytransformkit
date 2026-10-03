@@ -595,7 +595,7 @@ jobs:
           retention-days: 30
 
 
-  cli-schema-convert-contract:
+  cli-engines-contract:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -607,12 +607,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev,cli]"
-      - name: Run LOT-51 CLI tests
+      - name: Run LOT-52 CLI tests
         run: |
           pytest tests/unit/cli \
             tests/contract/cli \
             tests/architecture/test_cli_boundaries.py -ra
-      - name: Build LOT-51 wheel
+      - name: Build LOT-52 wheel
         run: |
           python -m build --wheel
       - name: Qualify core wheel without CLI extra
@@ -657,6 +657,9 @@ jobs:
           .cli-extra-venv/bin/ptk schema inspect --help
           .cli-extra-venv/bin/ptk schema format --help
           .cli-extra-venv/bin/ptk schema convert --help
+          .cli-extra-venv/bin/ptk engines --help
+          .cli-extra-venv/bin/ptk engines list --help
+          .cli-extra-venv/bin/ptk engines inspect --help
           cat > .cli-schema.yml <<'YAML'
           version: 1
           schema:
@@ -712,6 +715,18 @@ jobs:
           .cli-extra-venv/bin/ptk schema convert \
             .cli-schema-wire.json --to json > .cli-schema-wire-roundtrip.json
           cmp .cli-schema-wire.json .cli-schema-wire-roundtrip.json
+          .cli-extra-venv/bin/ptk engines list --json > .cli-engines.json
+          grep -F '"command": "engines.list"' .cli-engines.json
+          .cli-extra-venv/bin/ptk engines inspect pandas --json > .cli-engine.json
+          grep -F '"id": "pandas"' .cli-engine.json
+          set +e
+          OUTPUT="$(
+            .cli-extra-venv/bin/ptk engines inspect spark --no-color 2>&1
+          )"
+          STATUS=$?
+          set -e
+          test "${STATUS}" -eq 2
+          printf '%s\n' "${OUTPUT}" | grep -F 'Unknown engine id'
           .cli-extra-venv/bin/python -m pytransformkit.cli --help
       - name: Qualify wheel with CLI and YAML extras
         run: |

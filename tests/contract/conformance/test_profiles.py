@@ -24,6 +24,7 @@ from pytransformkit.conformance import (
     EngineStability,
     engine_profile,
 )
+from pytransformkit.conformance.model import engine_capabilities
 
 
 def test_pandas_and_polars_are_stable_v1_engines_with_mandatory_capabilities() -> None:
@@ -35,6 +36,8 @@ def test_pandas_and_polars_are_stable_v1_engines_with_mandatory_capabilities() -
     assert PANDAS_CONFORMANCE.mandatory_for_v1 is True
     assert POLARS_CONFORMANCE.mandatory_for_v1 is True
 
+    assert pandas.capabilities == engine_capabilities("pandas")
+    assert polars.capabilities == engine_capabilities("polars")
     assert pandas.capabilities >= MANDATORY_V1_CAPABILITIES
     assert polars.capabilities >= MANDATORY_V1_CAPABILITIES
 
@@ -59,6 +62,8 @@ def test_optional_engines_are_published_as_provisional_without_overclaiming() ->
         assert PYARROW_CONFORMANCE.mandatory_for_v1 is False
         assert DUCKDB_CONFORMANCE.mandatory_for_v1 is False
 
+        assert pyarrow.capabilities == engine_capabilities("pyarrow")
+        assert duckdb.capabilities == engine_capabilities("duckdb")
         assert not pyarrow.capabilities >= MANDATORY_V1_CAPABILITIES
         assert not duckdb.capabilities >= MANDATORY_V1_CAPABILITIES
 

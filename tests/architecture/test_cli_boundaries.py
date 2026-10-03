@@ -207,3 +207,38 @@ def test_schema_command_module_does_not_eagerly_import_serialization() -> None:
         not module.startswith("pytransformkit.serialization")
         for module in top_level_imports
     )
+
+
+def test_engines_cli_path_does_not_import_optional_adapters_or_plugins() -> None:
+    engine_paths = (
+        CLI_ROOT / "commands" / "engines.py",
+        CLI_ROOT / "services" / "engines.py",
+    )
+    forbidden_prefixes = (
+        "pytransformkit.adapters",
+        "pytransformkit.infrastructure.engines",
+        "pytransformkit.plugins",
+        "pandas",
+        "polars",
+        "pyarrow",
+        "duckdb",
+    )
+    violations: list[str] = []
+
+    for path in engine_paths:
+        for module in _imports(path):
+            if module.startswith(forbidden_prefixes):
+                violations.append(f"{path}: forbidden import {module}")
+
+    assert violations == []
+
+
+def test_engines_service_uses_conformance_authority() -> None:
+    engine_service = CLI_ROOT / "services" / "engines.py"
+    imports = _imports(engine_service)
+
+    assert "pytransformkit.conformance.model" in imports
+    assert all(
+        not module.startswith("pytransformkit.application.execution")
+        for module in imports
+    )

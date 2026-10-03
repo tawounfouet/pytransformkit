@@ -201,8 +201,8 @@ versioned canonical JSON wire format:
 ```python
 from pytransformkit.serialization import SchemaCodec
 
-payload = SchemaCodec.to_json(schema)
-restored = SchemaCodec.from_json(payload)
+codec = SchemaCodec()\npayload = codec.to_json(schema)
+restored = codec.from_json(payload)
 
 assert restored == schema
 ```

@@ -106,3 +106,34 @@ def test_doctor_service_is_offline_and_does_not_import_optional_runtimes() -> No
     ]
 
     assert violations == []
+
+
+def test_schema_service_uses_public_schema_io_api_only() -> None:
+    schema_service = CLI_ROOT / "services" / "schema.py"
+    imports = _imports(schema_service)
+
+    assert "pytransformkit.schema_io" in imports
+    assert all(not module.startswith("pytransformkit.schema_io.") for module in imports)
+
+
+def test_schema_validate_path_has_no_network_dependency() -> None:
+    schema_paths = (
+        CLI_ROOT / "commands" / "schema.py",
+        CLI_ROOT / "services" / "schema.py",
+    )
+    forbidden_prefixes = (
+        "http",
+        "requests",
+        "socket",
+        "urllib.request",
+        "pytransformkit.engines",
+        "pytransformkit.plugins",
+    )
+    violations: list[str] = []
+
+    for path in schema_paths:
+        for module in _imports(path):
+            if module.startswith(forbidden_prefixes):
+                violations.append(f"{path}: forbidden import {module}")
+
+    assert violations == []

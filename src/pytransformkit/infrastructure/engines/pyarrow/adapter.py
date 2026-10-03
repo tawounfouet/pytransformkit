@@ -20,7 +20,7 @@ from pytransformkit.application.execution.results import (
     NamedEngineOutput,
 )
 from pytransformkit.application.ports.engines import PhysicalHandle
-from pytransformkit.conformance import engine_capabilities
+from pytransformkit.conformance.model import engine_capabilities
 from pytransformkit.domain.engines import EngineDescriptor
 from pytransformkit.domain.pipelines.nodes import PipelineNodeKind
 from pytransformkit.domain.pipelines.plan import LogicalPlan

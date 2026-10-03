@@ -43,7 +43,6 @@ def test_declarative_schema_v1_1_stable_release_manifest_is_frozen() -> None:
     assert "Stable release freeze: PASS" in result.stdout
 
 
-
 def test_developer_cli_v1_2_stable_release_manifest_is_frozen() -> None:
     result = subprocess.run(
         [

@@ -6,7 +6,16 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 
 ## [Unreleased]
 
-No changes yet.
+### Added
+
+- Declarative Schema 1.1 Getting Started and reference-example documentation.
+- Executable declarative documentation smoke covering Python/YAML equivalence, primitive, decimal, temporal and nested types, multi-schema documents, canonical round-trips, SchemaCodec coexistence and typed failures.
+- `declarative-docs-contract` CI gate that builds and installs the release-candidate wheel with the `yaml` extra, executes the published examples and rechecks the frozen 1.1 API/error contracts.
+
+### Changed
+
+- README and general Getting Started now document the `pytransformkit.schema_io` stable surface, optional `yaml` extra, and the distinction between declarative YAML authoring and the frozen SchemaCodec JSON wire contract.
+- Release-candidate checkpoint advanced to `1.1.0rc2`.
 
 ## [1.0.0] - 2026-10-01
 

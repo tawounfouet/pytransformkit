@@ -94,9 +94,7 @@ schema:
         )
 
         _run("schema", "validate", str(source))
-        inspected = json.loads(
-            _run("schema", "inspect", str(source), "--json").stdout
-        )
+        inspected = json.loads(_run("schema", "inspect", str(source), "--json").stdout)
         assert inspected["data"]["schema"]["name"] == "customers"
 
         wire = root / "customers.json"

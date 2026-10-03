@@ -154,7 +154,7 @@ Report commands support the stable CLI v1 JSON envelope:
   "command": "version",
   "contract_version": 1,
   "data": {
-    "pytransformkit": "1.2.0rc3",
+    "pytransformkit": "1.2.0",
     "python": "3.x.y"
   },
   "ok": true

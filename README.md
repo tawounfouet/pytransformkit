@@ -10,7 +10,7 @@ PyTransformKit is an engine-agnostic Python framework for defining typed, compos
        width="100%">
 </p>
 
-> Status: **PyTransformKit 1.1.0 is stable.** The 1.2 Developer CLI is in release-candidate qualification. The frozen V1, Declarative Schema 1.1, wire and compatibility contracts remain preserved.
+> Status: **PyTransformKit 1.2.0 is stable.** The optional Developer CLI, Declarative Schema 1.1, frozen V1, wire and compatibility contracts are release-qualified.
 
 ## Goals
 
@@ -351,9 +351,8 @@ Current status:
 
 - V1 stable line: **LOT-00 → LOT-28 complete**;
 - Declarative Schema 1.1 line: **LOT-29 → LOT-43 complete**;
-- Developer CLI 1.2 line: **LOT-44 → LOT-58 complete; LOT-59 stable release closure pending**;
-- current stable package: **1.1.0**;
-- current 1.2 release-candidate checkpoint: **1.2.0rc3**.
+- Developer CLI 1.2 line: **LOT-44 → LOT-59 complete**;
+- current stable package: **1.2.0**.
 
 ## Development
 
@@ -397,7 +396,7 @@ Start with:
 - `docs/specifications/42_PYTRANSFORMKIT_DECLARATIVE_SCHEMA_REFERENCE_EXAMPLES.md` — declarative Schema reference examples;
 - `docs/CLI_GETTING_STARTED.md` — PyTransformKit 1.2 developer CLI walkthrough;
 - `docs/CLI_REFERENCE.md` — frozen CLI v1 command, option, output, exit and security reference;
-- `docs/RELEASE_NOTES_1_2_0.md` — prepared 1.2 stable release notes;
+- `docs/RELEASE_NOTES_1_2_0.md` — PyTransformKit 1.2.0 stable release notes;
 - `docs/ENGINE_CONFORMANCE_MATRIX.md` — published engine stability and semantic qualification matrix;
 - `benchmarks/README.md` — LOT-25 performance harness, budgets and qualified `0.7.0` baseline;
 - `notebooks/00 - Local Experimentation.ipynb` — interactive first experiment;

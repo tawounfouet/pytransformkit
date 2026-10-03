@@ -1,12 +1,10 @@
 # PyTransformKit 1.2.0 Release Notes
 
-PyTransformKit 1.2 introduces the optional Developer CLI while preserving the
-stable 1.0/1.1 Python, wire, error and Declarative Schema contracts.
+PyTransformKit `1.2.0` is the stable Developer CLI release.
 
-These notes are prepared during the 1.2 release-candidate closure. The stable
-`1.2.0` release is completed only by LOT-59 after the exact stable commit,
-artifacts, tag, GitHub Release, PyPI publication and public consumer smoke are
-qualified.
+It promotes the fully qualified `1.2.0rc3` line without introducing new
+runtime behavior. The stable 1.0/1.1 Python, wire, error and Declarative Schema
+contracts remain preserved while 1.2 adds the optional `ptk` developer CLI.
 
 ## Developer CLI
 
@@ -169,4 +167,7 @@ Published examples are executed from an installed wheel during CI.
 v1.2.0
 ```
 
-Tagging, GitHub Release creation and PyPI publication belong to LOT-59 only.
+Stable publication uses tag `v1.2.0` and must target the exact qualified
+`1.2.0` commit. GitHub Release creation, PyPI Trusted Publishing and the
+public consumer smoke are release evidence, not sources of new runtime
+behavior.

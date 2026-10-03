@@ -30,8 +30,8 @@ CLAUDE.md
 Project: PyTransformKit
 Package: pytransformkit
 Repository: tawounfouet/pytransformkit
-Current stable baseline: 1.1.0
-Next planned line: 1.2 Developer CLI
+Current stable baseline: 1.2.0
+Current CLI contract: 1.2 Developer CLI stable
 Python: 3.11 / 3.12 / 3.13 / 3.14
 ```
 

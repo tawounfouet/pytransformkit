@@ -14,7 +14,7 @@ Human-maintained specifications, public contracts, tests, and release evidence r
 Project: PyTransformKit
 Package: pytransformkit
 Repository: tawounfouet/pytransformkit
-Current stable baseline: 1.1.0
+Current stable baseline: 1.2.0
 Python support: 3.11 / 3.12 / 3.13 / 3.14
 ```
 

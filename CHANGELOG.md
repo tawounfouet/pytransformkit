@@ -6,9 +6,9 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 
 ## [Unreleased]
 
-No changes beyond the prepared 1.2.0 release candidate documentation.
+No changes yet.
 
-## [1.2.0] - Unreleased
+## [1.2.0] - 2026-10-03
 
 ### Added
 
@@ -20,7 +20,7 @@ No changes beyond the prepared 1.2.0 release candidate documentation.
 - CLI security/filesystem closure with no network loading, no environment expansion, no implicit plugin activation, no shell execution, explicit overwrite, symlink protection, atomic replacement, interruption cleanup and secret redaction.
 - Wheel and sdist qualification with `twine check`, SHA-256 evidence and clean-environment core/`[cli]`/`[cli,yaml]`/no-YAML modes.
 - Linux, macOS and Windows installed-`ptk` smoke qualification across Python 3.11, 3.12, 3.13 and 3.14.
-- `docs/CLI_GETTING_STARTED.md`, `docs/CLI_REFERENCE.md` and prepared `docs/RELEASE_NOTES_1_2_0.md`.
+- `docs/CLI_GETTING_STARTED.md`, `docs/CLI_REFERENCE.md`, `docs/RELEASE_NOTES_1_2_0.md` and the LOT-59 stable release review.
 
 ### Changed
 

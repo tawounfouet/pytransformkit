@@ -51,6 +51,13 @@ def _python_matrix(workflow: str) -> list[str]:
     return re.findall(r'"([^"]+)"', match.group(1))
 
 
+def _platform_matrix(workflow: str) -> list[str]:
+    match = re.search(r"os:\s*\[([^\]]+)\]", workflow)
+    if match is None:
+        return []
+    return [value.strip() for value in match.group(1).split(",")]
+
+
 def _version_core(value: str) -> tuple[int, int, int]:
     match = re.match(r"^(\d+)\.(\d+)\.(\d+)", value)
     if match is None:
@@ -354,8 +361,217 @@ def _validate_v1_1(root: Path, manifest_path: Path) -> list[str]:
     return errors
 
 
+def _validate_v1_2(root: Path, manifest_path: Path) -> list[str]:
+    manifest = _load_json(manifest_path)
+    errors: list[str] = []
+
+    if manifest.get("manifest_version") != 3:
+        errors.append("manifest_version must be 3")
+    if manifest.get("lot") != "LOT-59":
+        errors.append("lot must be LOT-59")
+    if manifest.get("phase") != "developer-cli-stable-release":
+        errors.append("phase must be developer-cli-stable-release")
+    if manifest.get("project_version") != "1.2.0":
+        errors.append("project_version must be 1.2.0")
+    if manifest.get("release_candidate_version") != "1.2.0rc3":
+        errors.append("release_candidate_version must be 1.2.0rc3")
+    if (
+        manifest.get("release_candidate_main_commit")
+        != "02028651a242912633b1ad7d17364714be016ce6"
+    ):
+        errors.append(
+            "release_candidate_main_commit must match the qualified rc3 main SHA"
+        )
+
+    predecessor_path = root / str(manifest.get("predecessor_stable_manifest", ""))
+    if not predecessor_path.is_file():
+        errors.append("1.2 predecessor stable manifest is missing")
+    else:
+        predecessor_errors = _validate_v1_1(root, predecessor_path)
+        if predecessor_errors:
+            errors.append(
+                "1.1 stable predecessor no longer validates: "
+                + "; ".join(predecessor_errors)
+            )
+
+    with (root / "pyproject.toml").open("rb") as stream:
+        project = tomllib.load(stream)["project"]
+
+    expected_version = manifest.get("project_version")
+    rc_version = manifest.get("release_candidate_version")
+    current_version = project.get("version")
+    if not all(
+        isinstance(value, str)
+        for value in (expected_version, rc_version, current_version)
+    ):
+        errors.append(
+            "1.2 stable version drift: project, RC and stable versions must be strings"
+        )
+    elif current_version != rc_version and not _preserves_release_line(
+        current_version,
+        expected_version,
+    ):
+        errors.append(
+            "1.2 stable version drift: "
+            f"expected prequalification {rc_version!r}, stable {expected_version!r}, "
+            f"or a later compatible 1.x version, got {current_version!r}"
+        )
+
+    if project.get("requires-python") != manifest.get("requires_python"):
+        errors.append("requires-python drifted from the 1.2 stable manifest")
+
+    optional_dependencies = project.get("optional-dependencies", {})
+    for extra in (
+        *manifest.get("stable_runtime_extra_additions", []),
+        *manifest.get("retained_runtime_extras", []),
+    ):
+        if extra not in optional_dependencies:
+            errors.append(f"missing stable runtime extra: {extra!r}")
+
+    cli_dependencies = {
+        str(value).split(";", 1)[0].strip().lower()
+        for value in optional_dependencies.get("cli", [])
+    }
+    if not any(value.startswith("typer") for value in cli_dependencies):
+        errors.append("CLI extra must retain Typer")
+    if not any(value.startswith("rich") for value in cli_dependencies):
+        errors.append("CLI extra must retain Rich")
+
+    core_dependencies = [
+        str(value).lower() for value in project.get("dependencies", [])
+    ]
+    forbidden_core = ("typer", "rich", "pyyaml")
+    for package in forbidden_core:
+        if any(value.startswith(package) for value in core_dependencies):
+            errors.append(f"{package} must remain optional and absent from core")
+
+    scripts = project.get("scripts", {})
+    expected_entrypoint = manifest.get("cli_contract_identity", {}).get("entrypoint")
+    if scripts.get("ptk") != expected_entrypoint:
+        errors.append("ptk console entrypoint drifted from the 1.2 stable manifest")
+
+    workflow = (root / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    if _python_matrix(workflow) != manifest.get("python_versions", []):
+        errors.append("Python CI matrix drifted from the 1.2 stable manifest")
+    if _platform_matrix(workflow) != manifest.get("platform_runners", []):
+        errors.append("CLI platform matrix drifted from the 1.2 stable manifest")
+
+    jobs = _workflow_jobs(workflow)
+    missing_jobs = sorted(set(manifest.get("required_ci_jobs", [])) - jobs)
+    if missing_jobs:
+        errors.append(f"missing 1.2 stable CI jobs: {missing_jobs!r}")
+
+    missing_paths = [
+        relative
+        for relative in manifest.get("required_paths", [])
+        if not (root / relative).is_file()
+    ]
+    if missing_paths:
+        errors.append(f"missing 1.2 stable evidence paths: {missing_paths!r}")
+
+    cli_contract = _load_json(root / str(manifest.get("cli_contract", "")))
+    identity = manifest.get("cli_contract_identity", {})
+    for key in (
+        "contract",
+        "contract_version",
+        "status",
+        "framework_line",
+        "program",
+        "entrypoint",
+    ):
+        if cli_contract.get(key) != identity.get(key):
+            errors.append(f"CLI contract identity drifted for {key}")
+
+    command_ids = list(cli_contract.get("commands", {}))
+    if command_ids != manifest.get("cli_command_ids", []):
+        errors.append("stable CLI command IDs drifted")
+
+    root_flags = {
+        flag
+        for option in cli_contract.get("root_options", [])
+        for flag in option.get("flags", [])
+    }
+    completion = manifest.get("shell_completion", {})
+    if completion.get("install_option_supported") is not False:
+        errors.append("shell_completion.install_option_supported must be false")
+    if completion.get("show_option_supported") is not False:
+        errors.append("shell_completion.show_option_supported must be false")
+    if "--install-completion" in root_flags or "--show-completion" in root_flags:
+        errors.append("shell completion options appeared after CLI v1 freeze")
+
+    security = cli_contract.get("security_filesystem", {})
+    required_true = (
+        "secret_redaction",
+        "debug_redaction",
+        "atomic_replacement",
+        "temporary_cleanup",
+        "interrupt_before_commit_preserves_destination",
+    )
+    for key in required_true:
+        if security.get(key) is not True:
+            errors.append(f"CLI security guarantee must remain true: {key}")
+    required_false = (
+        "remote_sources",
+        "recursive_discovery",
+        "implicit_overwrite",
+        "mutable_symlinks",
+        "env_expansion",
+        "implicit_plugin_activation",
+        "shell_execution",
+    )
+    for key in required_false:
+        if security.get(key) is not False:
+            errors.append(f"CLI security guarantee must remain false: {key}")
+
+    artifact_policy = manifest.get("artifact_policy", {})
+    for key in (
+        "wheel_required",
+        "sdist_required",
+        "twine_check_required",
+        "clean_core_install_required",
+        "cli_extra_install_required",
+        "cli_yaml_install_required",
+        "cli_without_yaml_required",
+        "sha256_record_required",
+        "installed_console_script_required",
+        "platform_matrix_required",
+    ):
+        if artifact_policy.get(key) is not True:
+            errors.append(f"artifact_policy.{key} must remain true")
+
+    publication = manifest.get("publication_policy", {})
+    if publication.get("tag") != "v1.2.0":
+        errors.append("publication_policy.tag must be v1.2.0")
+    for key in (
+        "github_release_required",
+        "pypi_publish_required",
+        "public_consumer_smoke_required",
+        "tag_must_target_qualified_stable_commit",
+    ):
+        if publication.get(key) is not True:
+            errors.append(f"publication_policy.{key} must remain true")
+
+    release_policy = manifest.get("release_policy", {})
+    for key in (
+        "new_features_allowed",
+        "architecture_changes_allowed",
+        "v1_baseline_drift_allowed",
+        "declarative_api_drift_allowed",
+        "cli_contract_drift_allowed",
+        "wire_contract_drift_allowed",
+        "error_code_drift_allowed",
+        "security_regression_allowed",
+    ):
+        if release_policy.get(key) is not False:
+            errors.append(f"release_policy.{key} must be false")
+
+    return errors
+
+
 def validate(root: Path, manifest_path: Path) -> list[str]:
     manifest = _load_json(manifest_path)
+    if manifest.get("lot") == "LOT-59":
+        return _validate_v1_2(root, manifest_path)
     if manifest.get("lot") == "LOT-43":
         return _validate_v1_1(root, manifest_path)
     return _validate_v1(root, manifest_path)

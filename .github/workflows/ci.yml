@@ -595,7 +595,7 @@ jobs:
           retention-days: 30
 
 
-  cli-schema-inspect-contract:
+  cli-schema-format-contract:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -607,12 +607,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev,cli]"
-      - name: Run LOT-49 CLI tests
+      - name: Run LOT-50 CLI tests
         run: |
           pytest tests/unit/cli \
             tests/contract/cli \
             tests/architecture/test_cli_boundaries.py -ra
-      - name: Build LOT-49 wheel
+      - name: Build LOT-50 wheel
         run: |
           python -m build --wheel
       - name: Qualify core wheel without CLI extra
@@ -655,6 +655,7 @@ jobs:
           .cli-extra-venv/bin/ptk schema --help
           .cli-extra-venv/bin/ptk schema validate --help
           .cli-extra-venv/bin/ptk schema inspect --help
+          .cli-extra-venv/bin/ptk schema format --help
           cat > .cli-schema.yml <<'YAML'
           version: 1
           schema:
@@ -680,6 +681,14 @@ jobs:
           set -e
           test "${STATUS}" -eq 11
           printf '%s\n' "${OUTPUT}" | grep -F 'PTK-DECL-010'
+          set +e
+          OUTPUT="$(
+            .cli-extra-venv/bin/ptk schema format .cli-schema.yml 2>&1
+          )"
+          STATUS=$?
+          set -e
+          test "${STATUS}" -eq 11
+          printf '%s\n' "${OUTPUT}" | grep -F 'PTK-DECL-010'
           .cli-extra-venv/bin/python -m pytransformkit.cli --help
       - name: Qualify wheel with CLI and YAML extras
         run: |
@@ -693,6 +702,11 @@ jobs:
           .cli-yaml-venv/bin/ptk schema validate .cli-schema.yml --json
           .cli-yaml-venv/bin/ptk schema inspect .cli-schema.yml --no-color
           .cli-yaml-venv/bin/ptk schema inspect .cli-schema.yml --json
+          .cli-yaml-venv/bin/ptk schema format .cli-schema.yml > .cli-schema-formatted.yml
+          .cli-yaml-venv/bin/ptk schema validate .cli-schema-formatted.yml --no-color
+          cp .cli-schema.yml .cli-schema-write.yml
+          .cli-yaml-venv/bin/ptk schema format .cli-schema-write.yml --write
+          .cli-yaml-venv/bin/ptk schema validate .cli-schema-write.yml --no-color
 
   build:
     runs-on: ubuntu-latest

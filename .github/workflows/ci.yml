@@ -595,7 +595,7 @@ jobs:
           retention-days: 30
 
 
-  cli-version-contract:
+  cli-doctor-contract:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -607,12 +607,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev,cli]"
-      - name: Run LOT-46 CLI tests
+      - name: Run LOT-47 CLI tests
         run: |
           pytest tests/unit/cli \
             tests/contract/cli \
             tests/architecture/test_cli_boundaries.py -ra
-      - name: Build LOT-46 wheel
+      - name: Build LOT-47 wheel
         run: |
           python -m build --wheel
       - name: Qualify core wheel without CLI extra
@@ -650,6 +650,8 @@ jobs:
           .cli-extra-venv/bin/ptk version
           .cli-extra-venv/bin/ptk version --json
           .cli-extra-venv/bin/ptk --version
+          .cli-extra-venv/bin/ptk doctor --no-color
+          .cli-extra-venv/bin/ptk doctor --json
           .cli-extra-venv/bin/python -m pytransformkit.cli --help
 
   build:

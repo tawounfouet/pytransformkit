@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import pytest
+
+pytest.importorskip("rich")
+
 from pytransformkit.cli.rendering.console import create_console_pair
 
 

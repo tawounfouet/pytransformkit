@@ -424,6 +424,45 @@ jobs:
           .declarative-sdist-yaml/bin/python scripts/public_api_snapshot.py             --line 1.1             --check contracts/public_api_v1_1.json
           .declarative-sdist-yaml/bin/python scripts/error_code_catalog.py             --line 1.1             --check contracts/error_codes_v1_1.json
 
+  declarative-docs-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Verify declarative documentation surfaces
+        run: |
+          test -f docs/specifications/41_PYTRANSFORMKIT_DECLARATIVE_SCHEMA_GETTING_STARTED.md
+          test -f docs/specifications/42_PYTRANSFORMKIT_DECLARATIVE_SCHEMA_REFERENCE_EXAMPLES.md
+          grep -F 'pip install "pytransformkit[yaml]"' README.md
+          grep -F 'pytransformkit.schema_io' README.md
+          grep -F 'SchemaCodec' README.md
+      - name: Build documentation qualification wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build --wheel
+      - name: Install wheel with yaml extra
+        run: |
+          python -m venv .declarative-docs-venv
+          .declarative-docs-venv/bin/python -m pip install --upgrade pip
+          WHEEL="$(realpath "$(find dist -maxdepth 1 -name '*.whl' -print -quit)")"
+          .declarative-docs-venv/bin/python -m pip install \
+            "pytransformkit[yaml] @ file://${WHEEL}"
+          .declarative-docs-venv/bin/python -m pip check
+      - name: Execute published declarative examples
+        run: |
+          .declarative-docs-venv/bin/python scripts/guides/declarative_schema.py
+      - name: Recheck frozen 1.1 surface from documentation environment
+        run: |
+          .declarative-docs-venv/bin/python scripts/public_api_snapshot.py \
+            --line 1.1 \
+            --check contracts/public_api_v1_1.json
+          .declarative-docs-venv/bin/python scripts/error_code_catalog.py \
+            --line 1.1 \
+            --check contracts/error_codes_v1_1.json
+
   release-qualification-contract:
     runs-on: ubuntu-latest
     steps:

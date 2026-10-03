@@ -96,9 +96,7 @@ class HumanRenderer:
             if include_detail:
                 detail = engine.detail
                 if detail is None and engine.missing_dependencies:
-                    detail = (
-                        "missing: " + ", ".join(engine.missing_dependencies)
-                    )
+                    detail = "missing: " + ", ".join(engine.missing_dependencies)
                 values.append(detail or "-")
             rows.append(tuple(values))
 
@@ -116,14 +114,10 @@ class HumanRenderer:
         self.write(f"Installed: {'yes' if engine.installed else 'no'}")
         self.write(f"Qualification: {engine.qualification.upper()}")
         self.write(f"Version: {engine.version or '-'}")
-        self.write(
-            "Mandatory for V1: "
-            + ("yes" if report.mandatory_for_v1 else "no")
-        )
+        self.write("Mandatory for V1: " + ("yes" if report.mandatory_for_v1 else "no"))
         if engine.missing_dependencies:
             self.write(
-                "Missing dependencies: "
-                + ", ".join(engine.missing_dependencies)
+                "Missing dependencies: " + ", ".join(engine.missing_dependencies)
             )
         if engine.detail is not None:
             self.write(f"Detail: {engine.detail}")

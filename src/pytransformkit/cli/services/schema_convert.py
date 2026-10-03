@@ -170,7 +170,10 @@ def _replace_existing_atomic(path: Path, text: str) -> None:
                 f"Refusing to replace symbolic link: {path}",
             )
         if not stat.S_ISREG(current.st_mode):
-            raise CLIFileSystemError(path, f"Output is no longer a regular file: {path}")
+            raise CLIFileSystemError(
+                path,
+                f"Output is no longer a regular file: {path}",
+            )
         if (current.st_dev, current.st_ino) != (original.st_dev, original.st_ino):
             raise CLIFileSystemError(
                 path,
@@ -190,7 +193,10 @@ def _replace_existing_atomic(path: Path, text: str) -> None:
 
 def _write_output(path: Path, text: str, *, force: bool) -> None:
     if path.is_symlink():
-        raise CLIFileSystemError(path, f"Refusing to write through symbolic link: {path}")
+        raise CLIFileSystemError(
+            path,
+            f"Refusing to write through symbolic link: {path}",
+        )
 
     try:
         existing = path.lstat()

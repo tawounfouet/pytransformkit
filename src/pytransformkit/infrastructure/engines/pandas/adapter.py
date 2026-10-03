@@ -21,7 +21,7 @@ from pytransformkit.application.execution.results import (
     NamedEngineOutput,
 )
 from pytransformkit.application.ports.engines import PhysicalHandle
-from pytransformkit.conformance import engine_capabilities
+from pytransformkit.conformance.model import engine_capabilities
 from pytransformkit.domain.data.data_types import (
     BooleanType,
     DateType,

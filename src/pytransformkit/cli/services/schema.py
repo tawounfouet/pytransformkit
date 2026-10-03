@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import os
 import stat
 import tempfile
@@ -105,10 +106,8 @@ def _atomic_replace_text(path: Path, text: str) -> None:
         temp_path = None
     finally:
         if temp_path is not None:
-            try:
+            with contextlib.suppress(OSError):
                 temp_path.unlink(missing_ok=True)
-            except OSError:
-                pass
 
 
 def _type_descriptor(data_type: DataType) -> tuple[str, dict[str, object] | None]:
@@ -234,7 +233,7 @@ class SchemaCLIService:
         )
 
     def format(self, path: str | Path, *, write: bool = False) -> str:
-        """Return canonical YAML and optionally replace the explicit source atomically."""
+        """Return canonical YAML and optionally replace the source atomically."""
         path_text = _path_text(path)
         _reject_remote_source(path_text)
         target = Path(path_text)

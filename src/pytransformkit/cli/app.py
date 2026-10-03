@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import typer
 
+from pytransformkit.cli.commands.doctor import doctor_command
 from pytransformkit.cli.commands.version import render_version, version_command
 
 app = typer.Typer(
@@ -36,3 +37,4 @@ def root(
 
 
 app.command("version")(version_command)
+app.command("doctor")(doctor_command)

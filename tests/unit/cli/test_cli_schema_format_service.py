@@ -55,8 +55,7 @@ def test_schema_format_uses_multi_schema_public_emitter(
     )
 
     assert (
-        schema_service.SchemaCLIService().format("schemas.yml")
-        == "multi-canonical\n"
+        schema_service.SchemaCLIService().format("schemas.yml") == "multi-canonical\n"
     )
 
 

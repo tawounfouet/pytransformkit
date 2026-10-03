@@ -13,7 +13,7 @@ from pytransformkit.cli.security import (
 
 def test_redact_text_covers_named_secrets_bearer_tokens_and_uri_userinfo() -> None:
     value = (
-        'password=hunter2 token: abc123 '
+        "password=hunter2 token: abc123 "
         '"api_key": "json-secret" '
         "Authorization: Bearer bearer-secret "
         "https://user:pass@example.invalid/schema.yml"

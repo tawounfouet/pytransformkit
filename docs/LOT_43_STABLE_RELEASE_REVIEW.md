@@ -14,6 +14,9 @@ The `1.1.0rc2` line completed the full repository and declarative qualification
 matrix on `main`, including installed wheel/sdist scenarios, documentation
 execution, compatibility freezes and security boundaries.
 
+LOT-43 pre-stable qualification then completed CI #539 with 30/30 jobs green,
+including the new stable declarative release gate before the version promotion.
+
 The stable promotion is therefore limited to:
 
 - stable version metadata;

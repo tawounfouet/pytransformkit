@@ -51,11 +51,14 @@ class JSONRenderer:
 
     @staticmethod
     def _dumps(payload: Mapping[str, object]) -> str:
-        return json.dumps(
-            payload,
-            ensure_ascii=False,
-            sort_keys=True,
-        ) + "\n"
+        return (
+            json.dumps(
+                payload,
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+            + "\n"
+        )
 
 
 __all__ = ["CLI_REPORT_CONTRACT_VERSION", "JSONRenderer"]

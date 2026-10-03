@@ -160,9 +160,7 @@ def test_schema_convert_service_uses_public_schema_and_wire_apis_only() -> None:
 
     assert "pytransformkit.schema_io" in imports
     assert "pytransformkit.serialization" in imports
-    assert all(
-        not module.startswith("pytransformkit.schema_io.") for module in imports
-    )
+    assert all(not module.startswith("pytransformkit.schema_io.") for module in imports)
     assert all(
         not module.startswith("pytransformkit.serialization.") for module in imports
     )

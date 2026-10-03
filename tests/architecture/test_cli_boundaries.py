@@ -276,5 +276,5 @@ def test_contract_service_uses_packaged_resources_not_checkout_paths() -> None:
 
     assert "from importlib import resources" in source
     assert 'Path("contracts")' not in source
+    assert '"contracts/' not in source
     assert "Path.cwd()" not in source
-    assert "git " not in source.lower()

@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from io import StringIO
 
+import pytest
+
+pytest.importorskip("rich")
 from rich.console import Console
 
 from pytransformkit.cli.exit_codes import ExitCode

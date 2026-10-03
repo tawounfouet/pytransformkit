@@ -14,6 +14,7 @@ from pytransformkit.cli.models.reports import (
     ContractSummaryReport,
 )
 
+
 @dataclass(frozen=True, slots=True)
 class _ContractSpec:
     id: str

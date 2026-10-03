@@ -209,7 +209,6 @@ def test_schema_command_module_does_not_eagerly_import_serialization() -> None:
     )
 
 
-
 def test_engines_cli_path_does_not_import_optional_adapters_or_plugins() -> None:
     engine_paths = (
         CLI_ROOT / "commands" / "engines.py",

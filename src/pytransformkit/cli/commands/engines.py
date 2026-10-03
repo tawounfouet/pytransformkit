@@ -2,16 +2,10 @@
 
 from __future__ import annotations
 
-import sys
-import traceback
-
 import typer
 
 from pytransformkit.cli.context import CLIContext, OutputMode
-from pytransformkit.cli.exceptions import (
-    CLIUsageError,
-    error_report_from_exception,
-)
+from pytransformkit.cli.exceptions import CLIUsageError
 from pytransformkit.cli.exit_codes import ExitCode
 from pytransformkit.cli.rendering.console import create_console_pair
 from pytransformkit.cli.rendering.errors import render_cli_error

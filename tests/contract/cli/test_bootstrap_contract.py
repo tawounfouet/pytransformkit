@@ -19,6 +19,7 @@ def test_root_without_arguments_shows_help_and_succeeds() -> None:
     assert result.exit_code == 0
     assert "PyTransformKit developer CLI." in result.stdout
     assert "version" in result.stdout
+    assert "doctor" in result.stdout
 
 
 def test_root_help_succeeds() -> None:

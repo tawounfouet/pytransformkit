@@ -80,3 +80,29 @@ def test_version_path_has_no_engine_or_schema_io_dependencies() -> None:
                 violations.append(f"{path}: forbidden import {module}")
 
     assert violations == []
+
+
+def test_doctor_service_is_offline_and_does_not_import_optional_runtimes() -> None:
+    doctor_path = CLI_ROOT / "services" / "doctor.py"
+    forbidden_prefixes = (
+        "http",
+        "requests",
+        "socket",
+        "urllib",
+        "pytransformkit.engines",
+        "pytransformkit.plugins",
+        "pytransformkit.schema_io",
+        "pandas",
+        "polars",
+        "pyarrow",
+        "duckdb",
+        "yaml",
+    )
+
+    violations = [
+        module
+        for module in _imports(doctor_path)
+        if module.startswith(forbidden_prefixes)
+    ]
+
+    assert violations == []

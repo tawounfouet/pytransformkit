@@ -83,8 +83,9 @@ def test_duckdb_requires_pyarrow_to_be_locally_available() -> None:
     assert report.engine.missing_dependencies == ("pyarrow",)
 
 
-def test_engine_inspect_normalizes_identifier_and_uses_conformance_capabilities(
-) -> None:
+def test_engine_inspect_normalizes_identifier_and_uses_conformance_capabilities() -> (
+    None
+):
     service = EngineService(
         version_resolver=_resolver(
             {

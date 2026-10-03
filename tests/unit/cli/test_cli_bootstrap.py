@@ -33,3 +33,19 @@ def test_main_without_cli_dependencies_is_controlled(
     assert "PyTransformKit CLI dependencies are not installed." in captured.err
     assert "typer, rich" in captured.err
     assert 'pip install "pytransformkit[cli]"' in captured.err
+
+
+
+def test_main_returns_broken_pipe_exit_for_epipe_from_click_boundary(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(bootstrap, "_missing_cli_dependencies", lambda: ())
+
+    import pytransformkit.cli.app as app_module
+
+    def fail_app(*args, **kwargs):
+        raise BrokenPipeError()
+
+    monkeypatch.setattr(app_module, "app", fail_app)
+
+    assert bootstrap.main(()) == 141

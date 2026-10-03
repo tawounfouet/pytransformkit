@@ -35,6 +35,7 @@ from pytransformkit.infrastructure.engines.duckdb.planner import (
     DuckDBPlanCompiler,
 )
 
+
 class DuckDBAdapter:
     """Relational DuckDB backend using parameterized SQL lowering."""
 

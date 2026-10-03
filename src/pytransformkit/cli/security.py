@@ -32,9 +32,7 @@ _ASSIGNMENT_PATTERN = re.compile(
     )
     """
 )
-_URI_USERINFO_PATTERN = re.compile(
-    r"(?i)\b([a-z][a-z0-9+.-]*://)([^/@\s]+)@"
-)
+_URI_USERINFO_PATTERN = re.compile(r"(?i)\b([a-z][a-z0-9+.-]*://)([^/@\s]+)@")
 
 
 def _replacement(prefix: str, value: str) -> str:

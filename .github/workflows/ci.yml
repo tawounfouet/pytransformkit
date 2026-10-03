@@ -609,7 +609,7 @@ jobs:
           pip install -e ".[dev,cli]"
       - name: Run LOT-44 CLI tests
         run: |
-          pytest tests/unit/cli/test_bootstrap.py \
+          pytest tests/unit/cli/test_cli_bootstrap.py \
             tests/contract/cli/test_bootstrap_contract.py -ra
       - name: Build LOT-44 wheel
         run: |

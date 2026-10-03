@@ -148,9 +148,7 @@ class DoctorService:
             ),
             version=self._python_version,
             detail=(
-                None
-                if supported
-                else "Supported Python range is 3.11 through 3.14."
+                None if supported else "Supported Python range is 3.11 through 3.14."
             ),
         )
 

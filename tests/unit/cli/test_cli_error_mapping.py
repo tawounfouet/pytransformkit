@@ -35,9 +35,7 @@ def test_declarative_schema_error_preserves_public_ptk_code() -> None:
 
 
 def test_declarative_dependency_error_maps_to_missing_optional_dependency() -> None:
-    report = error_report_from_exception(
-        DeclarativeSchemaDependencyError("PyYAML")
-    )
+    report = error_report_from_exception(DeclarativeSchemaDependencyError("PyYAML"))
 
     assert report.category is ErrorCategory.MISSING_OPTIONAL_DEPENDENCY
     assert report.exit_code is ExitCode.MISSING_OPTIONAL_DEPENDENCY
@@ -86,9 +84,7 @@ def test_keyboard_interrupt_and_broken_pipe_have_dedicated_outcomes() -> None:
 
 
 def test_unexpected_exception_does_not_leak_raw_message() -> None:
-    report = error_report_from_exception(
-        RuntimeError("SECRET_TOKEN_DO_NOT_RENDER")
-    )
+    report = error_report_from_exception(RuntimeError("SECRET_TOKEN_DO_NOT_RENDER"))
 
     assert report.category is ErrorCategory.INTERNAL_ERROR
     assert report.exit_code is ExitCode.INTERNAL_ERROR

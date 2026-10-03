@@ -44,6 +44,7 @@ from pytransformkit.infrastructure.engines.pyarrow.handle import (
     PyArrowDatasetHandle,
 )
 
+
 class PyArrowAdapter:
     """Arrow adapter for the explicitly qualified LOT-18 capability subset."""
 

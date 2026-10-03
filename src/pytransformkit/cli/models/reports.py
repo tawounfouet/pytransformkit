@@ -65,6 +65,21 @@ class DoctorCheck:
 
 
 @dataclass(frozen=True, slots=True)
+class SchemaValidationReport:
+    """Result of validating one explicit declarative schema file."""
+
+    path: str
+    valid: bool
+
+    def to_data(self) -> ReportData:
+        """Return the machine-facing schema validation payload."""
+        return {
+            "path": self.path,
+            "valid": self.valid,
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class DoctorReport:
     """Aggregate local CLI environment diagnostics."""
 
@@ -90,5 +105,6 @@ __all__ = [
     "DoctorReport",
     "DoctorStatus",
     "ReportData",
+    "SchemaValidationReport",
     "VersionReport",
 ]

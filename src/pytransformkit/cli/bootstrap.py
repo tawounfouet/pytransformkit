@@ -40,27 +40,21 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(_render_missing_dependency_message(missing), file=sys.stderr)
         return MISSING_OPTIONAL_DEPENDENCY_EXIT_CODE
 
-    from click import Abort, ClickException
-
     from pytransformkit.cli.app import app
 
     args = list(argv) if argv is not None else None
     try:
-        result = app(args=args, prog_name="ptk", standalone_mode=False)
+        app(args=args, prog_name="ptk", standalone_mode=True)
     except BrokenPipeError:
         return int(ExitCode.BROKEN_PIPE)
     except OSError as exc:
         if exc.errno == errno.EPIPE:
             return int(ExitCode.BROKEN_PIPE)
         raise
-    except ClickException as exc:
-        exc.show()
-        return int(exc.exit_code)
-    except Abort:
-        print("Aborted!", file=sys.stderr)
-        return 1
-
-    return result if isinstance(result, int) else 0
+    except SystemExit as exc:
+        code = exc.code
+        return code if isinstance(code, int) else 1
+    return 0
 
 
 __all__ = ["main"]

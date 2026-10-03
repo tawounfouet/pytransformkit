@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import typer
 
-from pytransformkit import __version__
+from pytransformkit.cli.commands.version import render_version, version_command
 
 app = typer.Typer(
     name="ptk",
@@ -17,13 +17,22 @@ app = typer.Typer(
 
 
 @app.callback(invoke_without_command=True)
-def root(ctx: typer.Context) -> None:
+def root(
+    ctx: typer.Context,
+    version: bool = typer.Option(
+        False,
+        "--version",
+        is_eager=True,
+        help="Show the installed PyTransformKit and Python versions.",
+    ),
+) -> None:
     """PyTransformKit developer CLI."""
+    if version:
+        render_version()
+        raise typer.Exit(code=0)
+
     if ctx.invoked_subcommand is None:
         typer.echo(ctx.get_help())
 
 
-@app.command("version")
-def version_command() -> None:
-    """Show the installed PyTransformKit version."""
-    typer.echo(f"PyTransformKit {__version__}")
+app.command("version")(version_command)

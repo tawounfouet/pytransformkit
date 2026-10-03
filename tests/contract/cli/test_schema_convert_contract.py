@@ -364,7 +364,7 @@ def test_schema_convert_missing_output_parent_is_filesystem_error(
 
     assert result.exit_code == 12
     assert result.stdout == ""
-    assert str(output) in result.stderr
+    assert str(output) in result.stderr.replace("\n", "")
     assert not output.parent.exists()
 
 

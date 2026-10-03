@@ -223,19 +223,12 @@ def build_cli_contract() -> dict[str, object]:
             f"actual={sorted(registered_paths)!r}."
         )
 
-    commands = {
-        spec.command_id: _command_document(spec)
-        for spec in _COMMAND_SPECS
-    }
+    commands = {spec.command_id: _command_document(spec) for spec in _COMMAND_SPECS}
     report_commands = [
-        spec.command_id
-        for spec in _COMMAND_SPECS
-        if spec.classification == "report"
+        spec.command_id for spec in _COMMAND_SPECS if spec.classification == "report"
     ]
     payload_commands = [
-        spec.command_id
-        for spec in _COMMAND_SPECS
-        if spec.classification == "payload"
+        spec.command_id for spec in _COMMAND_SPECS if spec.classification == "payload"
     ]
 
     return {
@@ -264,14 +257,8 @@ def build_cli_contract() -> dict[str, object]:
             "error_required": ["category", "message"],
             "error_optional": ["code", "path", "hint", "details"],
         },
-        "exit_codes": {
-            code.name.lower(): int(code)
-            for code in ExitCode
-        },
-        "error_categories": [
-            category.value
-            for category in ErrorCategory
-        ],
+        "exit_codes": {code.name.lower(): int(code) for code in ExitCode},
+        "error_categories": [category.value for category in ErrorCategory],
         "critical_error_mappings": {
             "contradictory_options": {
                 "category": "invalid_usage",

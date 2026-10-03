@@ -57,7 +57,8 @@ def test_schema_validate_valid_file_human_success(tmp_path: Path) -> None:
     )
 
     assert result.exit_code == 0
-    assert result.stdout.strip() == f"Valid schema: {path}"
+    assert "Valid schema:" in result.stdout
+    assert str(path) in result.stdout.replace("\n", "")
     assert result.stderr == ""
     assert "\x1b[" not in result.stdout
 

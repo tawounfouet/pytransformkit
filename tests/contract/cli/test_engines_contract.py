@@ -13,6 +13,7 @@ from typer.testing import CliRunner
 
 from pytransformkit.cli.app import app
 from pytransformkit.conformance.model import engine_capabilities
+from pytransformkit.domain.engines import EngineCapability
 
 runner = CliRunner()
 
@@ -76,7 +77,7 @@ def test_engines_inspect_json_uses_conformance_capability_authority() -> None:
     assert data["mandatory_for_v1"] is True
     assert data["capabilities"] == [
         capability.value
-        for capability in type(next(iter(engine_capabilities("polars"))))
+        for capability in EngineCapability
         if capability in engine_capabilities("polars")
     ]
     assert data["capabilities"][-1] == "lazy"

@@ -102,12 +102,33 @@ def render_contract_inspect(
     )
     service = ContractInspectionService()
 
+    if contract_id is None:
+        try:
+            report = service.list()
+        except (Exception, KeyboardInterrupt) as exc:
+            return _render_error(exc, context=context)
+
+        if context.output_mode is OutputMode.JSON:
+            typer.echo(
+                JSONRenderer().render_success(
+                    command=COMMAND_ID,
+                    data=report.to_data(),
+                ),
+                nl=False,
+            )
+        else:
+            consoles = create_console_pair(color=context.color)
+            HumanRenderer(
+                stdout=consoles.stdout,
+                stderr=consoles.stderr,
+            ).render_contract_list(
+                report,
+                quiet=context.quiet,
+            )
+        return ExitCode.SUCCESS
+
     try:
-        report = (
-            service.list()
-            if contract_id is None
-            else service.inspect(contract_id)
-        )
+        inspection = service.inspect(contract_id)
     except (Exception, KeyboardInterrupt) as exc:
         return _render_error(exc, context=context)
 
@@ -115,28 +136,19 @@ def render_contract_inspect(
         typer.echo(
             JSONRenderer().render_success(
                 command=COMMAND_ID,
-                data=report.to_data(),
+                data=inspection.to_data(),
             ),
             nl=False,
         )
-        return ExitCode.SUCCESS
-
-    consoles = create_console_pair(color=context.color)
-    renderer = HumanRenderer(
-        stdout=consoles.stdout,
-        stderr=consoles.stderr,
-    )
-
-    if contract_id is None:
-        renderer.render_contract_list(
-            report,
-            quiet=context.quiet,
-        )
     elif context.quiet:
-        typer.echo(report.contract.id)
+        typer.echo(inspection.contract.id)
     else:
-        renderer.render_contract_inspection(
-            report,
+        consoles = create_console_pair(color=context.color)
+        HumanRenderer(
+            stdout=consoles.stdout,
+            stderr=consoles.stderr,
+        ).render_contract_inspection(
+            inspection,
             include_document=context.verbose or context.debug,
         )
 

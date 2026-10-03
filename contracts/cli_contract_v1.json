@@ -698,7 +698,13 @@
     "env_expansion": false,
     "plugin_command_injection": false,
     "project_discovery": false,
-    "shell_execution": false
+    "shell_execution": false,
+    "implicit_plugin_activation": false,
+    "secret_redaction": true,
+    "debug_redaction": true,
+    "atomic_replacement": true,
+    "temporary_cleanup": true,
+    "interrupt_before_commit_preserves_destination": true
   },
   "packaging": {
     "core_without_cli": true,

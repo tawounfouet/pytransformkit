@@ -194,7 +194,10 @@ def test_schema_convert_path_has_no_network_or_engine_dependency() -> None:
 def test_schema_command_module_does_not_eagerly_import_serialization() -> None:
     command_path = CLI_ROOT / "commands" / "schema.py"
     top_level_imports: list[str] = []
-    tree = ast.parse(command_path.read_text(encoding="utf-8"), filename=str(command_path))
+    tree = ast.parse(
+        command_path.read_text(encoding="utf-8"),
+        filename=str(command_path),
+    )
 
     for node in tree.body:
         if isinstance(node, ast.Import):

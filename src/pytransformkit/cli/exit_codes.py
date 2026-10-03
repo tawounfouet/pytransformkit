@@ -1,9 +1,8 @@
-"""Stable candidate process exit codes for the PyTransformKit CLI."""
+"""Stable process exit codes for the PyTransformKit CLI."""
 
 from __future__ import annotations
 
 from enum import IntEnum
-
 
 class ExitCode(IntEnum):
     """Process exit codes defined by the CLI v1 candidate contract."""
@@ -18,6 +17,5 @@ class ExitCode(IntEnum):
     INTERNAL_ERROR = 70
     INTERRUPTED = 130
     BROKEN_PIPE = 141
-
 
 __all__ = ["ExitCode"]

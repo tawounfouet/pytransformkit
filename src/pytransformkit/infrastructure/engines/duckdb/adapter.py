@@ -22,7 +22,8 @@ from pytransformkit.application.execution.results import (
     NamedEngineOutput,
 )
 from pytransformkit.application.ports.engines import PhysicalHandle
-from pytransformkit.domain.engines import EngineCapability, EngineDescriptor
+from pytransformkit.conformance import engine_capabilities
+from pytransformkit.domain.engines import EngineDescriptor
 from pytransformkit.domain.pipelines.plan import LogicalPlan
 from pytransformkit.domain.runtime import Diagnostic, DiagnosticSeverity
 from pytransformkit.errors.engine import AdapterError
@@ -33,38 +34,6 @@ from pytransformkit.infrastructure.engines.duckdb.planner import (
     DuckDBCompiledPlan,
     DuckDBPlanCompiler,
 )
-
-_DUCKDB_CAPABILITIES = frozenset(
-    {
-        EngineCapability.SELECT,
-        EngineCapability.DROP,
-        EngineCapability.RENAME,
-        EngineCapability.FILTER,
-        EngineCapability.LIMIT,
-        EngineCapability.DISTINCT,
-        EngineCapability.CAST,
-        EngineCapability.DERIVE,
-        EngineCapability.SORT,
-        EngineCapability.JOIN_INNER,
-        EngineCapability.JOIN_LEFT,
-        EngineCapability.JOIN_RIGHT,
-        EngineCapability.JOIN_FULL,
-        EngineCapability.JOIN_SEMI,
-        EngineCapability.JOIN_ANTI,
-        EngineCapability.JOIN_CROSS,
-        EngineCapability.UNION,
-        EngineCapability.INTERSECT,
-        EngineCapability.EXCEPT,
-        EngineCapability.AGGREGATE,
-        EngineCapability.WINDOW,
-        EngineCapability.WINDOW_ROWS_CUMULATIVE,
-        EngineCapability.WINDOW_ROWS_MOVING,
-        EngineCapability.WINDOW_ROWS_ARBITRARY,
-        EngineCapability.WINDOW_RANGE,
-        EngineCapability.LAZY,
-    }
-)
-
 
 class DuckDBAdapter:
     """Relational DuckDB backend using parameterized SQL lowering."""
@@ -97,7 +66,7 @@ class DuckDBAdapter:
             id="duckdb",
             name="DuckDB",
             adapter_version=_package_version(),
-            capabilities=_DUCKDB_CAPABILITIES,
+            capabilities=engine_capabilities("duckdb"),
         )
 
     @property

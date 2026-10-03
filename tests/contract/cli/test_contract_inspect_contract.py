@@ -146,6 +146,22 @@ def test_contract_inspect_unknown_contract_json_is_error_report() -> None:
     assert payload["error"]["category"] == "invalid_usage"
 
 
+def test_contract_inspect_works_outside_repository_checkout(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    result = runner.invoke(
+        app,
+        ["contract", "inspect", "errors", "--json"],
+    )
+
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert payload["data"]["document"]["contract"] == "pytransformkit.errors.v1"
+
+
 def test_contract_inspect_does_not_require_yaml_or_engine_packages(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

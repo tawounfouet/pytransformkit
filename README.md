@@ -4,7 +4,7 @@
 
 PyTransformKit is an engine-agnostic Python framework for defining typed, composable data transformations independently from their physical execution engine.
 
-> Status: PyTransformKit 1.0.0 stable. The V1 public contract is frozen and release-qualified.
+> Status: PyTransformKit 1.0.0 is stable. The additive 1.1 declarative-schema line is currently qualified at **1.1.0rc1**.
 
 ## Goals
 
@@ -164,6 +164,62 @@ pytransformkit.plugins
 pytransformkit.conformance
 ~~~
 
+## Declarative Schema authoring (1.1)
+
+PyTransformKit 1.1 adds a stable YAML authoring layer for the canonical Domain
+`Schema` model. Install the optional capability explicitly:
+
+~~~bash
+pip install "pytransformkit[yaml]"
+~~~
+
+Then load a human-authored schema:
+
+~~~yaml
+version: 1
+schema:
+  name: customers
+  fields:
+    - name: customer_id
+      type: int64
+      nullable: false
+    - name: status
+      type: string
+      nullable: true
+~~~
+
+~~~python
+from pytransformkit.schema_io import load_schema
+
+schema = load_schema("schemas/customers.yml")
+~~~
+
+Or emit canonical YAML from a Python `Schema`:
+
+~~~python
+from pytransformkit.schema_io import dumps_schema
+
+yaml_text = dumps_schema(schema, name="customers")
+~~~
+
+The stable `pytransformkit.schema_io` namespace exposes exactly eight helpers:
+`load_schema`, `loads_schema`, `load_schemas`, `loads_schemas`,
+`dump_schema`, `dumps_schema`, `dump_schemas`, and `dumps_schemas`.
+
+Declarative YAML is a human-authoring format, not a replacement for the
+versioned `SchemaCodec` JSON wire contract. The existing
+`pytransformkit.schema` wire contract remains version 1 and byte-compatible.
+
+The core package does not depend on PyYAML. Without the `yaml` extra,
+`pytransformkit.schema_io` remains importable and YAML operations fail
+explicitly with `PTK-DECL-010`.
+
+See
+`docs/specifications/41_PYTRANSFORMKIT_DECLARATIVE_SCHEMA_GETTING_STARTED.md`
+and
+`docs/specifications/42_PYTRANSFORMKIT_DECLARATIVE_SCHEMA_REFERENCE_EXAMPLES.md`
+for the complete guide and executable examples.
+
 ## Quick example
 
 ~~~python
@@ -226,13 +282,12 @@ The current normative implementation roadmap is:
 
 The historical `docs/ROADMAP_LOT_11_TO_1_0.md` remains useful as project history but no longer governs future implementation where it conflicts with the PyKit Ecosystem V2 architecture.
 
-Current count:
+Current roadmap status:
 
-- Total roadmap: **29 lots** (`LOT-00` → `LOT-28`)
-- Completed after LOT-25: **26 lots** (`LOT-00` → `LOT-25`)
-- Remaining: **3 lots** (`LOT-26` → `LOT-28`)
-- Next lot: **LOT-26 — Public API, Security and Migration Freeze**
-- Final lot: **LOT-28 — PyTransformKit 1.0.0 Stable Release**
+- V1 stable line: **LOT-00 → LOT-28 complete**;
+- Declarative Schema 1.1 line: **LOT-29 → LOT-41 complete**;
+- Current lot: **LOT-42 — Documentation and RC Closure**;
+- Final 1.1 lot: **LOT-43 — Declarative Schema Stable Release Closure**.
 
 ## Development
 
@@ -271,7 +326,9 @@ On Windows PowerShell:
 
 Start with:
 
-- `docs/GETTING_STARTED.md` — canonical V1 authoring and execution path;
+- `docs/GETTING_STARTED.md` — canonical transformation authoring and execution path;
+- `docs/specifications/41_PYTRANSFORMKIT_DECLARATIVE_SCHEMA_GETTING_STARTED.md` — declarative Schema quick start;
+- `docs/specifications/42_PYTRANSFORMKIT_DECLARATIVE_SCHEMA_REFERENCE_EXAMPLES.md` — declarative Schema reference examples;
 - `docs/ENGINE_CONFORMANCE_MATRIX.md` — published engine stability and semantic qualification matrix;
 - `benchmarks/README.md` — LOT-25 performance harness, budgets and qualified `0.7.0` baseline;
 - `notebooks/00 - Local Experimentation.ipynb` — interactive first experiment;

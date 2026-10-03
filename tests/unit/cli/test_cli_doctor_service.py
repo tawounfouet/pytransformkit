@@ -51,9 +51,7 @@ def test_doctor_is_healthy_when_all_checks_are_available() -> None:
         "pyarrow",
         "duckdb",
     ]
-    assert all(
-        check.status is DoctorCheckStatus.AVAILABLE for check in report.checks
-    )
+    assert all(check.status is DoctorCheckStatus.AVAILABLE for check in report.checks)
 
 
 def test_missing_optional_dependency_degrades_without_fatal_error() -> None:

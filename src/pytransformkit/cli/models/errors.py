@@ -11,7 +11,7 @@ from pytransformkit.cli.exit_codes import ExitCode
 
 
 class ErrorCategory(StrEnum):
-    """Stable candidate error categories for the CLI v1 contract."""
+    """Stable error categories for the CLI v1 contract."""
 
     GENERAL_ERROR = "general_error"
     INVALID_USAGE = "invalid_usage"

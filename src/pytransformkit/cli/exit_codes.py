@@ -1,4 +1,4 @@
-"""Stable candidate process exit codes for the PyTransformKit CLI."""
+"""Stable process exit codes for the PyTransformKit CLI."""
 
 from __future__ import annotations
 

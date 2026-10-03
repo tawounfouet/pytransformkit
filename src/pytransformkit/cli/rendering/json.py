@@ -15,7 +15,7 @@ CLI_REPORT_CONTRACT_VERSION = 1
 
 
 class JSONRenderer:
-    """Serialize CLI reports using the candidate CLI v1 envelope."""
+    """Serialize CLI reports using the stable CLI v1 envelope."""
 
     def render_success(
         self,

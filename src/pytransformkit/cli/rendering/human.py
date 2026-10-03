@@ -103,7 +103,7 @@ class HumanRenderer:
         *,
         include_document: bool = False,
     ) -> None:
-        """Render one stable/candidate contract inspection."""
+        """Render one stable/contract inspection."""
         contract = report.contract
         self.write(f"Contract: {contract.id}")
         self.write(f"Status: {contract.status.upper()}")

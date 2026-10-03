@@ -8,14 +8,11 @@ from importlib import resources
 from typing import cast
 
 from pytransformkit.cli.exceptions import CLIUsageError
-from pytransformkit.cli.exit_codes import ExitCode
-from pytransformkit.cli.models.errors import ErrorCategory
 from pytransformkit.cli.models.reports import (
     ContractInspectionReport,
     ContractListReport,
     ContractSummaryReport,
 )
-from pytransformkit.cli.rendering.json import CLI_REPORT_CONTRACT_VERSION
 
 
 @dataclass(frozen=True, slots=True)
@@ -47,40 +44,15 @@ _CONTRACT_SPECS: tuple[_ContractSpec, ...] = (
     ),
     _ContractSpec(
         id="cli",
-        status="candidate",
+        status="stable",
         version="1",
-        description="PyTransformKit 1.2 CLI candidate contract metadata.",
+        description="Frozen PyTransformKit 1.2 CLI public contract.",
     ),
-)
-
-_REPORT_COMMANDS: tuple[str, ...] = (
-    "version",
-    "doctor",
-    "schema.validate",
-    "schema.inspect",
-    "engines.list",
-    "engines.inspect",
-    "contract.inspect",
-)
-_PAYLOAD_COMMANDS: tuple[str, ...] = (
-    "schema.format",
-    "schema.convert",
-)
-_COMMANDS: tuple[str, ...] = (
-    "version",
-    "doctor",
-    "schema.validate",
-    "schema.inspect",
-    "schema.format",
-    "schema.convert",
-    "engines.list",
-    "engines.inspect",
-    "contract.inspect",
 )
 
 
 class ContractInspectionService:
-    """Inspect stable/candidate contract metadata from the installed package."""
+    """Inspect stable contract metadata from the installed package."""
 
     def list(self) -> ContractListReport:
         """Return inspectable contracts in deterministic public order."""
@@ -108,7 +80,7 @@ class ContractInspectionService:
         elif normalized == "schema-wire":
             document = self._schema_wire_document()
         else:
-            document = self._cli_document()
+            document = self._load_packaged_json("cli_contract_v1.json")
 
         return ContractInspectionReport(
             contract=self._summary(spec),
@@ -141,26 +113,6 @@ class ContractInspectionService:
             "codec": "SchemaCodec",
             "contract": SchemaCodec.contract,
             "contract_version": SchemaCodec.contract_version,
-        }
-
-    @staticmethod
-    def _cli_document() -> dict[str, object]:
-        return {
-            "cli_contract_version": 1,
-            "status": "candidate",
-            "program": "ptk",
-            "report_contract_version": CLI_REPORT_CONTRACT_VERSION,
-            "commands": list(_COMMANDS),
-            "report_commands": list(_REPORT_COMMANDS),
-            "payload_commands": list(_PAYLOAD_COMMANDS),
-            "exit_codes": {code.name.lower(): int(code) for code in ExitCode},
-            "error_categories": [category.value for category in ErrorCategory],
-            "security": {
-                "implicit_network": False,
-                "plugin_command_injection": False,
-                "project_discovery": False,
-                "silent_overwrite": False,
-            },
         }
 
 

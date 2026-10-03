@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[3]
 PACKAGED_CONTRACTS = (
     ("public_api_v1_1.json", ROOT / "contracts" / "public_api_v1_1.json"),
     ("error_codes_v1_1.json", ROOT / "contracts" / "error_codes_v1_1.json"),
+    ("cli_contract_v1.json", ROOT / "contracts" / "cli_contract_v1.json"),
 )
 
 

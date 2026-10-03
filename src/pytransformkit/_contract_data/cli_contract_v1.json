@@ -1,0 +1,713 @@
+{
+  "contract": "pytransformkit.cli",
+  "contract_version": 1,
+  "status": "stable",
+  "framework_line": "1.2.x",
+  "program": "ptk",
+  "entrypoint": "pytransformkit.cli.bootstrap:main",
+  "root_options": [
+    {
+      "name": "version",
+      "flags": [
+        "--version"
+      ],
+      "type": "bool",
+      "required": false,
+      "eager": true,
+      "default": false
+    }
+  ],
+  "command_tree": {
+    "version": null,
+    "doctor": null,
+    "schema": [
+      "validate",
+      "inspect",
+      "format",
+      "convert"
+    ],
+    "engines": [
+      "list",
+      "inspect"
+    ],
+    "contract": [
+      "inspect"
+    ]
+  },
+  "commands": {
+    "version": {
+      "path": [
+        "version"
+      ],
+      "classification": "report",
+      "arguments": [],
+      "options": [
+        {
+          "name": "json_output",
+          "flags": [
+            "--json"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "no_color",
+          "flags": [
+            "--no-color"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        }
+      ]
+    },
+    "doctor": {
+      "path": [
+        "doctor"
+      ],
+      "classification": "report",
+      "arguments": [],
+      "options": [
+        {
+          "name": "json_output",
+          "flags": [
+            "--json"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "quiet",
+          "flags": [
+            "--quiet"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "verbose",
+          "flags": [
+            "--verbose"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "debug",
+          "flags": [
+            "--debug"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "no_color",
+          "flags": [
+            "--no-color"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        }
+      ]
+    },
+    "schema.validate": {
+      "path": [
+        "schema",
+        "validate"
+      ],
+      "classification": "report",
+      "arguments": [
+        {
+          "name": "path",
+          "type": "str",
+          "required": true
+        }
+      ],
+      "options": [
+        {
+          "name": "json_output",
+          "flags": [
+            "--json"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "quiet",
+          "flags": [
+            "--quiet"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "verbose",
+          "flags": [
+            "--verbose"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "debug",
+          "flags": [
+            "--debug"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "no_color",
+          "flags": [
+            "--no-color"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        }
+      ]
+    },
+    "schema.inspect": {
+      "path": [
+        "schema",
+        "inspect"
+      ],
+      "classification": "report",
+      "arguments": [
+        {
+          "name": "path",
+          "type": "str",
+          "required": true
+        }
+      ],
+      "options": [
+        {
+          "name": "json_output",
+          "flags": [
+            "--json"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "quiet",
+          "flags": [
+            "--quiet"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "verbose",
+          "flags": [
+            "--verbose"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "debug",
+          "flags": [
+            "--debug"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "no_color",
+          "flags": [
+            "--no-color"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        }
+      ]
+    },
+    "schema.format": {
+      "path": [
+        "schema",
+        "format"
+      ],
+      "classification": "payload",
+      "arguments": [
+        {
+          "name": "path",
+          "type": "str",
+          "required": true
+        }
+      ],
+      "options": [
+        {
+          "name": "write",
+          "flags": [
+            "--write"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "debug",
+          "flags": [
+            "--debug"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "no_color",
+          "flags": [
+            "--no-color"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        }
+      ]
+    },
+    "schema.convert": {
+      "path": [
+        "schema",
+        "convert"
+      ],
+      "classification": "payload",
+      "arguments": [
+        {
+          "name": "input_path",
+          "type": "str",
+          "required": true
+        }
+      ],
+      "options": [
+        {
+          "name": "to_format",
+          "flags": [
+            "--to"
+          ],
+          "type": "str",
+          "required": true,
+          "eager": false
+        },
+        {
+          "name": "from_format",
+          "flags": [
+            "--from"
+          ],
+          "type": "str | None",
+          "required": false,
+          "eager": false,
+          "default": null
+        },
+        {
+          "name": "name",
+          "flags": [
+            "--name"
+          ],
+          "type": "str | None",
+          "required": false,
+          "eager": false,
+          "default": null
+        },
+        {
+          "name": "output",
+          "flags": [
+            "--output"
+          ],
+          "type": "str | None",
+          "required": false,
+          "eager": false,
+          "default": null
+        },
+        {
+          "name": "force",
+          "flags": [
+            "--force"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "debug",
+          "flags": [
+            "--debug"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "no_color",
+          "flags": [
+            "--no-color"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        }
+      ]
+    },
+    "engines.list": {
+      "path": [
+        "engines",
+        "list"
+      ],
+      "classification": "report",
+      "arguments": [],
+      "options": [
+        {
+          "name": "json_output",
+          "flags": [
+            "--json"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "quiet",
+          "flags": [
+            "--quiet"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "verbose",
+          "flags": [
+            "--verbose"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "debug",
+          "flags": [
+            "--debug"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "no_color",
+          "flags": [
+            "--no-color"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        }
+      ]
+    },
+    "engines.inspect": {
+      "path": [
+        "engines",
+        "inspect"
+      ],
+      "classification": "report",
+      "arguments": [
+        {
+          "name": "engine_id",
+          "type": "str",
+          "required": true
+        }
+      ],
+      "options": [
+        {
+          "name": "json_output",
+          "flags": [
+            "--json"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "quiet",
+          "flags": [
+            "--quiet"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "verbose",
+          "flags": [
+            "--verbose"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "debug",
+          "flags": [
+            "--debug"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "no_color",
+          "flags": [
+            "--no-color"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        }
+      ]
+    },
+    "contract.inspect": {
+      "path": [
+        "contract",
+        "inspect"
+      ],
+      "classification": "report",
+      "arguments": [
+        {
+          "name": "contract_id",
+          "type": "str | None",
+          "required": false,
+          "default": null
+        }
+      ],
+      "options": [
+        {
+          "name": "json_output",
+          "flags": [
+            "--json"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "quiet",
+          "flags": [
+            "--quiet"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "verbose",
+          "flags": [
+            "--verbose"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "debug",
+          "flags": [
+            "--debug"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        },
+        {
+          "name": "no_color",
+          "flags": [
+            "--no-color"
+          ],
+          "type": "bool",
+          "required": false,
+          "eager": false,
+          "default": false
+        }
+      ]
+    }
+  },
+  "report_commands": [
+    "version",
+    "doctor",
+    "schema.validate",
+    "schema.inspect",
+    "engines.list",
+    "engines.inspect",
+    "contract.inspect"
+  ],
+  "payload_commands": [
+    "schema.format",
+    "schema.convert"
+  ],
+  "json_envelope": {
+    "contract_version": 1,
+    "common_required": [
+      "contract_version",
+      "ok",
+      "command"
+    ],
+    "success_member": "data",
+    "error_member": "error",
+    "error_required": [
+      "category",
+      "message"
+    ],
+    "error_optional": [
+      "code",
+      "path",
+      "hint",
+      "details"
+    ]
+  },
+  "exit_codes": {
+    "success": 0,
+    "general_error": 1,
+    "invalid_usage": 2,
+    "invalid_schema": 10,
+    "missing_optional_dependency": 11,
+    "filesystem_error": 12,
+    "unsupported_operation": 13,
+    "internal_error": 70,
+    "interrupted": 130,
+    "broken_pipe": 141
+  },
+  "error_categories": [
+    "general_error",
+    "invalid_usage",
+    "invalid_schema",
+    "missing_optional_dependency",
+    "filesystem_error",
+    "unsupported_operation",
+    "internal_error",
+    "interrupted",
+    "broken_pipe"
+  ],
+  "critical_error_mappings": {
+    "contradictory_options": {
+      "category": "invalid_usage",
+      "exit_code": 2
+    },
+    "unknown_engine_id": {
+      "category": "invalid_usage",
+      "exit_code": 2
+    },
+    "unknown_contract_id": {
+      "category": "invalid_usage",
+      "exit_code": 2
+    },
+    "PTK-DECL-010": {
+      "category": "missing_optional_dependency",
+      "exit_code": 11
+    },
+    "filesystem_failure": {
+      "category": "filesystem_error",
+      "exit_code": 12
+    },
+    "remote_source": {
+      "category": "unsupported_operation",
+      "exit_code": 13
+    },
+    "keyboard_interrupt": {
+      "category": "interrupted",
+      "exit_code": 130
+    },
+    "broken_pipe": {
+      "category": "broken_pipe",
+      "exit_code": 141
+    }
+  },
+  "streams": {
+    "human_success": "stdout",
+    "human_error": "stderr",
+    "json_success": "stdout",
+    "json_error": "stdout",
+    "debug_diagnostics": "stderr",
+    "payload": "stdout_or_explicit_file"
+  },
+  "reserved_future_commands": [
+    "project",
+    "run",
+    "compile",
+    "plan",
+    "build",
+    "test"
+  ],
+  "security_filesystem": {
+    "remote_sources": false,
+    "recursive_discovery": false,
+    "implicit_overwrite": false,
+    "format_write_requires_flag": true,
+    "convert_output_requires_path": true,
+    "convert_overwrite_requires_force": true,
+    "mutable_symlinks": false,
+    "implicit_include": false,
+    "env_expansion": false,
+    "plugin_command_injection": false,
+    "project_discovery": false,
+    "shell_execution": false
+  },
+  "packaging": {
+    "core_without_cli": true,
+    "cli_extra": [
+      "typer",
+      "rich"
+    ],
+    "yaml_extra": "PyYAML",
+    "missing_cli_exit_code": 11,
+    "missing_yaml_framework_code": "PTK-DECL-010"
+  }
+}

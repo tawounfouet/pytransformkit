@@ -966,6 +966,44 @@ jobs:
         run: |
           python scripts/qualify_cli_artifact.py --venv .lot57-platform --kind wheel --extras cli,yaml --mode cli-yaml
 
+
+  cli-docs-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install documentation contract dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,cli,yaml]"
+      - name: Verify CLI documentation contract
+        run: |
+          pytest tests/contract/cli/test_cli_documentation_contract.py -ra
+          test -f docs/CLI_GETTING_STARTED.md
+          test -f docs/CLI_REFERENCE.md
+          test -f docs/RELEASE_NOTES_1_2_0.md
+          grep -F 'docs/CLI_GETTING_STARTED.md' README.md
+          grep -F 'docs/CLI_REFERENCE.md' README.md
+          grep -F '## [1.2.0] - Unreleased' CHANGELOG.md
+      - name: Build documentation qualification wheel
+        run: |
+          python -m build --wheel
+      - name: Install documented CLI surface from wheel
+        run: |
+          python -m venv .cli-docs-venv
+          .cli-docs-venv/bin/python -m pip install --upgrade pip
+          WHEEL="$(realpath "$(find dist -maxdepth 1 -name '*.whl' -print -quit)")"
+          .cli-docs-venv/bin/python -m pip install \
+            "pytransformkit[cli,yaml] @ file://${WHEEL}"
+          .cli-docs-venv/bin/python -m pip check
+      - name: Execute published CLI examples
+        run: |
+          .cli-docs-venv/bin/python scripts/cli_docs_smoke.py \
+            --root "${GITHUB_WORKSPACE}"
+
   build:
     runs-on: ubuntu-latest
     steps:

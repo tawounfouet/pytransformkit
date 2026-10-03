@@ -58,7 +58,7 @@ contract.inspect
 | --- | --- |
 | `--version` | print installed PyTransformKit and Python versions |
 
-Shell-completion installer options are not part of CLI contract v1.
+Shell-completion installer options are not part of CLI contract v1. The root help does not expose `--install-completion` or `--show-completion`.
 
 ## Report commands
 

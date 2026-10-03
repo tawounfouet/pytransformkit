@@ -5,6 +5,7 @@ from __future__ import annotations
 from rich.console import Console
 
 from pytransformkit.cli.models.errors import CLIErrorReport
+from pytransformkit.cli.models.reports import VersionReport
 
 
 class HumanRenderer:
@@ -17,6 +18,11 @@ class HumanRenderer:
     def write(self, message: str) -> None:
         """Write a success/report line without interpreting user markup."""
         self._stdout.print(message, markup=False, highlight=False)
+
+    def render_version(self, report: VersionReport) -> None:
+        """Render compact version information to stdout."""
+        self.write(f"PyTransformKit {report.pytransformkit}")
+        self.write(f"Python {report.python}")
 
     def render_error(self, report: CLIErrorReport) -> None:
         """Render a controlled error to stderr."""

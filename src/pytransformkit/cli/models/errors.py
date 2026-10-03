@@ -9,6 +9,7 @@ from types import MappingProxyType
 
 from pytransformkit.cli.exit_codes import ExitCode
 
+
 class ErrorCategory(StrEnum):
     """Stable error categories for the CLI v1 contract."""
 

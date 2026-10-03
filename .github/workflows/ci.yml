@@ -745,24 +745,31 @@ jobs:
             grep -F '"status": "candidate"' cli-contract.json
           )
           rm -rf "${TMP_DIR}"
-          .cli-extra-venv/bin/ptk contract inspect schema-wire --json             > .machine-base.json
-          .cli-extra-venv/bin/ptk contract inspect schema-wire --json --quiet             > .machine-quiet.json
-          .cli-extra-venv/bin/ptk contract inspect schema-wire --json --debug             > .machine-debug.json 2> .machine-debug.err
-          .cli-extra-venv/bin/ptk contract inspect schema-wire --json --no-color             > .machine-no-color.json
+          .cli-extra-venv/bin/ptk contract inspect schema-wire --json > .machine-base.json
+          .cli-extra-venv/bin/ptk contract inspect schema-wire --json --quiet > .machine-quiet.json
+          .cli-extra-venv/bin/ptk contract inspect schema-wire --json --debug > .machine-debug.json 2> .machine-debug.err
+          .cli-extra-venv/bin/ptk contract inspect schema-wire --json --no-color > .machine-no-color.json
           cmp .machine-base.json .machine-quiet.json
           cmp .machine-base.json .machine-debug.json
           cmp .machine-base.json .machine-no-color.json
           test ! -s .machine-debug.err
           set +e
-          .cli-extra-venv/bin/ptk contract inspect --json --verbose             > .machine-error.json 2> .machine-error.err
+          .cli-extra-venv/bin/ptk contract inspect --json --verbose > .machine-error.json 2> .machine-error.err
           STATUS=$?
           set -e
           test "${STATUS}" -eq 2
           test ! -s .machine-error.err
           grep -F '"ok": false' .machine-error.json
           grep -F '"category": "invalid_usage"' .machine-error.json
-          NO_COLOR=1 .cli-extra-venv/bin/ptk contract inspect schema-wire             > .machine-no-color-human.txt
-          if grep -q       - name: Qualify wheel with CLI and YAML extras
+          NO_COLOR=1 .cli-extra-venv/bin/ptk contract inspect schema-wire > .machine-no-color-human.txt
+          .cli-extra-venv/bin/python - <<'PY'
+          from pathlib import Path
+
+          text = Path(".machine-no-color-human.txt").read_text(encoding="utf-8")
+          assert chr(27) not in text
+          PY
+          .cli-extra-venv/bin/python -m pytransformkit.cli --help
+      - name: Qualify wheel with CLI and YAML extras
         run: |
           python -m venv .cli-yaml-venv
           .cli-yaml-venv/bin/python -m pip install --upgrade pip

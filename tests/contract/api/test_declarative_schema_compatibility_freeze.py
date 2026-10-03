@@ -109,8 +109,7 @@ def test_v1_1_declarative_error_catalogue_is_exact_and_additive() -> None:
     } == _DECLARATIVE_CODES
 
     runtime_codes = {
-        name: str(getattr(errors, name).error_code)
-        for name in _DECLARATIVE_CODES
+        name: str(getattr(errors, name).error_code) for name in _DECLARATIVE_CODES
     }
     assert runtime_codes == _DECLARATIVE_CODES
     assert len(set(runtime_codes.values())) == len(runtime_codes)
@@ -124,8 +123,7 @@ def test_v1_1_declarative_exception_hierarchy_matches_runtime() -> None:
     assert isinstance(hierarchy, dict)
 
     actual = {
-        name: getattr(errors, name).__bases__[0].__name__
-        for name in _DECLARATIVE_CODES
+        name: getattr(errors, name).__bases__[0].__name__ for name in _DECLARATIVE_CODES
     }
     assert hierarchy == actual
     assert additions["supporting_values"] == ["DeclarativeErrorContext"]

@@ -343,7 +343,6 @@ def test_remote_uri_credentials_are_redacted_from_json_error_path() -> None:
     assert REDACTED in error["path"]
 
 
-
 def test_schema_directory_is_rejected_without_recursive_discovery(
     tmp_path: Path,
 ) -> None:

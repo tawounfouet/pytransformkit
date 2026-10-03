@@ -53,19 +53,20 @@ def test_readme_links_cli_guides_and_release_notes() -> None:
     assert 'pip install "pytransformkit[cli,yaml]"' in readme
 
 
-def test_changelog_prepares_unreleased_1_2_entry_without_false_stable_date() -> None:
+def test_changelog_records_stable_1_2_release_date() -> None:
     changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
 
-    assert "## [1.2.0] - Unreleased" in changelog
+    assert "## [Unreleased]\n\nNo changes yet." in changelog
+    assert "## [1.2.0] - 2026-10-03" in changelog
     assert "1.2.0rc2" not in changelog
-    assert "LOT-59" not in changelog
 
 
-def test_release_notes_keep_publication_in_lot_59() -> None:
+def test_release_notes_describe_stable_publication_evidence() -> None:
     notes = (ROOT / "docs" / "RELEASE_NOTES_1_2_0.md").read_text(encoding="utf-8")
 
-    assert "LOT-59" in notes
-    assert "PyPI publication" in notes
+    assert "PyTransformKit `1.2.0` is the stable Developer CLI release." in notes
+    assert "PyPI Trusted Publishing" in notes
+    assert "public consumer smoke" in notes
     assert "v1.2.0" in notes
 
 

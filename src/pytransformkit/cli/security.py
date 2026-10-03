@@ -15,7 +15,7 @@ _SENSITIVE_NAME = (
     r"credential|private[_-]?key|client[_-]?secret)"
 )
 _BEARER_PATTERN = re.compile(
-    rf"(?i)(\b(?:authorization|token)\b\s*[:=]\s*bearer\s+)([^\s,;]+)"
+    r"(?i)(\b(?:authorization|token)\b\s*[:=]\s*bearer\s+)([^\s,;]+)"
 )
 _ASSIGNMENT_PATTERN = re.compile(
     rf"""(?ix)

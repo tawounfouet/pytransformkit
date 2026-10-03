@@ -2,16 +2,10 @@
 
 from __future__ import annotations
 
-import sys
-import traceback
-
 import typer
 
 from pytransformkit.cli.context import CLIContext, OutputMode
-from pytransformkit.cli.exceptions import (
-    CLIUsageError,
-    error_report_from_exception,
-)
+from pytransformkit.cli.exceptions import CLIUsageError
 from pytransformkit.cli.exit_codes import ExitCode
 from pytransformkit.cli.rendering.console import create_console_pair
 from pytransformkit.cli.rendering.errors import render_cli_error
@@ -202,13 +196,6 @@ def render_schema_format(
     no_color: bool = False,
 ) -> ExitCode:
     """Emit canonical declarative YAML or atomically replace the source."""
-    context = _context(
-        json_output=False,
-        quiet=False,
-        verbose=False,
-        debug=debug,
-        no_color=no_color,
-    )
     path_text = str(path)
 
     try:
@@ -241,13 +228,6 @@ def render_schema_convert(
     no_color: bool = False,
 ) -> ExitCode:
     """Convert one local Schema between declarative YAML and SchemaCodec JSON."""
-    context = _context(
-        json_output=False,
-        quiet=False,
-        verbose=False,
-        debug=debug,
-        no_color=no_color,
-    )
     input_text = str(input_path)
 
     try:

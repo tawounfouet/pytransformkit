@@ -55,7 +55,6 @@ def test_declarative_io_error_maps_to_filesystem_and_keeps_path() -> None:
     assert report.path == "schemas/customers.yml"
 
 
-
 def test_serialization_error_maps_to_invalid_schema_and_preserves_code() -> None:
     report = error_report_from_exception(
         WireParseError("invalid wire JSON"),

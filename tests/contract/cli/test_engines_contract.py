@@ -81,10 +81,7 @@ def test_engines_inspect_json_uses_conformance_capability_authority() -> None:
         if capability in engine_capabilities("polars")
     ]
     assert data["capabilities"][-1] == "lazy"
-    assert all(
-        dimension["status"] == "qualified"
-        for dimension in data["conformance"]
-    )
+    assert all(dimension["status"] == "qualified" for dimension in data["conformance"])
 
 
 def test_engines_inspect_known_provisional_engine_without_activation() -> None:

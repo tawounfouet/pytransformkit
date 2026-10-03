@@ -1,0 +1,178 @@
+{
+  "snapshot_version": 2,
+  "framework_line": "1.1.x",
+  "predecessor": "contracts/public_api_v1.json",
+  "v1_baseline_category_hashes": {
+    "engine_ids": "96bde4504cc62571ae102c9907634504e7d52f9e5e80307806dc395ee4bd2a91",
+    "enum_members": "3c3679375355bb5997ca66d8f86d3305d463f360ad5f329e174d9db77614eab3",
+    "exception_hierarchy": "b7e5e2141d57816e71adeb13802976115bde6c3068b874040f674a333f1071d6",
+    "extras": "bc32af831c4d789869e126db2a05f4cac9655e2fecea2acb7db3e064c60edec0",
+    "forbidden_public_types": "c7d08a258592bcf09362502011f96d45ed7a8e894eb74e373317b9713c5215a3",
+    "modules": "643a39207f7d945895603cffc6bf9c09a6bd406fa0cccffc44c7345f47356f01",
+    "protocol_members": "61f1e31245d97d5c27ae699a13166715d5dc1d00118117a8e0f248500dae5676",
+    "root_legacy_compatibility": "509f09bf61d0078f18f5e05bce3dcdbe1b14ca8aa111afe6be5cee2b55fe6e60",
+    "signatures": "06dce4df153c45b59f6be39a32cdd7d8fb0141b09e1c03162d351d7f400ceba9",
+    "wire_contracts": "f7d59f8f1a60ff2503a118df9883f9d130bda5c2363c10872a3b3d5cffbf0a44"
+  },
+  "unchanged_v1": {
+    "root_exports": [
+      "DataType",
+      "Dataset",
+      "Expression",
+      "Field",
+      "InputBinding",
+      "LogicalPlan",
+      "OutputBinding",
+      "ResourceReference",
+      "Schema",
+      "TransformationExecutionId",
+      "TransformationPlan",
+      "TransformationResult",
+      "TransformationRuntime",
+      "__version__",
+      "col",
+      "diagnostics",
+      "lit",
+      "lineage",
+      "quality",
+      "window"
+    ],
+    "root_legacy_compatibility": [
+      "CredentialReference",
+      "EngineRegistry",
+      "ExecutionContext",
+      "ExecutionMode",
+      "Pipeline",
+      "PipelineExecutionResult",
+      "RetrySafety",
+      "RunPipelineService",
+      "WriteMode",
+      "WriteStatus"
+    ],
+    "engine_ids": [
+      "duckdb",
+      "pandas",
+      "polars",
+      "pyarrow"
+    ],
+    "wire_contracts": {
+      "DataTypeCodec": {
+        "contract": "pytransformkit.data_type",
+        "contract_version": 1
+      },
+      "DiagnosticCodec": {
+        "contract": "pytransformkit.diagnostic",
+        "contract_version": 1
+      },
+      "ExecutionManifestCodec": {
+        "contract": "pytransformkit.execution_manifest",
+        "contract_version": 1
+      },
+      "ExpressionCodec": {
+        "contract": "pytransformkit.expression",
+        "contract_version": 1
+      },
+      "FieldCodec": {
+        "contract": "pytransformkit.field",
+        "contract_version": 1
+      },
+      "LineageCodec": {
+        "contract": "pytransformkit.transformation_lineage",
+        "contract_version": 1
+      },
+      "LogicalPlanCodec": {
+        "contract": "pytransformkit.logical_plan",
+        "contract_version": 1
+      },
+      "ResourceReferenceCodec": {
+        "contract": "pykit.resource_reference",
+        "contract_version": 1
+      },
+      "SchemaCodec": {
+        "contract": "pytransformkit.schema",
+        "contract_version": 1
+      },
+      "TransformationExecutionReferenceCodec": {
+        "contract": "pykit.transformation_execution_reference",
+        "contract_version": 1
+      },
+      "TransformationPlanCodec": {
+        "contract": "pytransformkit.transformation_plan",
+        "contract_version": 1
+      }
+    },
+    "stable_runtime_extras": [
+      "duckdb",
+      "io",
+      "pandas",
+      "polars",
+      "pyarrow"
+    ]
+  },
+  "additions": {
+    "modules": {
+      "pytransformkit.schema_io": {
+        "exports": [
+          "dump_schema",
+          "dump_schemas",
+          "dumps_schema",
+          "dumps_schemas",
+          "load_schema",
+          "load_schemas",
+          "loads_schema",
+          "loads_schemas"
+        ]
+      }
+    },
+    "signatures": {
+      "pytransformkit.schema_io.load_schema": "(path: 'str | os.PathLike[str]') -> 'Schema'",
+      "pytransformkit.schema_io.loads_schema": "(text: 'str', *, source: 'str | None' = None) -> 'Schema'",
+      "pytransformkit.schema_io.load_schemas": "(path: 'str | os.PathLike[str]') -> 'dict[str, Schema]'",
+      "pytransformkit.schema_io.loads_schemas": "(text: 'str', *, source: 'str | None' = None) -> 'dict[str, Schema]'",
+      "pytransformkit.schema_io.dump_schema": "(schema: 'Schema', path: 'str | os.PathLike[str]', *, name: 'str') -> 'None'",
+      "pytransformkit.schema_io.dumps_schema": "(schema: 'Schema', *, name: 'str') -> 'str'",
+      "pytransformkit.schema_io.dump_schemas": "(schemas: 'Mapping[str, Schema]', path: 'str | os.PathLike[str]') -> 'None'",
+      "pytransformkit.schema_io.dumps_schemas": "(schemas: 'Mapping[str, Schema]') -> 'str'"
+    },
+    "exception_hierarchy": {
+      "DeclarativeSchemaError": "PyTransformKitError",
+      "DeclarativeSchemaParseError": "DeclarativeSchemaError",
+      "DeclarativeSchemaVersionError": "DeclarativeSchemaError",
+      "DeclarativeSchemaValidationError": "DeclarativeSchemaError",
+      "DeclarativeSchemaUnknownPropertyError": "DeclarativeSchemaValidationError",
+      "DeclarativeSchemaTypeError": "DeclarativeSchemaValidationError",
+      "DeclarativeSchemaDuplicateKeyError": "DeclarativeSchemaParseError",
+      "DeclarativeSchemaDuplicateFieldError": "DeclarativeSchemaValidationError",
+      "DeclarativeSchemaDuplicateSchemaError": "DeclarativeSchemaValidationError",
+      "DeclarativeSchemaCardinalityError": "DeclarativeSchemaError",
+      "DeclarativeSchemaDependencyError": "DeclarativeSchemaError",
+      "DeclarativeSchemaIOError": "DeclarativeSchemaError",
+      "DeclarativeSchemaExportError": "DeclarativeSchemaError",
+      "DeclarativeSchemaLimitError": "DeclarativeSchemaError"
+    },
+    "supporting_values": [
+      "DeclarativeErrorContext"
+    ],
+    "stable_runtime_extras": [
+      "yaml"
+    ]
+  },
+  "stable_runtime_extras": [
+    "duckdb",
+    "io",
+    "pandas",
+    "polars",
+    "pyarrow",
+    "yaml"
+  ],
+  "schema_io_exports": [
+    "dump_schema",
+    "dump_schemas",
+    "dumps_schema",
+    "dumps_schemas",
+    "load_schema",
+    "load_schemas",
+    "loads_schema",
+    "loads_schemas"
+  ]
+}

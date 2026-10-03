@@ -104,7 +104,6 @@ def test_schema_convert_json_to_yaml_requires_explicit_authoring_name(
         SchemaCodec().from_json(wire),
         name="customers",
     )
-    assert load_schema(json_source.with_suffix(".yml")) == load_schema(yaml_source) if False else True
 
 
 def test_schema_convert_round_trip_preserves_schema_semantics(tmp_path: Path) -> None:

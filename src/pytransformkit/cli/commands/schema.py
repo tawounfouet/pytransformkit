@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import sys
 import traceback
-from pathlib import Path
-
 import typer
 
 from pytransformkit.cli.context import CLIContext, OutputMode
@@ -86,7 +84,7 @@ def _render_validate_error(
 
 
 def render_schema_validate(
-    path: str | Path,
+    path: str,
     *,
     json_output: bool = False,
     quiet: bool = False,
@@ -133,13 +131,8 @@ def render_schema_validate(
 
 @schema_app.command("validate")
 def validate_command(
-    path: Path = typer.Argument(
+    path: str = typer.Argument(
         ...,
-        exists=False,
-        file_okay=True,
-        dir_okay=True,
-        readable=False,
-        resolve_path=False,
         help="Explicit local declarative schema file.",
     ),
     json_output: bool = typer.Option(

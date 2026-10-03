@@ -375,7 +375,8 @@ from pytransformkit.serialization import SchemaCodec
 
 schema = loads_schema(yaml_text)
 
-codec = SchemaCodec()\nwire = codec.to_json(schema)
+codec = SchemaCodec()
+wire = codec.to_json(schema)
 restored = codec.from_json(wire)
 
 assert restored == schema

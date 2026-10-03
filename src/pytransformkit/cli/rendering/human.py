@@ -19,6 +19,7 @@ from pytransformkit.cli.models.reports import (
 )
 from pytransformkit.cli.rendering.tables import build_table
 
+
 class HumanRenderer:
     """Render safe, copyable human output through explicit Rich consoles."""
 

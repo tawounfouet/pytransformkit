@@ -69,3 +69,28 @@ def test_json_renderer_is_deterministic_for_equivalent_input() -> None:
     )
 
     assert first == second
+
+
+
+def test_json_renderer_normalizes_nested_mapping_order_and_unicode() -> None:
+    renderer = JSONRenderer()
+
+    first = renderer.render_success(
+        command="contract.inspect",
+        data={
+            "zeta": {"beta": 2, "alpha": 1},
+            "alpha": "Créé à Paris — 東京",
+        },
+    )
+    second = renderer.render_success(
+        command="contract.inspect",
+        data={
+            "alpha": "Créé à Paris — 東京",
+            "zeta": {"alpha": 1, "beta": 2},
+        },
+    )
+
+    assert first == second
+    assert "Créé à Paris — 東京" in first
+    assert "\\u6771" not in first
+    assert "\x1b[" not in first

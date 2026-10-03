@@ -34,7 +34,6 @@ def test_contract_inspect_without_id_lists_contracts_deterministically() -> None
     positions = [result.stdout.index(contract_id) for contract_id in CONTRACT_IDS]
     assert positions == sorted(positions)
     assert "STABLE" in result.stdout
-    assert "CANDIDATE" in result.stdout
     assert "\x1b[" not in result.stdout
 
 
@@ -81,7 +80,7 @@ def test_contract_inspect_schema_wire_matches_stable_wire_identity() -> None:
     }
 
 
-def test_contract_inspect_cli_is_candidate_not_frozen() -> None:
+def test_contract_inspect_cli_is_frozen_stable_contract() -> None:
     result = runner.invoke(
         app,
         ["contract", "inspect", "cli", "--json"],
@@ -89,9 +88,11 @@ def test_contract_inspect_cli_is_candidate_not_frozen() -> None:
 
     assert result.exit_code == 0
     data = json.loads(result.stdout)["data"]
-    assert data["status"] == "candidate"
-    assert data["document"]["status"] == "candidate"
-    assert data["document"]["commands"][-1] == "contract.inspect"
+    assert data["status"] == "stable"
+    assert data["document"]["status"] == "stable"
+    assert data["document"]["contract"] == "pytransformkit.cli"
+    assert data["document"]["contract_version"] == 1
+    assert "contract.inspect" in data["document"]["commands"]
 
 
 def test_contract_inspect_quiet_emits_normalized_id_only() -> None:

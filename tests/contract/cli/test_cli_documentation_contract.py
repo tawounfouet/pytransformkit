@@ -79,10 +79,6 @@ def test_shell_completion_options_remain_absent_after_contract_freeze() -> None:
     contract = json.loads(
         (ROOT / "contracts" / "cli_contract_v1.json").read_text(encoding="utf-8")
     )
-    flags = {
-        flag
-        for option in contract["root_options"]
-        for flag in option["flags"]
-    }
+    flags = {flag for option in contract["root_options"] for flag in option["flags"]}
     assert "--install-completion" not in flags
     assert "--show-completion" not in flags

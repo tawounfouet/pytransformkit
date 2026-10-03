@@ -65,6 +65,52 @@ class DoctorCheck:
 
 
 @dataclass(frozen=True, slots=True)
+class ContractSummaryReport:
+    """One inspectable PyTransformKit contract summary."""
+
+    id: str
+    status: str
+    version: str
+    description: str
+
+    def to_data(self) -> dict[str, object]:
+        """Return the machine-facing contract summary payload."""
+        return {
+            "id": self.id,
+            "status": self.status,
+            "version": self.version,
+            "description": self.description,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class ContractListReport:
+    """Deterministic catalogue of inspectable contracts."""
+
+    contracts: tuple[ContractSummaryReport, ...]
+
+    def to_data(self) -> ReportData:
+        """Return the machine-facing contract catalogue payload."""
+        return {
+            "contracts": [contract.to_data() for contract in self.contracts],
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class ContractInspectionReport:
+    """Detailed inspection of one packaged/runtime contract."""
+
+    contract: ContractSummaryReport
+    document: dict[str, object]
+
+    def to_data(self) -> ReportData:
+        """Return the machine-facing contract inspection payload."""
+        payload = self.contract.to_data()
+        payload["document"] = self.document
+        return payload
+
+
+@dataclass(frozen=True, slots=True)
 class EngineSummaryReport:
     """One official engine's installation and qualification summary."""
 
@@ -213,6 +259,9 @@ __all__ = [
     "DoctorCheck",
     "DoctorCheckStatus",
     "DoctorReport",
+    "ContractInspectionReport",
+    "ContractListReport",
+    "ContractSummaryReport",
     "DoctorStatus",
     "EngineConformanceDimensionReport",
     "EngineInspectionReport",

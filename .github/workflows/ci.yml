@@ -595,7 +595,7 @@ jobs:
           retention-days: 30
 
 
-  cli-engines-contract:
+  cli-contract-inspect-contract:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -607,12 +607,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev,cli]"
-      - name: Run LOT-52 CLI tests
+      - name: Run LOT-53 CLI tests
         run: |
           pytest tests/unit/cli \
             tests/contract/cli \
             tests/architecture/test_cli_boundaries.py -ra
-      - name: Build LOT-52 wheel
+      - name: Build LOT-53 wheel
         run: |
           python -m build --wheel
       - name: Qualify core wheel without CLI extra
@@ -660,6 +660,8 @@ jobs:
           .cli-extra-venv/bin/ptk engines --help
           .cli-extra-venv/bin/ptk engines list --help
           .cli-extra-venv/bin/ptk engines inspect --help
+          .cli-extra-venv/bin/ptk contract --help
+          .cli-extra-venv/bin/ptk contract inspect --help
           cat > .cli-schema.yml <<'YAML'
           version: 1
           schema:
@@ -727,6 +729,22 @@ jobs:
           set -e
           test "${STATUS}" -eq 2
           printf '%s\n' "${OUTPUT}" | grep -F 'Unknown engine id'
+          PTK="$(realpath .cli-extra-venv/bin/ptk)"
+          TMP_DIR="$(mktemp -d)"
+          (
+            cd "${TMP_DIR}"
+            "${PTK}" contract inspect --json > contracts.json
+            grep -F '"command": "contract.inspect"' contracts.json
+            "${PTK}" contract inspect public-api --json > public-api.json
+            grep -F '"framework_line": "1.1.x"' public-api.json
+            "${PTK}" contract inspect errors --json > errors.json
+            grep -F '"contract": "pytransformkit.errors.v1"' errors.json
+            "${PTK}" contract inspect schema-wire --json > schema-wire.json
+            grep -F '"contract": "pytransformkit.schema"' schema-wire.json
+            "${PTK}" contract inspect cli --json > cli-contract.json
+            grep -F '"status": "candidate"' cli-contract.json
+          )
+          rm -rf "${TMP_DIR}"
           .cli-extra-venv/bin/python -m pytransformkit.cli --help
       - name: Qualify wheel with CLI and YAML extras
         run: |

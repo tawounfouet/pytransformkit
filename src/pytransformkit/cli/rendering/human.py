@@ -8,6 +8,8 @@ from rich.console import Console
 
 from pytransformkit.cli.models.errors import CLIErrorReport
 from pytransformkit.cli.models.reports import (
+    ContractInspectionReport,
+    ContractListReport,
     DoctorReport,
     EngineInspectionReport,
     EngineListReport,
@@ -67,6 +69,61 @@ class HumanRenderer:
                 rows=rows,
             )
         )
+
+    def render_contract_list(
+        self,
+        report: ContractListReport,
+        *,
+        quiet: bool = False,
+    ) -> None:
+        """Render the deterministic contract catalogue."""
+        if quiet:
+            for contract in report.contracts:
+                self.write(contract.id)
+            return
+
+        self._stdout.print(
+            build_table(
+                columns=["Contract", "Status", "Version", "Description"],
+                rows=(
+                    (
+                        contract.id,
+                        contract.status.upper(),
+                        contract.version,
+                        contract.description,
+                    )
+                    for contract in report.contracts
+                ),
+            )
+        )
+
+    def render_contract_inspection(
+        self,
+        report: ContractInspectionReport,
+        *,
+        include_document: bool = False,
+    ) -> None:
+        """Render one stable/candidate contract inspection."""
+        contract = report.contract
+        self.write(f"Contract: {contract.id}")
+        self.write(f"Status: {contract.status.upper()}")
+        self.write(f"Version: {contract.version}")
+        self.write(f"Description: {contract.description}")
+
+        for key, value in report.document.items():
+            if isinstance(value, (str, int, float, bool)) or value is None:
+                self.write(f"{key}: {value}")
+
+        if include_document:
+            self.write("Document:")
+            self.write(
+                json.dumps(
+                    report.document,
+                    ensure_ascii=False,
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
 
     def render_engine_list(
         self,

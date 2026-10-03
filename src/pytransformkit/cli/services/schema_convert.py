@@ -49,9 +49,7 @@ def _reject_remote_path(path: str) -> None:
 def _normalize_format(value: str, *, option: str) -> str:
     normalized = value.strip().lower()
     if normalized not in _VALID_FORMATS:
-        raise CLIUsageError(
-            f"{option} must be one of: yaml, json; received {value!r}."
-        )
+        raise CLIUsageError(f"{option} must be one of: yaml, json; received {value!r}.")
     return normalized
 
 

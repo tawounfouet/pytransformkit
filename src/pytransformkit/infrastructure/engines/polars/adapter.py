@@ -82,6 +82,7 @@ from pytransformkit.infrastructure.engines.polars.quality import PolarsQualityEv
 from pytransformkit.infrastructure.engines.polars.types import PolarsTypeMapper
 from pytransformkit.infrastructure.engines.polars.windows import PolarsWindowCompiler
 
+
 class PolarsAdapter:
     """Polars adapter implementing portable Transformation semantics."""
 

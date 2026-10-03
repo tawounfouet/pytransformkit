@@ -21,10 +21,11 @@ from pytransformkit.cli.services.schema import SchemaCLIService
 VALIDATE_COMMAND_ID = "schema.validate"
 INSPECT_COMMAND_ID = "schema.inspect"
 FORMAT_COMMAND_ID = "schema.format"
+CONVERT_COMMAND_ID = "schema.convert"
 
 schema_app = typer.Typer(
     name="schema",
-    help="Validate, inspect, and format declarative schemas.",
+    help="Validate, inspect, format, and convert declarative schemas.",
     invoke_without_command=True,
     no_args_is_help=False,
 )
@@ -217,6 +218,52 @@ def render_schema_format(
     return ExitCode.SUCCESS
 
 
+def render_schema_convert(
+    input_path: str,
+    *,
+    to_format: str,
+    from_format: str | None = None,
+    name: str | None = None,
+    output: str | None = None,
+    force: bool = False,
+    debug: bool = False,
+    no_color: bool = False,
+) -> ExitCode:
+    """Convert one local Schema between declarative YAML and SchemaCodec JSON."""
+    context = _context(
+        json_output=False,
+        quiet=False,
+        verbose=False,
+        debug=debug,
+        no_color=no_color,
+    )
+    input_text = str(input_path)
+
+    try:
+        from pytransformkit.cli.services.schema_convert import SchemaConversionService
+
+        payload = SchemaConversionService().convert(
+            input_text,
+            to_format=to_format,
+            from_format=from_format,
+            name=name,
+            output=output,
+            force=force,
+        )
+    except (Exception, KeyboardInterrupt) as exc:
+        return _render_schema_error(
+            exc,
+            path=input_text,
+            command=CONVERT_COMMAND_ID,
+            context=context,
+        )
+
+    if payload is not None:
+        typer.echo(payload, nl=False)
+
+    return ExitCode.SUCCESS
+
+
 @schema_app.command("validate")
 def validate_command(
     path: str = typer.Argument(
@@ -340,12 +387,72 @@ def format_command(
         raise typer.Exit(code=int(exit_code))
 
 
+@schema_app.command("convert")
+def convert_command(
+    input_path: str = typer.Argument(
+        ...,
+        help="Explicit local schema input file.",
+    ),
+    to_format: str = typer.Option(
+        ...,
+        "--to",
+        help="Target payload format: yaml or json.",
+    ),
+    from_format: str | None = typer.Option(
+        None,
+        "--from",
+        help="Override inferred input format: yaml or json.",
+    ),
+    name: str | None = typer.Option(
+        None,
+        "--name",
+        help="Declarative schema name when YAML output needs one.",
+    ),
+    output: str | None = typer.Option(
+        None,
+        "--output",
+        help="Write the payload to an explicit local file.",
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Replace an existing --output file.",
+    ),
+    debug: bool = typer.Option(
+        False,
+        "--debug",
+        help="Include technical diagnostics for internal errors.",
+    ),
+    no_color: bool = typer.Option(
+        False,
+        "--no-color",
+        help="Disable ANSI color in error output.",
+    ),
+) -> None:
+    """Convert one local schema between YAML and SchemaCodec JSON."""
+    exit_code = render_schema_convert(
+        input_path,
+        to_format=to_format,
+        from_format=from_format,
+        name=name,
+        output=output,
+        force=force,
+        debug=debug,
+        no_color=no_color,
+    )
+    if exit_code is not ExitCode.SUCCESS:
+        raise typer.Exit(code=int(exit_code))
+
+
 __all__ = [
+    "CONVERT_COMMAND_ID",
     "FORMAT_COMMAND_ID",
     "INSPECT_COMMAND_ID",
     "VALIDATE_COMMAND_ID",
+    "convert_command",
     "format_command",
     "inspect_command",
+    "render_schema_convert",
     "render_schema_format",
     "render_schema_inspect",
     "render_schema_validate",

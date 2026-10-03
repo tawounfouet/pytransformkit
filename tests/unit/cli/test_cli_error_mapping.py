@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pytransformkit.cli.exceptions import (
+    CLIFileSystemError,
     CLIUnsupportedOperationError,
     CLIUsageError,
     error_report_from_exception,
@@ -11,6 +12,7 @@ from pytransformkit.errors import (
     DeclarativeSchemaDependencyError,
     DeclarativeSchemaIOError,
     DeclarativeSchemaTypeError,
+    WireParseError,
 )
 
 
@@ -51,6 +53,29 @@ def test_declarative_io_error_maps_to_filesystem_and_keeps_path() -> None:
     assert report.exit_code is ExitCode.FILESYSTEM_ERROR
     assert report.code == "PTK-DECL-011"
     assert report.path == "schemas/customers.yml"
+
+
+def test_serialization_error_maps_to_invalid_schema_and_preserves_code() -> None:
+    report = error_report_from_exception(
+        WireParseError("invalid wire JSON"),
+        path="schema.json",
+    )
+
+    assert report.category is ErrorCategory.INVALID_SCHEMA
+    assert report.exit_code is ExitCode.INVALID_SCHEMA
+    assert report.code == "PTK-WIRE-001"
+    assert report.path == "schema.json"
+
+
+def test_cli_filesystem_error_uses_its_explicit_output_path() -> None:
+    report = error_report_from_exception(
+        CLIFileSystemError("out/schema.json", "destination exists"),
+        path="input.yml",
+    )
+
+    assert report.category is ErrorCategory.FILESYSTEM_ERROR
+    assert report.exit_code is ExitCode.FILESYSTEM_ERROR
+    assert report.path == "out/schema.json"
 
 
 def test_known_filesystem_error_maps_to_exit_12() -> None:

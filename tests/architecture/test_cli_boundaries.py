@@ -152,3 +152,58 @@ def test_schema_inspect_does_not_depend_on_schema_codec() -> None:
                 violations.append(f"{path}: forbidden import {module}")
 
     assert violations == []
+
+
+def test_schema_convert_service_uses_public_schema_and_wire_apis_only() -> None:
+    convert_service = CLI_ROOT / "services" / "schema_convert.py"
+    imports = _imports(convert_service)
+
+    assert "pytransformkit.schema_io" in imports
+    assert "pytransformkit.serialization" in imports
+    assert all(not module.startswith("pytransformkit.schema_io.") for module in imports)
+    assert all(
+        not module.startswith("pytransformkit.serialization.") for module in imports
+    )
+
+
+def test_schema_convert_path_has_no_network_or_engine_dependency() -> None:
+    convert_paths = (
+        CLI_ROOT / "commands" / "schema.py",
+        CLI_ROOT / "services" / "schema_convert.py",
+    )
+    forbidden_prefixes = (
+        "http",
+        "requests",
+        "socket",
+        "urllib.request",
+        "pytransformkit.engines",
+        "pytransformkit.plugins",
+    )
+    violations: list[str] = []
+
+    for path in convert_paths:
+        for module in _imports(path):
+            if module.startswith(forbidden_prefixes):
+                violations.append(f"{path}: forbidden import {module}")
+
+    assert violations == []
+
+
+def test_schema_command_module_does_not_eagerly_import_serialization() -> None:
+    command_path = CLI_ROOT / "commands" / "schema.py"
+    top_level_imports: list[str] = []
+    tree = ast.parse(
+        command_path.read_text(encoding="utf-8"),
+        filename=str(command_path),
+    )
+
+    for node in tree.body:
+        if isinstance(node, ast.Import):
+            top_level_imports.extend(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            top_level_imports.append(node.module)
+
+    assert all(
+        not module.startswith("pytransformkit.serialization")
+        for module in top_level_imports
+    )

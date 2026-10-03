@@ -5,7 +5,11 @@ from __future__ import annotations
 from rich.console import Console
 
 from pytransformkit.cli.models.errors import CLIErrorReport
-from pytransformkit.cli.models.reports import DoctorReport, VersionReport
+from pytransformkit.cli.models.reports import (
+    DoctorReport,
+    SchemaValidationReport,
+    VersionReport,
+)
 from pytransformkit.cli.rendering.tables import build_table
 
 
@@ -58,6 +62,10 @@ class HumanRenderer:
                 rows=rows,
             )
         )
+
+    def render_schema_validation(self, report: SchemaValidationReport) -> None:
+        """Render a successful schema validation report."""
+        self.write(f"Valid schema: {report.path}")
 
     def render_error(self, report: CLIErrorReport) -> None:
         """Render a controlled error to stderr."""

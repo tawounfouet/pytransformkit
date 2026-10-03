@@ -161,7 +161,11 @@ def test_force_without_output_is_usage_error(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     source = tmp_path / "schema.yml"
-    monkeypatch.setattr(schema_convert, "load_schemas", lambda path: {"x": _schema()})
+    monkeypatch.setattr(
+        schema_convert,
+        "load_schemas",
+        lambda path: {"x": _schema()},
+    )
 
     with pytest.raises(CLIUsageError, match="--force requires --output"):
         schema_convert.SchemaConversionService().convert(

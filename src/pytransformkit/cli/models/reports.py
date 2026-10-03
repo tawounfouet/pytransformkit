@@ -80,6 +80,48 @@ class SchemaValidationReport:
 
 
 @dataclass(frozen=True, slots=True)
+class SchemaFieldInspection:
+    """Presentation-neutral description of one logical schema field."""
+
+    name: str
+    type: str
+    nullable: bool
+    description: str | None
+    type_details: dict[str, object] | None = None
+
+    def to_data(self) -> dict[str, object]:
+        """Return the machine-facing field inspection payload."""
+        payload: dict[str, object] = {
+            "name": self.name,
+            "type": self.type,
+            "nullable": self.nullable,
+            "description": self.description,
+        }
+        if self.type_details is not None:
+            payload["type_details"] = self.type_details
+        return payload
+
+
+@dataclass(frozen=True, slots=True)
+class SchemaInspectionReport:
+    """Inspection report for one explicit declarative schema."""
+
+    path: str
+    schema_name: str
+    fields: tuple[SchemaFieldInspection, ...]
+
+    def to_data(self) -> ReportData:
+        """Return the machine-facing schema inspection payload."""
+        return {
+            "path": self.path,
+            "schema": {
+                "name": self.schema_name,
+                "fields": [field.to_data() for field in self.fields],
+            },
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class DoctorReport:
     """Aggregate local CLI environment diagnostics."""
 
@@ -105,6 +147,8 @@ __all__ = [
     "DoctorReport",
     "DoctorStatus",
     "ReportData",
+    "SchemaFieldInspection",
+    "SchemaInspectionReport",
     "SchemaValidationReport",
     "VersionReport",
 ]

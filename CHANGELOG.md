@@ -6,16 +6,36 @@ The project follows Semantic Versioning and PEP 440 for pre-release versions.
 
 ## [Unreleased]
 
+No changes yet.
+
+## [1.1.0] - 2026-10-03
+
 ### Added
 
-- Declarative Schema 1.1 Getting Started and reference-example documentation.
-- Executable declarative documentation smoke covering Python/YAML equivalence, primitive, decimal, temporal and nested types, multi-schema documents, canonical round-trips, SchemaCodec coexistence and typed failures.
-- `declarative-docs-contract` CI gate that builds and installs the release-candidate wheel with the `yaml` extra, executes the published examples and rechecks the frozen 1.1 API/error contracts.
+- Stable Declarative Schema YAML authoring for the canonical `Schema` Domain model.
+- Stable `pytransformkit.schema_io` namespace with eight load/dump helpers for one or multiple schemas.
+- Optional `yaml` runtime extra backed by PyYAML while preserving a zero mandatory runtime-dependency core.
+- Hardened declarative parser, compiler, validator and deterministic YAML emitter.
+- Primitive, decimal, temporal, list, struct and map type mappings.
+- Stable declarative error family `PTK-DECL-000` through `PTK-DECL-013`.
+- Canonical YAML golden fixtures and YAML ↔ Schema ↔ SchemaCodec round-trip qualification.
+- Successor compatibility contracts `public_api_v1_1.json` and `error_codes_v1_1.json`.
+- Declarative Schema Getting Started and reference-example documentation with executable installed-wheel examples.
+- Dedicated declarative security, built-artifact, documentation and stable-release CI gates.
+- LOT-43 stable release manifest, release notes, release review and SHA-256 artifact evidence.
 
 ### Changed
 
-- README and general Getting Started now document the `pytransformkit.schema_io` stable surface, optional `yaml` extra, and the distinction between declarative YAML authoring and the frozen SchemaCodec JSON wire contract.
-- Release-candidate checkpoint advanced to `1.1.0rc2`.
+- Promoted the fully qualified `1.1.0rc2` line to `1.1.0` stable.
+- README and general Getting Started now describe the stable Declarative Schema authoring surface.
+
+### Compatibility
+
+- The PyTransformKit 1.0 public API baseline remains unchanged.
+- Existing root exports, legacy compatibility names, engine IDs and plugin protocol remain preserved.
+- `SchemaCodec.contract` remains `pytransformkit.schema` with `contract_version = 1`.
+- The 53 historical V1 public error identities remain unchanged; 14 declarative errors are added successor-only.
+- PyYAML remains optional and is not a core dependency.
 
 ## [1.0.0] - 2026-10-01
 

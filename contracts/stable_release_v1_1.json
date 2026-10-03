@@ -1,0 +1,110 @@
+{
+  "manifest_version": 2,
+  "lot": "LOT-43",
+  "phase": "declarative-schema-stable-release",
+  "project_version": "1.1.0",
+  "release_candidate_version": "1.1.0rc2",
+  "release_candidate_main_commit": "5c6ae11bab3bc1c2cf37ffd0358b898bc6e32085",
+  "predecessor_stable_manifest": "contracts/stable_release_v1.json",
+  "public_api_contract": "contracts/public_api_v1_1.json",
+  "error_catalogue_contract": "contracts/error_codes_v1_1.json",
+  "requires_python": ">=3.11",
+  "python_versions": [
+    "3.11",
+    "3.12",
+    "3.13",
+    "3.14"
+  ],
+  "required_ci_jobs": [
+    "quality",
+    "tests",
+    "pandas-contract",
+    "polars-contract",
+    "cross-engine-contract",
+    "pyarrow-contract",
+    "arrow-interchange-contract",
+    "duckdb-contract",
+    "duckdb-cross-engine-contract",
+    "io-contract",
+    "serialization-contract",
+    "conformance-contract",
+    "plugin-contract",
+    "optimizer-contract",
+    "performance-contract",
+    "security-contract",
+    "api-freeze-contract",
+    "backwards-compatibility-contract",
+    "release-qualification-contract",
+    "stable-release-contract",
+    "declarative-schema-contract",
+    "declarative-artifact-contract",
+    "declarative-docs-contract",
+    "stable-declarative-release-contract",
+    "build"
+  ],
+  "required_paths": [
+    "contracts/public_api_v1.json",
+    "contracts/public_api_v1_1.json",
+    "contracts/error_codes_v1.json",
+    "contracts/error_codes_v1_1.json",
+    "contracts/consumer_compatibility_v1.json",
+    "contracts/release_qualification_v1.json",
+    "contracts/stable_release_v1.json",
+    "contracts/stable_release_v1_1.json",
+    "docs/specifications/41_PYTRANSFORMKIT_DECLARATIVE_SCHEMA_GETTING_STARTED.md",
+    "docs/specifications/42_PYTRANSFORMKIT_DECLARATIVE_SCHEMA_REFERENCE_EXAMPLES.md",
+    "docs/RELEASE_NOTES_1_1_0.md",
+    "docs/LOT_43_STABLE_RELEASE_REVIEW.md",
+    "scripts/guides/declarative_schema.py",
+    "CHANGELOG.md"
+  ],
+  "schema_io_exports": [
+    "dump_schema",
+    "dump_schemas",
+    "dumps_schema",
+    "dumps_schemas",
+    "load_schema",
+    "load_schemas",
+    "loads_schema",
+    "loads_schemas"
+  ],
+  "stable_runtime_extra_additions": [
+    "yaml"
+  ],
+  "declarative_error_codes": [
+    "PTK-DECL-000",
+    "PTK-DECL-001",
+    "PTK-DECL-002",
+    "PTK-DECL-003",
+    "PTK-DECL-004",
+    "PTK-DECL-005",
+    "PTK-DECL-006",
+    "PTK-DECL-007",
+    "PTK-DECL-008",
+    "PTK-DECL-009",
+    "PTK-DECL-010",
+    "PTK-DECL-011",
+    "PTK-DECL-012",
+    "PTK-DECL-013"
+  ],
+  "schema_wire_contract": {
+    "contract": "pytransformkit.schema",
+    "contract_version": 1
+  },
+  "artifact_policy": {
+    "wheel_required": true,
+    "sdist_required": true,
+    "twine_check_equivalent_required": true,
+    "clean_core_install_required": true,
+    "yaml_extra_install_required": true,
+    "sha256_record_required": true
+  },
+  "release_policy": {
+    "new_features_allowed": false,
+    "architecture_changes_allowed": false,
+    "v1_baseline_drift_allowed": false,
+    "declarative_api_drift_allowed": false,
+    "wire_contract_drift_allowed": false,
+    "error_code_drift_allowed": false
+  }
+}

@@ -2,7 +2,7 @@
 
 PyTransformKit lets you define engine-neutral transformation semantics once, compile them into a LogicalPlan, and execute them explicitly through supported physical engines.
 
-PyTransformKit **1.0.0** is the stable V1 baseline. The current additive **1.1.0rc2** line introduces declarative Schema authoring without changing the frozen V1 transformation, engine, serialization, wire or compatibility contracts.
+PyTransformKit **1.1.0** is the stable release. It adds Declarative Schema authoring to the stable V1 baseline without changing the frozen V1 transformation, engine, serialization, wire or compatibility contracts.
 
 The canonical path is:
 

@@ -379,7 +379,7 @@ def _validate_v1_2(root: Path, manifest_path: Path) -> list[str]:
         manifest.get("release_candidate_main_commit")
         != "02028651a242912633b1ad7d17364714be016ce6"
     ):
-        errors.append("release_candidate_main_commit must match the qualified rc3 main SHA")
+        errors.append(\n            "release_candidate_main_commit must match the qualified rc3 main SHA"\n        )
 
     predecessor_path = root / str(manifest.get("predecessor_stable_manifest", ""))
     if not predecessor_path.is_file():

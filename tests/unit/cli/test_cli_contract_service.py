@@ -19,7 +19,7 @@ def test_contract_catalogue_has_deterministic_candidate_ids() -> None:
         "stable",
         "stable",
         "stable",
-        "candidate",
+        "stable",
     ]
 
 
@@ -55,14 +55,23 @@ def test_schema_wire_contract_uses_runtime_schema_codec_authority() -> None:
     }
 
 
-def test_cli_contract_is_explicitly_candidate_until_lot_55_freeze() -> None:
+def test_cli_contract_comes_from_frozen_packaged_snapshot() -> None:
     report = ContractInspectionService().inspect("cli")
 
-    assert report.contract.status == "candidate"
-    assert report.document["cli_contract_version"] == 1
-    assert report.document["report_contract_version"] == 1
+    assert report.contract.status == "stable"
+    assert report.contract.version == "1"
+    assert report.document["contract"] == "pytransformkit.cli"
+    assert report.document["contract_version"] == 1
+    assert report.document["status"] == "stable"
+    assert report.document["framework_line"] == "1.2.x"
     assert report.document["program"] == "ptk"
-    assert report.document["commands"] == [
+
+    commands = report.document["commands"]
+    exit_codes = report.document["exit_codes"]
+    error_categories = report.document["error_categories"]
+
+    assert isinstance(commands, dict)
+    assert list(commands) == [
         "version",
         "doctor",
         "schema.validate",
@@ -73,8 +82,6 @@ def test_cli_contract_is_explicitly_candidate_until_lot_55_freeze() -> None:
         "engines.inspect",
         "contract.inspect",
     ]
-    exit_codes = report.document["exit_codes"]
-    error_categories = report.document["error_categories"]
     assert isinstance(exit_codes, dict)
     assert isinstance(error_categories, list)
     assert exit_codes["invalid_usage"] == 2

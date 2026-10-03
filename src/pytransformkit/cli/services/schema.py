@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import contextlib
+import os
+import stat
+import tempfile
 from pathlib import Path
 
 from pytransformkit.cli.exceptions import CLIUnsupportedOperationError
@@ -31,7 +35,12 @@ from pytransformkit.errors import (
     DeclarativeErrorContext,
     DeclarativeSchemaCardinalityError,
 )
-from pytransformkit.schema_io import load_schema, load_schemas
+from pytransformkit.schema_io import (
+    dumps_schema,
+    dumps_schemas,
+    load_schema,
+    load_schemas,
+)
 
 _REMOTE_SCHEMES = (
     "http://",
@@ -57,6 +66,48 @@ def _reject_remote_source(path: str) -> None:
         raise CLIUnsupportedOperationError(
             "Remote schema sources are not supported by the PyTransformKit CLI."
         )
+
+
+def _atomic_replace_text(path: Path, text: str) -> None:
+    """Replace one regular file atomically while failing closed on path races."""
+    original = path.lstat()
+    if stat.S_ISLNK(original.st_mode):
+        raise OSError(f"Refusing to write through symbolic link: {path}")
+    if not stat.S_ISREG(original.st_mode):
+        raise OSError(f"Schema format --write requires a regular file: {path}")
+
+    temp_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            newline="",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as stream:
+            temp_path = Path(stream.name)
+            stream.write(text)
+            stream.flush()
+            os.fsync(stream.fileno())
+
+        os.chmod(temp_path, stat.S_IMODE(original.st_mode))
+
+        current = path.lstat()
+        if stat.S_ISLNK(current.st_mode):
+            raise OSError(f"Refusing to replace symbolic link: {path}")
+        if not stat.S_ISREG(current.st_mode):
+            raise OSError(f"Schema format target is no longer a regular file: {path}")
+        if (current.st_dev, current.st_ino) != (original.st_dev, original.st_ino):
+            raise OSError(f"Schema format target changed before atomic replace: {path}")
+
+        os.replace(temp_path, path)
+        temp_path = None
+    finally:
+        if temp_path is not None:
+            with contextlib.suppress(OSError):
+                temp_path.unlink(missing_ok=True)
 
 
 def _type_descriptor(data_type: DataType) -> tuple[str, dict[str, object] | None]:
@@ -180,6 +231,27 @@ class SchemaCLIService:
             schema_name=schema_name,
             fields=tuple(fields),
         )
+
+    def format(self, path: str | Path, *, write: bool = False) -> str:
+        """Return canonical YAML and optionally replace the source atomically."""
+        path_text = _path_text(path)
+        _reject_remote_source(path_text)
+        target = Path(path_text)
+
+        if write and target.is_symlink():
+            raise OSError(f"Refusing to write through symbolic link: {target}")
+
+        schemas = load_schemas(path_text)
+        if len(schemas) == 1:
+            schema_name, schema = next(iter(schemas.items()))
+            payload = dumps_schema(schema, name=schema_name)
+        else:
+            payload = dumps_schemas(schemas)
+
+        if write:
+            _atomic_replace_text(target, payload)
+
+        return payload
 
 
 __all__ = ["SchemaCLIService"]

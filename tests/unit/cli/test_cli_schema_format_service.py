@@ -107,7 +107,10 @@ def test_schema_format_write_rejects_symlink_before_loading(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     target = tmp_path / "target.yml"
-    target.write_text("version: 1\nschema:\n  name: x\n  fields: []\n", encoding="utf-8")
+    target.write_text(
+        "version: 1\nschema:\n  name: x\n  fields: []\n",
+        encoding="utf-8",
+    )
     link = tmp_path / "link.yml"
     try:
         link.symlink_to(target)

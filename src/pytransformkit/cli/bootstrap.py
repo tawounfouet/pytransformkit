@@ -6,8 +6,10 @@ import importlib.util
 import sys
 from collections.abc import Sequence
 
+from pytransformkit.cli.exit_codes import ExitCode
+
 CLI_DEPENDENCIES = ("typer", "rich")
-MISSING_OPTIONAL_DEPENDENCY_EXIT_CODE = 11
+MISSING_OPTIONAL_DEPENDENCY_EXIT_CODE = int(ExitCode.MISSING_OPTIONAL_DEPENDENCY)
 
 
 def _missing_cli_dependencies() -> tuple[str, ...]:

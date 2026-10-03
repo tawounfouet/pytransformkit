@@ -14,8 +14,10 @@ from pytransformkit.cli.exceptions import (
 )
 from pytransformkit.cli.exit_codes import ExitCode
 from pytransformkit.cli.rendering.console import create_console_pair
+from pytransformkit.cli.rendering.errors import render_cli_error
 from pytransformkit.cli.rendering.human import HumanRenderer
 from pytransformkit.cli.rendering.json import JSONRenderer
+from pytransformkit.cli.rendering.output import emit_stdout
 from pytransformkit.cli.services.engines import EngineService
 
 LIST_COMMAND_ID = "engines.list"
@@ -44,46 +46,13 @@ def _context(
     debug: bool,
     no_color: bool,
 ) -> CLIContext:
-    try:
-        return CLIContext(
-            output_mode=OutputMode.JSON if json_output else OutputMode.HUMAN,
-            quiet=quiet,
-            verbose=verbose,
-            debug=debug,
-            color=not no_color,
-        )
-    except CLIUsageError as exc:
-        raise typer.BadParameter(str(exc)) from exc
-
-
-def _render_error(
-    exc: BaseException,
-    *,
-    engine_id: str | None,
-    command: str,
-    context: CLIContext,
-) -> ExitCode:
-    report = error_report_from_exception(exc)
-
-    if context.output_mode is OutputMode.JSON:
-        typer.echo(
-            JSONRenderer().render_error(
-                command=command,
-                error=report,
-            ),
-            nl=False,
-        )
-    else:
-        consoles = create_console_pair(color=context.color)
-        HumanRenderer(
-            stdout=consoles.stdout,
-            stderr=consoles.stderr,
-        ).render_error(report)
-
-    if context.debug and report.exit_code is ExitCode.INTERNAL_ERROR:
-        traceback.print_exception(exc, file=sys.stderr)
-
-    return report.exit_code
+    return CLIContext.from_options(
+        json_output=json_output,
+        quiet=quiet,
+        verbose=verbose,
+        debug=debug,
+        no_color=no_color,
+    )
 
 
 def render_engines_list(
@@ -95,42 +64,60 @@ def render_engines_list(
     no_color: bool = False,
 ) -> ExitCode:
     """Render deterministic official-engine availability metadata."""
-    context = _context(
-        json_output=json_output,
-        quiet=quiet,
-        verbose=verbose,
-        debug=debug,
-        no_color=no_color,
-    )
+    try:
+        context = _context(
+            json_output=json_output,
+            quiet=quiet,
+            verbose=verbose,
+            debug=debug,
+            no_color=no_color,
+        )
+    except CLIUsageError as exc:
+        return render_cli_error(
+            exc,
+            command=LIST_COMMAND_ID,
+            json_output=json_output,
+            debug=debug,
+            no_color=no_color,
+        )
 
     try:
         report = EngineService().list()
     except (Exception, KeyboardInterrupt) as exc:
-        return _render_error(
+        return render_cli_error(
             exc,
-            engine_id=None,
             command=LIST_COMMAND_ID,
-            context=context,
+            json_output=json_output,
+            debug=debug,
+            no_color=no_color,
         )
 
     if context.output_mode is OutputMode.JSON:
-        typer.echo(
-            JSONRenderer().render_success(
-                command=LIST_COMMAND_ID,
-                data=report.to_data(),
-            ),
-            nl=False,
+        output_code = emit_stdout(
+            lambda: typer.echo(
+                JSONRenderer().render_success(
+                    command=LIST_COMMAND_ID,
+                    data=report.to_data(),
+                ),
+                nl=False,
+            )
         )
+        if output_code is not ExitCode.SUCCESS:
+            return output_code
     else:
         consoles = create_console_pair(color=context.color)
-        HumanRenderer(
-            stdout=consoles.stdout,
-            stderr=consoles.stderr,
-        ).render_engine_list(
-            report,
-            quiet=context.quiet,
-            include_detail=context.verbose or context.debug,
+        output_code = emit_stdout(
+            lambda: HumanRenderer(
+                stdout=consoles.stdout,
+                stderr=consoles.stderr,
+            ).render_engine_list(
+                report,
+                quiet=context.quiet,
+                include_detail=context.verbose,
+            )
         )
+        if output_code is not ExitCode.SUCCESS:
+            return output_code
 
     return ExitCode.SUCCESS
 
@@ -145,43 +132,63 @@ def render_engines_inspect(
     no_color: bool = False,
 ) -> ExitCode:
     """Render static qualification and capability metadata for one engine."""
-    context = _context(
-        json_output=json_output,
-        quiet=quiet,
-        verbose=verbose,
-        debug=debug,
-        no_color=no_color,
-    )
+    try:
+        context = _context(
+            json_output=json_output,
+            quiet=quiet,
+            verbose=verbose,
+            debug=debug,
+            no_color=no_color,
+        )
+    except CLIUsageError as exc:
+        return render_cli_error(
+            exc,
+            command=INSPECT_COMMAND_ID,
+            json_output=json_output,
+            debug=debug,
+            no_color=no_color,
+        )
 
     try:
         report = EngineService().inspect(engine_id)
     except (Exception, KeyboardInterrupt) as exc:
-        return _render_error(
+        return render_cli_error(
             exc,
-            engine_id=engine_id,
             command=INSPECT_COMMAND_ID,
-            context=context,
+            json_output=json_output,
+            debug=debug,
+            no_color=no_color,
         )
 
     if context.output_mode is OutputMode.JSON:
-        typer.echo(
-            JSONRenderer().render_success(
-                command=INSPECT_COMMAND_ID,
-                data=report.to_data(),
-            ),
-            nl=False,
+        output_code = emit_stdout(
+            lambda: typer.echo(
+                JSONRenderer().render_success(
+                    command=INSPECT_COMMAND_ID,
+                    data=report.to_data(),
+                ),
+                nl=False,
+            )
         )
+        if output_code is not ExitCode.SUCCESS:
+            return output_code
     elif context.quiet:
-        typer.echo(report.engine.id)
+        output_code = emit_stdout(lambda: typer.echo(report.engine.id))
+        if output_code is not ExitCode.SUCCESS:
+            return output_code
     else:
         consoles = create_console_pair(color=context.color)
-        HumanRenderer(
-            stdout=consoles.stdout,
-            stderr=consoles.stderr,
-        ).render_engine_inspection(
-            report,
-            include_detail=context.verbose or context.debug,
+        output_code = emit_stdout(
+            lambda: HumanRenderer(
+                stdout=consoles.stdout,
+                stderr=consoles.stderr,
+            ).render_engine_inspection(
+                report,
+                include_detail=context.verbose,
+            )
         )
+        if output_code is not ExitCode.SUCCESS:
+            return output_code
 
     return ExitCode.SUCCESS
 

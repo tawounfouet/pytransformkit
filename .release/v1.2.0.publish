@@ -1,0 +1,6 @@
+PyTransformKit 1.2.0 publication trigger
+
+stable_sha=db46355ad1e71686915722aeb19d5dd95b634976
+tag=v1.2.0
+manifest=contracts/stable_release_v1_2.json
+workflow=.github/workflows/publish-pypi.yml

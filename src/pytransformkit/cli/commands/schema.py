@@ -20,10 +20,11 @@ from pytransformkit.cli.services.schema import SchemaCLIService
 
 VALIDATE_COMMAND_ID = "schema.validate"
 INSPECT_COMMAND_ID = "schema.inspect"
+FORMAT_COMMAND_ID = "schema.format"
 
 schema_app = typer.Typer(
     name="schema",
-    help="Validate and inspect declarative schemas.",
+    help="Validate, inspect, and format declarative schemas.",
     invoke_without_command=True,
     no_args_is_help=False,
 )
@@ -183,6 +184,39 @@ def render_schema_inspect(
     return ExitCode.SUCCESS
 
 
+def render_schema_format(
+    path: str,
+    *,
+    write: bool = False,
+    debug: bool = False,
+    no_color: bool = False,
+) -> ExitCode:
+    """Emit canonical declarative YAML or atomically replace the source."""
+    context = _context(
+        json_output=False,
+        quiet=False,
+        verbose=False,
+        debug=debug,
+        no_color=no_color,
+    )
+    path_text = str(path)
+
+    try:
+        payload = SchemaCLIService().format(path_text, write=write)
+    except (Exception, KeyboardInterrupt) as exc:
+        return _render_schema_error(
+            exc,
+            path=path_text,
+            command=FORMAT_COMMAND_ID,
+            context=context,
+        )
+
+    if not write:
+        typer.echo(payload, nl=False)
+
+    return ExitCode.SUCCESS
+
+
 @schema_app.command("validate")
 def validate_command(
     path: str = typer.Argument(
@@ -273,10 +307,46 @@ def inspect_command(
         raise typer.Exit(code=int(exit_code))
 
 
+@schema_app.command("format")
+def format_command(
+    path: str = typer.Argument(
+        ...,
+        help="Explicit local declarative schema file.",
+    ),
+    write: bool = typer.Option(
+        False,
+        "--write",
+        help="Atomically replace PATH with canonical YAML.",
+    ),
+    debug: bool = typer.Option(
+        False,
+        "--debug",
+        help="Include technical diagnostics for internal errors.",
+    ),
+    no_color: bool = typer.Option(
+        False,
+        "--no-color",
+        help="Disable ANSI color in error output.",
+    ),
+) -> None:
+    """Format one local declarative schema file."""
+    exit_code = render_schema_format(
+        path,
+        write=write,
+        debug=debug,
+        no_color=no_color,
+    )
+    if exit_code is not ExitCode.SUCCESS:
+        raise typer.Exit(code=int(exit_code))
+
+
 __all__ = [
+    "FORMAT_COMMAND_ID",
     "INSPECT_COMMAND_ID",
     "VALIDATE_COMMAND_ID",
+    "format_command",
     "inspect_command",
+    "render_schema_format",
     "render_schema_inspect",
     "render_schema_validate",
     "schema_app",

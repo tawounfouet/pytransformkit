@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pytransformkit.cli.bootstrap import main
+from .bootstrap import main
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -24,6 +25,25 @@ class CLIContext:
     verbose: bool = False
     debug: bool = False
     color: bool = True
+
+    @classmethod
+    def from_options(
+        cls,
+        *,
+        json_output: bool = False,
+        quiet: bool = False,
+        verbose: bool = False,
+        debug: bool = False,
+        no_color: bool = False,
+    ) -> "CLIContext":
+        """Build a presentation context from public CLI output options."""
+        return cls(
+            output_mode=OutputMode.JSON if json_output else OutputMode.HUMAN,
+            quiet=quiet,
+            verbose=verbose,
+            debug=debug,
+            color=not no_color and "NO_COLOR" not in os.environ,
+        )
 
     def __post_init__(self) -> None:
         if self.quiet and self.verbose:

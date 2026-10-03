@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import sys
-import traceback
 from pathlib import Path
 
 import typer
@@ -16,6 +15,7 @@ from pytransformkit.cli.rendering.console import create_console_pair
 from pytransformkit.cli.rendering.human import HumanRenderer
 from pytransformkit.cli.rendering.json import JSONRenderer
 from pytransformkit.cli.rendering.output import emit_stdout
+from pytransformkit.cli.security import redact_error_report, redacted_traceback
 
 
 def render_error_json(
@@ -52,7 +52,7 @@ def render_cli_error(
         debug=debug,
         no_color=no_color,
     )
-    report = error_report_from_exception(exc, path=path)
+    report = redact_error_report(error_report_from_exception(exc, path=path))
 
     if context.output_mode is OutputMode.JSON:
         output_code = emit_stdout(
@@ -74,7 +74,7 @@ def render_cli_error(
         ).render_error(report)
 
     if context.debug and report.exit_code is ExitCode.INTERNAL_ERROR:
-        traceback.print_exception(exc, file=sys.stderr)
+        sys.stderr.write(redacted_traceback(exc))
 
     return report.exit_code
 

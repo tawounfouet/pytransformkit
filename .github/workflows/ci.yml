@@ -595,7 +595,7 @@ jobs:
           retention-days: 30
 
 
-  cli-machine-output-contract:
+  cli-contract:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -607,12 +607,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev,cli]"
-      - name: Run LOT-54 CLI tests
+      - name: Verify frozen CLI v1 runtime contract
+        run: |
+          python scripts/cli_contract_snapshot.py \
+            --check contracts/cli_contract_v1.json
+      - name: Run LOT-55 CLI tests
         run: |
           pytest tests/unit/cli \
             tests/contract/cli \
             tests/architecture/test_cli_boundaries.py -ra
-      - name: Build LOT-54 wheel
+      - name: Build LOT-55 wheel
         run: |
           python -m build --wheel
       - name: Qualify core wheel without CLI extra
@@ -742,7 +746,9 @@ jobs:
             "${PTK}" contract inspect schema-wire --json > schema-wire.json
             grep -F '"contract": "pytransformkit.schema"' schema-wire.json
             "${PTK}" contract inspect cli --json > cli-contract.json
-            grep -F '"status": "candidate"' cli-contract.json
+            grep -F '"status": "stable"' cli-contract.json
+            grep -F '"contract": "pytransformkit.cli"' cli-contract.json
+            grep -F '"contract_version": 1' cli-contract.json
           )
           rm -rf "${TMP_DIR}"
           .cli-extra-venv/bin/ptk contract inspect schema-wire --json > .machine-base.json

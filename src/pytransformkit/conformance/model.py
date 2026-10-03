@@ -192,7 +192,6 @@ def engine_capabilities(engine_id: str) -> frozenset[EngineCapability]:
     raise KeyError(engine_id)
 
 
-
 def _all(
     status: ConformanceStatus,
 ) -> tuple[

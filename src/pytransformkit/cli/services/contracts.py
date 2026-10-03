@@ -153,14 +153,8 @@ class ContractInspectionService:
             "commands": list(_COMMANDS),
             "report_commands": list(_REPORT_COMMANDS),
             "payload_commands": list(_PAYLOAD_COMMANDS),
-            "exit_codes": {
-                code.name.lower(): int(code)
-                for code in ExitCode
-            },
-            "error_categories": [
-                category.value
-                for category in ErrorCategory
-            ],
+            "exit_codes": {code.name.lower(): int(code) for code in ExitCode},
+            "error_categories": [category.value for category in ErrorCategory],
             "security": {
                 "implicit_network": False,
                 "plugin_command_injection": False,

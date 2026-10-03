@@ -9,6 +9,7 @@ from pytransformkit.cli.commands.doctor import doctor_command
 from pytransformkit.cli.commands.engines import engines_app
 from pytransformkit.cli.commands.schema import schema_app
 from pytransformkit.cli.commands.version import render_version, version_command
+from pytransformkit.cli.exit_codes import ExitCode
 
 app = typer.Typer(
     name="ptk",
@@ -32,8 +33,10 @@ def root(
 ) -> None:
     """PyTransformKit developer CLI."""
     if version:
-        render_version()
-        raise typer.Exit(code=0)
+        exit_code = render_version()
+        raise typer.Exit(
+            code=0 if exit_code is ExitCode.SUCCESS else int(exit_code)
+        )
 
     if ctx.invoked_subcommand is None:
         typer.echo(ctx.get_help())

@@ -364,13 +364,9 @@ def build_v1_1_successor_manifest(
     with project_file.open("rb") as stream:
         project = tomllib.load(stream)["project"]
     available_extras = set(project["optional-dependencies"])
-    missing_extras = sorted(
-        set(V1_1_STABLE_RUNTIME_ADDITIONS) - available_extras
-    )
+    missing_extras = sorted(set(V1_1_STABLE_RUNTIME_ADDITIONS) - available_extras)
     if missing_extras:
-        raise RuntimeError(
-            f"Missing stable 1.1 runtime extras: {missing_extras!r}."
-        )
+        raise RuntimeError(f"Missing stable 1.1 runtime extras: {missing_extras!r}.")
 
     baseline_extras = list(baseline["extras"]["stable_runtime"])
     stable_runtime_extras = [

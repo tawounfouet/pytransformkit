@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from enum import IntEnum
 
+
 class ExitCode(IntEnum):
     """Process exit codes defined by the CLI v1 candidate contract."""
 

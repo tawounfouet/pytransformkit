@@ -1004,6 +1004,87 @@ jobs:
           .cli-docs-venv/bin/python scripts/cli_docs_smoke.py \
             --root "${GITHUB_WORKSPACE}"
 
+
+  stable-cli-release-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install stable CLI release dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,cli,yaml]" twine
+      - name: Verify stable release manifests
+        run: |
+          python scripts/stable_release.py \
+            --check contracts/stable_release_v1.json
+          python scripts/stable_release.py \
+            --check contracts/stable_release_v1_1.json
+          python scripts/stable_release.py \
+            --check contracts/stable_release_v1_2.json
+      - name: Run stable CLI release contracts
+        run: |
+          pytest tests/contract/release/test_stable_release.py \
+            tests/contract/release/test_backward_compatibility.py \
+            tests/contract/cli/test_cli_public_contract_freeze.py \
+            tests/contract/cli/test_cli_documentation_contract.py -ra
+      - name: Build and validate stable CLI distributions
+        run: |
+          rm -rf dist
+          python -m build
+          python -m twine check dist/*
+          python scripts/artifact_sha256.py --output stable-cli-sha256.txt
+      - name: Qualify stable wheel
+        run: |
+          python scripts/qualify_cli_artifact.py \
+            --venv .stable-wheel-core --kind wheel --mode core
+          python scripts/qualify_cli_artifact.py \
+            --venv .stable-wheel-cli --kind wheel --extras "cli" --mode cli
+          python scripts/qualify_cli_artifact.py \
+            --venv .stable-wheel-yaml --kind wheel --extras "cli,yaml" --mode cli-yaml
+          python scripts/qualify_cli_artifact.py \
+            --venv .stable-wheel-no-yaml --kind wheel --extras "cli" --mode cli-no-yaml
+      - name: Qualify stable sdist
+        run: |
+          python scripts/qualify_cli_artifact.py \
+            --venv .stable-sdist-core --kind sdist --mode core
+          python scripts/qualify_cli_artifact.py \
+            --venv .stable-sdist-cli --kind sdist --extras "cli" --mode cli
+          python scripts/qualify_cli_artifact.py \
+            --venv .stable-sdist-yaml --kind sdist --extras "cli,yaml" --mode cli-yaml
+          python scripts/qualify_cli_artifact.py \
+            --venv .stable-sdist-no-yaml --kind sdist --extras "cli" --mode cli-no-yaml
+      - name: Run stable consumer smoke against built wheel
+        run: |
+          VERSION="$(python - <<'PY'
+          import tomllib
+          from pathlib import Path
+
+          with Path("pyproject.toml").open("rb") as stream:
+              print(tomllib.load(stream)["project"]["version"])
+          PY
+          )"
+          python -m venv .stable-consumer
+          .stable-consumer/bin/python -m pip install --upgrade pip
+          WHEEL="$(realpath "$(find dist -maxdepth 1 -name '*.whl' -print -quit)")"
+          .stable-consumer/bin/python -m pip install \
+            "pytransformkit[cli,yaml] @ file://${WHEEL}"
+          .stable-consumer/bin/python -m pip check
+          .stable-consumer/bin/python scripts/public_consumer_smoke.py \
+            --expected-version "${VERSION}"
+      - name: Upload stable CLI release evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytransformkit-1.2-stable-release-evidence
+          path: |
+            dist/*
+            stable-cli-sha256.txt
+          if-no-files-found: error
+          retention-days: 90
+
   build:
     runs-on: ubuntu-latest
     steps:

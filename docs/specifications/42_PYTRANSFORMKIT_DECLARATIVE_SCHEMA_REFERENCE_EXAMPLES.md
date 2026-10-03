@@ -375,12 +375,12 @@ from pytransformkit.serialization import SchemaCodec
 
 schema = loads_schema(yaml_text)
 
-wire = SchemaCodec.to_json(schema)
-restored = SchemaCodec.from_json(wire)
+codec = SchemaCodec()\nwire = codec.to_json(schema)
+restored = codec.from_json(wire)
 
 assert restored == schema
-assert SchemaCodec.contract == "pytransformkit.schema"
-assert SchemaCodec.contract_version == 1
+assert codec.contract == "pytransformkit.schema"
+assert codec.contract_version == 1
 ```
 
 Declarative YAML is not a replacement for the canonical JSON wire contract.

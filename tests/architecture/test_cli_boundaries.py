@@ -137,3 +137,18 @@ def test_schema_validate_path_has_no_network_dependency() -> None:
                 violations.append(f"{path}: forbidden import {module}")
 
     assert violations == []
+
+
+def test_schema_inspect_does_not_depend_on_schema_codec() -> None:
+    schema_paths = (
+        CLI_ROOT / "commands" / "schema.py",
+        CLI_ROOT / "services" / "schema.py",
+    )
+    violations: list[str] = []
+
+    for path in schema_paths:
+        for module in _imports(path):
+            if module.startswith("pytransformkit.serialization"):
+                violations.append(f"{path}: forbidden import {module}")
+
+    assert violations == []

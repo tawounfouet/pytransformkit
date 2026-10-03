@@ -73,8 +73,12 @@ def test_cli_contract_is_explicitly_candidate_until_lot_55_freeze() -> None:
         "engines.inspect",
         "contract.inspect",
     ]
-    assert report.document["exit_codes"]["invalid_usage"] == 2
-    assert "filesystem_error" in report.document["error_categories"]
+    exit_codes = report.document["exit_codes"]
+    error_categories = report.document["error_categories"]
+    assert isinstance(exit_codes, dict)
+    assert isinstance(error_categories, list)
+    assert exit_codes["invalid_usage"] == 2
+    assert "filesystem_error" in error_categories
 
 
 def test_contract_inspect_normalizes_case_and_whitespace() -> None:

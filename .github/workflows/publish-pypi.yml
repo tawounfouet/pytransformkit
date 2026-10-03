@@ -3,6 +3,10 @@ name: Publish PyTransformKit to PyPI
 on:
   release:
     types: [published]
+  push:
+    branches: [main]
+    paths:
+      - ".release/v1.2.0.publish"
 
 permissions:
   contents: read
@@ -11,11 +15,14 @@ jobs:
   build:
     name: Build and validate distributions
     runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || 'v1.2.0' }}
+      RELEASE_REF: ${{ github.event_name == 'release' && github.event.release.tag_name || 'db46355ad1e71686915722aeb19d5dd95b634976' }}
     steps:
-      - name: Check out released tag
+      - name: Check out release source
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ env.RELEASE_REF }}
           fetch-depth: 0
 
       - name: Set up Python
@@ -25,8 +32,6 @@ jobs:
           cache: pip
 
       - name: Verify release tag matches package version
-        env:
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           python - <<'PY'
           import os
@@ -47,6 +52,12 @@ jobs:
           print(f"Release identity verified: {release_tag} -> {package_version}")
           PY
 
+      - name: Verify 1.2 stable freeze
+        if: github.event_name == 'push'
+        run: |
+          python scripts/stable_release.py \
+            --check contracts/stable_release_v1_2.json
+
       - name: Build wheel and source distribution
         run: |
           python -m pip install --upgrade pip build twine
@@ -58,6 +69,18 @@ jobs:
           test -n "$(find dist -maxdepth 1 -name '*.whl' -print -quit)"
           test -n "$(find dist -maxdepth 1 -name '*.tar.gz' -print -quit)"
 
+      - name: Verify built stable consumer surface
+        if: github.event_name == 'push'
+        run: |
+          python -m venv .release-consumer
+          .release-consumer/bin/python -m pip install --upgrade pip
+          WHEEL="$(realpath "$(find dist -maxdepth 1 -name '*.whl' -print -quit)")"
+          .release-consumer/bin/python -m pip install \
+            "pytransformkit[cli,yaml] @ file://${WHEEL}"
+          .release-consumer/bin/python -m pip check
+          .release-consumer/bin/python scripts/public_consumer_smoke.py \
+            --expected-version 1.2.0
+
       - name: Upload distributions for trusted publishing
         uses: actions/upload-artifact@v4
         with:
@@ -66,9 +89,78 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  release-identity:
+    name: Establish GitHub release identity
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || 'v1.2.0' }}
+      RELEASE_VERSION: ${{ github.event_name == 'release' && github.event.release.tag_name || 'v1.2.0' }}
+      RELEASE_SHA: db46355ad1e71686915722aeb19d5dd95b634976
+    steps:
+      - name: Check out qualified stable commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || env.RELEASE_SHA }}
+          fetch-depth: 0
+
+      - name: Download qualified distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Generate SHA-256 evidence
+        run: |
+          python scripts/artifact_sha256.py --dist dist --output SHA256SUMS
+
+      - name: Create or verify v1.2.0 tag
+        if: github.event_name == 'push'
+        run: |
+          existing="$(git ls-remote --tags origin "refs/tags/${RELEASE_TAG}" | awk '{print $1}')"
+          if [ -n "${existing}" ]; then
+            if [ "${existing}" != "${RELEASE_SHA}" ]; then
+              echo "::error::${RELEASE_TAG} points to ${existing}, expected ${RELEASE_SHA}"
+              exit 1
+            fi
+            echo "${RELEASE_TAG} already points to the qualified stable commit."
+          else
+            git tag "${RELEASE_TAG}" "${RELEASE_SHA}"
+            git push origin "refs/tags/${RELEASE_TAG}"
+          fi
+
+      - name: Create or refresh GitHub Release
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            gh release upload "${RELEASE_TAG}" dist/* SHA256SUMS --clobber
+          else
+            gh release create "${RELEASE_TAG}" \
+              dist/* SHA256SUMS \
+              --verify-tag \
+              --title "PyTransformKit 1.2.0" \
+              --notes-file docs/RELEASE_NOTES_1_2_0.md \
+              --latest
+          fi
+
+      - name: Verify GitHub Release identity
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${RELEASE_TAG}" = "v1.2.0" ]; then
+            gh release view "${RELEASE_TAG}" \
+              --json tagName,name,isDraft,isPrerelease,url
+          else
+            echo "Release event identity already established for ${RELEASE_TAG}."
+          fi
+
   publish:
     name: Publish distributions to PyPI
-    needs: build
+    needs: [build, release-identity]
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -85,3 +177,53 @@ jobs:
 
       - name: Publish to PyPI with Trusted Publishing
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1
+
+  public-consumer-smoke:
+    name: Verify public PyPI consumer
+    if: github.event_name == 'push'
+    needs: [publish, release-identity]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out qualified stable commit
+        uses: actions/checkout@v4
+        with:
+          ref: db46355ad1e71686915722aeb19d5dd95b634976
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Wait for PyPI project version
+        run: |
+          python - <<'PY'
+          import json
+          import time
+          import urllib.error
+          import urllib.request
+
+          url = "https://pypi.org/pypi/pytransformkit/1.2.0/json"
+          for attempt in range(60):
+              try:
+                  with urllib.request.urlopen(url, timeout=10) as response:
+                      payload = json.load(response)
+                  if payload["info"]["version"] == "1.2.0":
+                      print("PyPI 1.2.0 is available.")
+                      break
+              except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError):
+                  pass
+              print(f"PyPI propagation pending ({attempt + 1}/60)")
+              time.sleep(10)
+          else:
+              raise SystemExit("PyPI 1.2.0 did not become available in time.")
+          PY
+
+      - name: Install from public PyPI and smoke
+        run: |
+          python -m venv .public-consumer
+          .public-consumer/bin/python -m pip install --upgrade pip
+          .public-consumer/bin/python -m pip install --no-cache-dir \
+            "pytransformkit[cli,yaml]==1.2.0"
+          .public-consumer/bin/python -m pip check
+          .public-consumer/bin/python scripts/public_consumer_smoke.py \
+            --expected-version 1.2.0

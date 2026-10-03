@@ -88,8 +88,9 @@ def _assert_documentation_surface(root: Path) -> None:
         assert command in getting_started or command in readme, command
 
     for document in (reference, getting_started, readme):
-        assert "--install-completion" not in document
-        assert "--show-completion" not in document or "not" in document.lower()
+        assert "--install-completion" in document
+        assert "--show-completion" in document
+        assert "not" in document.lower()
 
 
 def _assert_completion_contract() -> None:

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from pathlib import Path
 
 import pytest
 
@@ -148,7 +149,7 @@ def test_contract_inspect_unknown_contract_json_is_error_report() -> None:
 
 def test_contract_inspect_works_outside_repository_checkout(
     monkeypatch: pytest.MonkeyPatch,
-    tmp_path,
+    tmp_path: Path,
 ) -> None:
     monkeypatch.chdir(tmp_path)
 

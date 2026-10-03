@@ -4,7 +4,7 @@
 
 PyTransformKit is an engine-agnostic Python framework for defining typed, composable data transformations independently from their physical execution engine.
 
-> Status: PyTransformKit 1.0.0 is stable. The additive 1.1 declarative-schema line is currently qualified at **1.1.0rc2**.
+> Status: **PyTransformKit 1.1.0 is stable.** The Declarative Schema authoring surface is release-qualified while the frozen V1 compatibility and wire contracts remain preserved.
 
 ## Goals
 
@@ -274,20 +274,18 @@ result = runtime.execute(
 print(result.output_handle.dataframe)
 ~~~
 
-## Revised roadmap to 1.0.0
+## Roadmap status
 
-The current normative implementation roadmap is:
+The completed implementation roadmaps are:
 
-`docs/specifications/PYTRANSFORMKIT_V1_REVISED_IMPLEMENTATION_ROADMAP.md`
+- `docs/specifications/PYTRANSFORMKIT_V1_REVISED_IMPLEMENTATION_ROADMAP.md`;
+- `docs/specifications/40_PYTRANSFORMKIT_DECLARATIVE_SCHEMA_IMPLEMENTATION_ROADMAP.md`.
 
-The historical `docs/ROADMAP_LOT_11_TO_1_0.md` remains useful as project history but no longer governs future implementation where it conflicts with the PyKit Ecosystem V2 architecture.
-
-Current roadmap status:
+Current status:
 
 - V1 stable line: **LOT-00 → LOT-28 complete**;
-- Declarative Schema 1.1 line: **LOT-29 → LOT-41 complete**;
-- Current lot: **LOT-42 — Documentation and RC Closure**;
-- Final 1.1 lot: **LOT-43 — Declarative Schema Stable Release Closure**.
+- Declarative Schema 1.1 line: **LOT-29 → LOT-43 complete**;
+- current stable package: **1.1.0**.
 
 ## Development
 

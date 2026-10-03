@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 
 import pytest
@@ -58,8 +59,9 @@ def test_schema_format_help_is_available() -> None:
     result = runner.invoke(app, ["schema", "format", "--help"])
 
     assert result.exit_code == 0
-    assert "Format one local declarative schema file" in result.stdout
-    assert "--write" in result.stdout
+    plain = re.sub(r"\x1b\\[[0-9;]*m", "", result.stdout)
+    assert "Format one local declarative schema file" in plain
+    assert "--write" in plain
 
 
 def test_schema_format_emits_canonical_yaml_without_modifying_source(

@@ -72,7 +72,7 @@ def _preserves_release_line(current: str, baseline: str) -> bool:
     return not (current_core == baseline_core and current != baseline)
 
 
-def validate(root: Path, manifest_path: Path) -> list[str]:
+def _validate_v1(root: Path, manifest_path: Path) -> list[str]:
     manifest = _load_json(manifest_path)
     errors: list[str] = []
 
@@ -187,6 +187,184 @@ def validate(root: Path, manifest_path: Path) -> list[str]:
             errors.append(f"release_policy.{key} must be false")
 
     return errors
+
+
+def _validate_v1_1(root: Path, manifest_path: Path) -> list[str]:
+    manifest = _load_json(manifest_path)
+    errors: list[str] = []
+
+    if manifest.get("manifest_version") != 2:
+        errors.append("manifest_version must be 2")
+    if manifest.get("lot") != "LOT-43":
+        errors.append("lot must be LOT-43")
+    if manifest.get("phase") != "declarative-schema-stable-release":
+        errors.append("phase must be declarative-schema-stable-release")
+    if manifest.get("project_version") != "1.1.0":
+        errors.append("project_version must be 1.1.0")
+    if manifest.get("release_candidate_version") != "1.1.0rc2":
+        errors.append("release_candidate_version must be 1.1.0rc2")
+
+    rc_commit = manifest.get("release_candidate_main_commit")
+    if (
+        not isinstance(rc_commit, str)
+        or re.fullmatch(r"[0-9a-f]{40}", rc_commit) is None
+    ):
+        errors.append("release_candidate_main_commit must be a 40-character SHA")
+
+    predecessor_path = root / str(
+        manifest.get("predecessor_stable_manifest", "")
+    )
+    if not predecessor_path.is_file():
+        errors.append("predecessor stable manifest is missing")
+    else:
+        predecessor_errors = _validate_v1(root, predecessor_path)
+        if predecessor_errors:
+            errors.append(
+                "V1 stable predecessor no longer validates: "
+                + "; ".join(predecessor_errors)
+            )
+
+    with (root / "pyproject.toml").open("rb") as stream:
+        project = tomllib.load(stream)["project"]
+
+    current_version = project.get("version")
+    allowed_versions = {
+        manifest.get("release_candidate_version"),
+        manifest.get("project_version"),
+    }
+    if current_version not in allowed_versions:
+        errors.append(
+            "1.1 stable promotion version drift: "
+            f"expected one of {sorted(str(v) for v in allowed_versions)!r}, "
+            f"got {current_version!r}"
+        )
+
+    if project.get("requires-python") != manifest.get("requires_python"):
+        errors.append("requires-python drifted from the 1.1 stable manifest")
+
+    optional_dependencies = project.get("optional-dependencies", {})
+    additions = set(manifest.get("stable_runtime_extra_additions", []))
+    missing_extras = sorted(additions - set(optional_dependencies))
+    if missing_extras:
+        errors.append(f"missing 1.1 stable extras: {missing_extras!r}")
+
+    core_dependencies = [
+        str(value).lower() for value in project.get("dependencies", [])
+    ]
+    if any(value.startswith("pyyaml") for value in core_dependencies):
+        errors.append("PyYAML must remain optional and absent from core dependencies")
+
+    workflow = (root / ".github" / "workflows" / "ci.yml").read_text(
+        encoding="utf-8"
+    )
+    if _python_matrix(workflow) != manifest.get("python_versions", []):
+        errors.append("Python CI matrix drifted from the 1.1 stable manifest")
+
+    jobs = _workflow_jobs(workflow)
+    missing_jobs = sorted(set(manifest.get("required_ci_jobs", [])) - jobs)
+    if missing_jobs:
+        errors.append(f"missing 1.1 stable CI jobs: {missing_jobs!r}")
+
+    missing_paths = [
+        relative
+        for relative in manifest.get("required_paths", [])
+        if not (root / relative).is_file()
+    ]
+    if missing_paths:
+        errors.append(f"missing 1.1 stable evidence paths: {missing_paths!r}")
+
+    public_v1 = _load_json(root / "contracts" / "public_api_v1.json")
+    public_v1_1 = _load_json(
+        root / str(manifest.get("public_api_contract", ""))
+    )
+    if public_v1_1.get("predecessor") != "contracts/public_api_v1.json":
+        errors.append("1.1 public API successor predecessor drifted")
+    if public_v1_1.get("v1_baseline_category_hashes") != public_v1.get(
+        "category_hashes"
+    ):
+        errors.append("V1 public API baseline changed in the 1.1 successor")
+
+    unchanged_v1 = public_v1_1.get("unchanged_v1", {})
+    if unchanged_v1.get("root_exports") != public_v1.get("root_exports"):
+        errors.append("V1 root exports changed in the 1.1 successor")
+    if unchanged_v1.get("root_legacy_compatibility") != public_v1.get(
+        "root_legacy_compatibility"
+    ):
+        errors.append("V1 legacy compatibility names changed in the 1.1 successor")
+    if unchanged_v1.get("engine_ids") != public_v1.get("engine_ids"):
+        errors.append("V1 engine IDs changed in the 1.1 successor")
+    if unchanged_v1.get("wire_contracts") != public_v1.get("wire_contracts"):
+        errors.append("V1 wire contracts changed in the 1.1 successor")
+
+    expected_exports = manifest.get("schema_io_exports", [])
+    if public_v1_1.get("schema_io_exports") != expected_exports:
+        errors.append("schema_io stable export surface drifted")
+
+    public_additions = public_v1_1.get("additions", {})
+    if public_additions.get("stable_runtime_extras") != manifest.get(
+        "stable_runtime_extra_additions"
+    ):
+        errors.append("1.1 stable runtime extra additions drifted")
+
+    expected_schema_wire = manifest.get("schema_wire_contract")
+    actual_schema_wire = public_v1.get("wire_contracts", {}).get("SchemaCodec")
+    if actual_schema_wire != expected_schema_wire:
+        errors.append("SchemaCodec wire contract changed during 1.1 promotion")
+
+    errors_v1 = _load_json(root / "contracts" / "error_codes_v1.json")
+    errors_v1_1 = _load_json(
+        root / str(manifest.get("error_catalogue_contract", ""))
+    )
+    if errors_v1_1.get("predecessor") != "contracts/error_codes_v1.json":
+        errors.append("1.1 error catalogue predecessor drifted")
+
+    v1_entries = errors_v1.get("entries", {})
+    successor_entries = errors_v1_1.get("entries", {})
+    for name, entry in v1_entries.items():
+        if successor_entries.get(name) != entry:
+            errors.append(f"V1 public error changed in 1.1 successor: {name}")
+            break
+
+    actual_declarative_codes = sorted(
+        entry.get("code")
+        for name, entry in successor_entries.items()
+        if name.startswith("DeclarativeSchema")
+    )
+    if actual_declarative_codes != manifest.get("declarative_error_codes", []):
+        errors.append("stable PTK-DECL error-code set drifted")
+
+    artifact_policy = manifest.get("artifact_policy", {})
+    for key in (
+        "wheel_required",
+        "sdist_required",
+        "twine_check_equivalent_required",
+        "clean_core_install_required",
+        "yaml_extra_install_required",
+        "sha256_record_required",
+    ):
+        if artifact_policy.get(key) is not True:
+            errors.append(f"artifact_policy.{key} must remain true")
+
+    release_policy = manifest.get("release_policy", {})
+    for key in (
+        "new_features_allowed",
+        "architecture_changes_allowed",
+        "v1_baseline_drift_allowed",
+        "declarative_api_drift_allowed",
+        "wire_contract_drift_allowed",
+        "error_code_drift_allowed",
+    ):
+        if release_policy.get(key) is not False:
+            errors.append(f"release_policy.{key} must be false")
+
+    return errors
+
+
+def validate(root: Path, manifest_path: Path) -> list[str]:
+    manifest = _load_json(manifest_path)
+    if manifest.get("lot") == "LOT-43":
+        return _validate_v1_1(root, manifest_path)
+    return _validate_v1(root, manifest_path)
 
 
 def _arguments() -> argparse.Namespace:

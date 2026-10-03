@@ -2,7 +2,7 @@
 
 PyTransformKit lets you define engine-neutral transformation semantics once, compile them into a LogicalPlan, and execute them explicitly through supported physical engines.
 
-The current development line is **0.8.0**. LOT-26 freezes the V1 public API, security boundaries and pre-1.0 migration path on top of the already qualified transformation, engine, I/O, serialization, optimizer, plugin, conformance and performance baselines.
+PyTransformKit **1.0.0** is the stable V1 baseline. The current additive **1.1.0rc1** line introduces declarative Schema authoring without changing the frozen V1 transformation, engine, serialization, wire or compatibility contracts.
 
 The canonical path is:
 
@@ -92,6 +92,27 @@ pip install -e ".[dev,pandas,polars]"
 ~~~
 
 The core package has no mandatory physical-engine dependency.
+
+### Declarative Schema YAML
+
+Install the optional YAML authoring capability with:
+
+~~~bash
+pip install -e ".[dev,yaml]"
+~~~
+
+or from a built/released distribution:
+
+~~~bash
+pip install "pytransformkit[yaml]"
+~~~
+
+The stable declarative API is exposed from `pytransformkit.schema_io`.
+PyYAML remains optional; importing the namespace does not install or require a
+physical execution engine.
+
+For the dedicated guide, see
+`docs/specifications/41_PYTRANSFORMKIT_DECLARATIVE_SCHEMA_GETTING_STARTED.md`.
 
 ---
 

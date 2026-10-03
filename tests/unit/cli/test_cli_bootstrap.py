@@ -35,7 +35,6 @@ def test_main_without_cli_dependencies_is_controlled(
     assert 'pip install "pytransformkit[cli]"' in captured.err
 
 
-
 def test_main_returns_broken_pipe_exit_for_epipe_from_click_boundary(
     monkeypatch,
 ) -> None:

@@ -1,0 +1,139 @@
+{
+  "manifest_version": 3,
+  "lot": "LOT-59",
+  "phase": "developer-cli-stable-release",
+  "project_version": "1.2.0",
+  "release_candidate_version": "1.2.0rc3",
+  "release_candidate_main_commit": "02028651a242912633b1ad7d17364714be016ce6",
+  "predecessor_stable_manifest": "contracts/stable_release_v1_1.json",
+  "public_api_contract": "contracts/public_api_v1_1.json",
+  "error_catalogue_contract": "contracts/error_codes_v1_1.json",
+  "cli_contract": "contracts/cli_contract_v1.json",
+  "requires_python": ">=3.11",
+  "python_versions": [
+    "3.11",
+    "3.12",
+    "3.13",
+    "3.14"
+  ],
+  "platform_runners": [
+    "ubuntu-latest",
+    "macos-latest",
+    "windows-latest"
+  ],
+  "required_ci_jobs": [
+    "quality",
+    "tests",
+    "pandas-contract",
+    "polars-contract",
+    "cross-engine-contract",
+    "pyarrow-contract",
+    "arrow-interchange-contract",
+    "duckdb-contract",
+    "duckdb-cross-engine-contract",
+    "io-contract",
+    "serialization-contract",
+    "conformance-contract",
+    "plugin-contract",
+    "optimizer-contract",
+    "performance-contract",
+    "security-contract",
+    "api-freeze-contract",
+    "backwards-compatibility-contract",
+    "release-qualification-contract",
+    "stable-release-contract",
+    "declarative-schema-contract",
+    "declarative-artifact-contract",
+    "declarative-docs-contract",
+    "stable-declarative-release-contract",
+    "cli-contract",
+    "cli-security",
+    "cli-artifact-wheel",
+    "cli-artifact-sdist",
+    "cli-platform-smoke",
+    "cli-docs-contract",
+    "stable-cli-release-contract",
+    "build"
+  ],
+  "required_paths": [
+    "contracts/public_api_v1.json",
+    "contracts/public_api_v1_1.json",
+    "contracts/error_codes_v1.json",
+    "contracts/error_codes_v1_1.json",
+    "contracts/consumer_compatibility_v1.json",
+    "contracts/release_qualification_v1.json",
+    "contracts/stable_release_v1.json",
+    "contracts/stable_release_v1_1.json",
+    "contracts/cli_contract_v1.json",
+    "contracts/stable_release_v1_2.json",
+    "docs/CLI_GETTING_STARTED.md",
+    "docs/CLI_REFERENCE.md",
+    "docs/RELEASE_NOTES_1_2_0.md",
+    "docs/LOT_59_STABLE_RELEASE_REVIEW.md",
+    "scripts/cli_contract_snapshot.py",
+    "scripts/cli_artifact_smoke.py",
+    "scripts/qualify_cli_artifact.py",
+    "scripts/cli_docs_smoke.py",
+    "scripts/public_consumer_smoke.py",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "stable_runtime_extra_additions": [
+    "cli"
+  ],
+  "retained_runtime_extras": [
+    "yaml"
+  ],
+  "cli_contract_identity": {
+    "contract": "pytransformkit.cli",
+    "contract_version": 1,
+    "status": "stable",
+    "framework_line": "1.2.x",
+    "program": "ptk",
+    "entrypoint": "pytransformkit.cli.bootstrap:main"
+  },
+  "cli_command_ids": [
+    "version",
+    "doctor",
+    "schema.validate",
+    "schema.inspect",
+    "schema.format",
+    "schema.convert",
+    "engines.list",
+    "engines.inspect",
+    "contract.inspect"
+  ],
+  "artifact_policy": {
+    "wheel_required": true,
+    "sdist_required": true,
+    "twine_check_required": true,
+    "clean_core_install_required": true,
+    "cli_extra_install_required": true,
+    "cli_yaml_install_required": true,
+    "cli_without_yaml_required": true,
+    "sha256_record_required": true,
+    "installed_console_script_required": true,
+    "platform_matrix_required": true
+  },
+  "publication_policy": {
+    "tag": "v1.2.0",
+    "github_release_required": true,
+    "pypi_publish_required": true,
+    "public_consumer_smoke_required": true,
+    "tag_must_target_qualified_stable_commit": true
+  },
+  "shell_completion": {
+    "install_option_supported": false,
+    "show_option_supported": false
+  },
+  "release_policy": {
+    "new_features_allowed": false,
+    "architecture_changes_allowed": false,
+    "v1_baseline_drift_allowed": false,
+    "declarative_api_drift_allowed": false,
+    "cli_contract_drift_allowed": false,
+    "wire_contract_drift_allowed": false,
+    "error_code_drift_allowed": false,
+    "security_regression_allowed": false
+  }
+}

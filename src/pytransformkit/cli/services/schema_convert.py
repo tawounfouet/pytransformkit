@@ -119,7 +119,8 @@ def _write_new_atomic(path: Path, text: str) -> None:
             os.link(temp_path, path)
         except OSError as exc:
             raise CLIFileSystemError(path, str(exc)) from exc
-        temp_path.unlink()
+        with contextlib.suppress(OSError):
+            temp_path.unlink()
         temp_path = None
     finally:
         if temp_path is not None:
@@ -134,7 +135,10 @@ def _replace_existing_atomic(path: Path, text: str) -> None:
         raise CLIFileSystemError(path, str(exc)) from exc
 
     if stat.S_ISLNK(original.st_mode):
-        raise CLIFileSystemError(path, f"Refusing to write through symbolic link: {path}")
+        raise CLIFileSystemError(
+            path,
+            f"Refusing to write through symbolic link: {path}",
+        )
     if not stat.S_ISREG(original.st_mode):
         raise CLIFileSystemError(path, f"Output must be a regular file: {path}")
 
@@ -161,7 +165,10 @@ def _replace_existing_atomic(path: Path, text: str) -> None:
         except OSError as exc:
             raise CLIFileSystemError(path, str(exc)) from exc
         if stat.S_ISLNK(current.st_mode):
-            raise CLIFileSystemError(path, f"Refusing to replace symbolic link: {path}")
+            raise CLIFileSystemError(
+                path,
+                f"Refusing to replace symbolic link: {path}",
+            )
         if not stat.S_ISREG(current.st_mode):
             raise CLIFileSystemError(path, f"Output is no longer a regular file: {path}")
         if (current.st_dev, current.st_ino) != (original.st_dev, original.st_ino):

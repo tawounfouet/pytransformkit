@@ -34,7 +34,6 @@ def test_cli_context_rejects_contradictory_modes(
         CLIContext(**kwargs)  # type: ignore[arg-type]
 
 
-
 @pytest.mark.parametrize(
     "kwargs",
     [

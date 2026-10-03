@@ -64,8 +64,6 @@ class DoctorCheck:
         return payload
 
 
-
-
 @dataclass(frozen=True, slots=True)
 class ContractSummaryReport:
     """One inspectable PyTransformKit contract summary."""

@@ -1,0 +1,276 @@
+{
+  "catalogue_version": 2,
+  "contract": "pytransformkit.errors.v1",
+  "framework_line": "1.1.x",
+  "predecessor": "contracts/error_codes_v1.json",
+  "entries": {
+    "AdapterError": {
+      "code": "PTK-ENGINE-100",
+      "parent": "EngineError"
+    },
+    "BindingError": {
+      "code": "PTK-BIND-001",
+      "parent": "PyTransformKitError"
+    },
+    "DeclarativeSchemaCardinalityError": {
+      "code": "PTK-DECL-009",
+      "parent": "DeclarativeSchemaError"
+    },
+    "DeclarativeSchemaDependencyError": {
+      "code": "PTK-DECL-010",
+      "parent": "DeclarativeSchemaError"
+    },
+    "DeclarativeSchemaDuplicateFieldError": {
+      "code": "PTK-DECL-007",
+      "parent": "DeclarativeSchemaValidationError"
+    },
+    "DeclarativeSchemaDuplicateKeyError": {
+      "code": "PTK-DECL-006",
+      "parent": "DeclarativeSchemaParseError"
+    },
+    "DeclarativeSchemaDuplicateSchemaError": {
+      "code": "PTK-DECL-008",
+      "parent": "DeclarativeSchemaValidationError"
+    },
+    "DeclarativeSchemaError": {
+      "code": "PTK-DECL-000",
+      "parent": "PyTransformKitError"
+    },
+    "DeclarativeSchemaExportError": {
+      "code": "PTK-DECL-012",
+      "parent": "DeclarativeSchemaError"
+    },
+    "DeclarativeSchemaIOError": {
+      "code": "PTK-DECL-011",
+      "parent": "DeclarativeSchemaError"
+    },
+    "DeclarativeSchemaLimitError": {
+      "code": "PTK-DECL-013",
+      "parent": "DeclarativeSchemaError"
+    },
+    "DeclarativeSchemaParseError": {
+      "code": "PTK-DECL-001",
+      "parent": "DeclarativeSchemaError"
+    },
+    "DeclarativeSchemaTypeError": {
+      "code": "PTK-DECL-005",
+      "parent": "DeclarativeSchemaValidationError"
+    },
+    "DeclarativeSchemaUnknownPropertyError": {
+      "code": "PTK-DECL-004",
+      "parent": "DeclarativeSchemaValidationError"
+    },
+    "DeclarativeSchemaValidationError": {
+      "code": "PTK-DECL-003",
+      "parent": "DeclarativeSchemaError"
+    },
+    "DeclarativeSchemaVersionError": {
+      "code": "PTK-DECL-002",
+      "parent": "DeclarativeSchemaError"
+    },
+    "DuplicateFieldError": {
+      "code": "PTK-SCHEMA-002",
+      "parent": "SchemaError"
+    },
+    "EngineContractViolationError": {
+      "code": "PTK-EXEC-005",
+      "parent": "ExecutionError"
+    },
+    "EngineError": {
+      "code": "PTK-ENGINE-000",
+      "parent": "PyTransformKitError"
+    },
+    "EngineNotFoundError": {
+      "code": "PTK-ENGINE-001",
+      "parent": "EngineError"
+    },
+    "ExecutionCancelledError": {
+      "code": "PTK-EXEC-003",
+      "parent": "ExecutionError"
+    },
+    "ExecutionError": {
+      "code": "PTK-EXEC-000",
+      "parent": "PyTransformKitError"
+    },
+    "ExecutionTimeoutError": {
+      "code": "PTK-EXEC-002",
+      "parent": "ExecutionError"
+    },
+    "ExpressionError": {
+      "code": "PTK-EXPR-000",
+      "parent": "PyTransformKitError"
+    },
+    "ExpressionTypeError": {
+      "code": "PTK-EXPR-001",
+      "parent": "ExpressionError"
+    },
+    "FieldCollisionError": {
+      "code": "PTK-SCHEMA-003",
+      "parent": "SchemaError"
+    },
+    "FieldNotFoundError": {
+      "code": "PTK-SCHEMA-001",
+      "parent": "SchemaError"
+    },
+    "FunctionNotFoundError": {
+      "code": "PTK-EXPR-003",
+      "parent": "ExpressionError"
+    },
+    "InvalidBooleanUsageError": {
+      "code": "PTK-EXPR-002",
+      "parent": "ExpressionError"
+    },
+    "InvalidPipelineError": {
+      "code": "PTK-PIPE-001",
+      "parent": "PipelineError"
+    },
+    "InvalidTransformationError": {
+      "code": "PTK-TRANSFORM-001",
+      "parent": "TransformationError"
+    },
+    "InvalidValidationError": {
+      "code": "PTK-QUALITY-001",
+      "parent": "QualityError"
+    },
+    "InvalidWirePayloadError": {
+      "code": "PTK-WIRE-004",
+      "parent": "SerializationError"
+    },
+    "LineageError": {
+      "code": "PTK-LINEAGE-000",
+      "parent": "PyTransformKitError"
+    },
+    "MigrationError": {
+      "code": "PTK-WIRE-007",
+      "parent": "SerializationError"
+    },
+    "NonPortableValueError": {
+      "code": "PTK-WIRE-006",
+      "parent": "SerializationError"
+    },
+    "PayloadTooLargeError": {
+      "code": "PTK-WIRE-005",
+      "parent": "SerializationError"
+    },
+    "PipelineCycleError": {
+      "code": "PTK-PIPE-002",
+      "parent": "PipelineError"
+    },
+    "PipelineError": {
+      "code": "PTK-PIPE-000",
+      "parent": "PyTransformKitError"
+    },
+    "PipelineNodeNotFoundError": {
+      "code": "PTK-PIPE-003",
+      "parent": "PipelineError"
+    },
+    "PluginActivationError": {
+      "code": "PTK-PLUGIN-004",
+      "parent": "PluginError"
+    },
+    "PluginCompatibilityError": {
+      "code": "PTK-PLUGIN-003",
+      "parent": "PluginError"
+    },
+    "PluginConflictError": {
+      "code": "PTK-PLUGIN-002",
+      "parent": "PluginError"
+    },
+    "PluginError": {
+      "code": "PTK-PLUGIN-000",
+      "parent": "PyTransformKitError"
+    },
+    "PluginNotFoundError": {
+      "code": "PTK-PLUGIN-001",
+      "parent": "PluginError"
+    },
+    "PyTransformKitError": {
+      "code": "PTK-CORE-000",
+      "parent": "Exception"
+    },
+    "QualityError": {
+      "code": "PTK-QUALITY-000",
+      "parent": "PyTransformKitError"
+    },
+    "QualityGateError": {
+      "code": "PTK-QUALITY-002",
+      "parent": "QualityError"
+    },
+    "RegistryFrozenError": {
+      "code": "PTK-PLUGIN-005",
+      "parent": "PluginError"
+    },
+    "ResourceIOError": {
+      "code": "PTK-IO-000",
+      "parent": "PyTransformKitError"
+    },
+    "ResourcePathViolationError": {
+      "code": "PTK-IO-005",
+      "parent": "ResourceIOError"
+    },
+    "ResourceReadError": {
+      "code": "PTK-IO-003",
+      "parent": "ResourceIOError"
+    },
+    "ResourceResolutionError": {
+      "code": "PTK-BIND-002",
+      "parent": "BindingError"
+    },
+    "ResourceWriteError": {
+      "code": "PTK-IO-004",
+      "parent": "ResourceIOError"
+    },
+    "SchemaError": {
+      "code": "PTK-SCHEMA-000",
+      "parent": "PyTransformKitError"
+    },
+    "SerializationError": {
+      "code": "PTK-WIRE-000",
+      "parent": "PyTransformKitError"
+    },
+    "TransformationError": {
+      "code": "PTK-TRANSFORM-000",
+      "parent": "PyTransformKitError"
+    },
+    "TransformationExecutionError": {
+      "code": "PTK-EXEC-001",
+      "parent": "ExecutionError"
+    },
+    "UnknownContractError": {
+      "code": "PTK-WIRE-002",
+      "parent": "SerializationError"
+    },
+    "UnknownOutcomeExecutionError": {
+      "code": "PTK-EXEC-004",
+      "parent": "ExecutionError"
+    },
+    "UnsupportedContractVersionError": {
+      "code": "PTK-WIRE-003",
+      "parent": "SerializationError"
+    },
+    "UnsupportedEngineCapabilityError": {
+      "code": "PTK-ENGINE-002",
+      "parent": "EngineError"
+    },
+    "UnsupportedLineageError": {
+      "code": "PTK-LINEAGE-001",
+      "parent": "LineageError"
+    },
+    "UnsupportedResourceFormatError": {
+      "code": "PTK-IO-002",
+      "parent": "ResourceIOError"
+    },
+    "UnsupportedResourceSchemeError": {
+      "code": "PTK-IO-001",
+      "parent": "ResourceIOError"
+    },
+    "UnsupportedTransformationError": {
+      "code": "PTK-TRANSFORM-002",
+      "parent": "TransformationError"
+    },
+    "WireParseError": {
+      "code": "PTK-WIRE-001",
+      "parent": "SerializationError"
+    }
+  }
+}

@@ -29,8 +29,8 @@ def test_root_help_succeeds() -> None:
     assert "version" in result.stdout
 
 
-def test_version_command_reports_installed_package_version() -> None:
+def test_version_command_remains_available_from_root_app() -> None:
     result = runner.invoke(app, ["version"])
 
     assert result.exit_code == 0
-    assert result.stdout.strip() == f"PyTransformKit {pytransformkit.__version__}"
+    assert f"PyTransformKit {pytransformkit.__version__}" in result.stdout

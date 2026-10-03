@@ -17,9 +17,18 @@ class ConsolePair:
 
 def create_console_pair(*, color: bool = True) -> ConsolePair:
     """Create consistently configured stdout and stderr consoles."""
+    force_terminal = None if color else False
     return ConsolePair(
-        stdout=Console(stderr=False, no_color=not color),
-        stderr=Console(stderr=True, no_color=not color),
+        stdout=Console(
+            stderr=False,
+            no_color=not color,
+            force_terminal=force_terminal,
+        ),
+        stderr=Console(
+            stderr=True,
+            no_color=not color,
+            force_terminal=force_terminal,
+        ),
     )
 
 

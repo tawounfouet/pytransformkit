@@ -2,20 +2,16 @@
 
 from __future__ import annotations
 
-import sys
-import traceback
-
 import typer
 
 from pytransformkit.cli.context import CLIContext, OutputMode
-from pytransformkit.cli.exceptions import (
-    CLIUsageError,
-    error_report_from_exception,
-)
+from pytransformkit.cli.exceptions import CLIUsageError
 from pytransformkit.cli.exit_codes import ExitCode
 from pytransformkit.cli.rendering.console import create_console_pair
+from pytransformkit.cli.rendering.errors import render_cli_error
 from pytransformkit.cli.rendering.human import HumanRenderer
 from pytransformkit.cli.rendering.json import JSONRenderer
+from pytransformkit.cli.rendering.output import emit_stdout
 from pytransformkit.cli.services.schema import SchemaCLIService
 
 VALIDATE_COMMAND_ID = "schema.validate"
@@ -46,46 +42,13 @@ def _context(
     debug: bool,
     no_color: bool,
 ) -> CLIContext:
-    try:
-        return CLIContext(
-            output_mode=OutputMode.JSON if json_output else OutputMode.HUMAN,
-            quiet=quiet,
-            verbose=verbose,
-            debug=debug,
-            color=not no_color,
-        )
-    except CLIUsageError as exc:
-        raise typer.BadParameter(str(exc)) from exc
-
-
-def _render_schema_error(
-    exc: BaseException,
-    *,
-    path: str,
-    command: str,
-    context: CLIContext,
-) -> ExitCode:
-    report = error_report_from_exception(exc, path=path)
-
-    if context.output_mode is OutputMode.JSON:
-        typer.echo(
-            JSONRenderer().render_error(
-                command=command,
-                error=report,
-            ),
-            nl=False,
-        )
-    else:
-        consoles = create_console_pair(color=context.color)
-        HumanRenderer(
-            stdout=consoles.stdout,
-            stderr=consoles.stderr,
-        ).render_error(report)
-
-    if context.debug and report.exit_code is ExitCode.INTERNAL_ERROR:
-        traceback.print_exception(exc, file=sys.stderr)
-
-    return report.exit_code
+    return CLIContext.from_options(
+        json_output=json_output,
+        quiet=quiet,
+        verbose=verbose,
+        debug=debug,
+        no_color=no_color,
+    )
 
 
 def render_schema_validate(
@@ -98,39 +61,59 @@ def render_schema_validate(
     no_color: bool = False,
 ) -> ExitCode:
     """Validate one explicit local schema and render the result."""
-    context = _context(
-        json_output=json_output,
-        quiet=quiet,
-        verbose=verbose,
-        debug=debug,
-        no_color=no_color,
-    )
+    try:
+        context = _context(
+            json_output=json_output,
+            quiet=quiet,
+            verbose=verbose,
+            debug=debug,
+            no_color=no_color,
+        )
+    except CLIUsageError as exc:
+        return render_cli_error(
+            exc,
+            command=VALIDATE_COMMAND_ID,
+            json_output=json_output,
+            debug=debug,
+            no_color=no_color,
+            path=path,
+        )
     path_text = str(path)
 
     try:
         report = SchemaCLIService().validate(path_text)
     except (Exception, KeyboardInterrupt) as exc:
-        return _render_schema_error(
+        return render_cli_error(
             exc,
-            path=path_text,
             command=VALIDATE_COMMAND_ID,
-            context=context,
+            json_output=json_output,
+            debug=debug,
+            no_color=no_color,
+            path=path_text,
         )
 
     if context.output_mode is OutputMode.JSON:
-        typer.echo(
-            JSONRenderer().render_success(
-                command=VALIDATE_COMMAND_ID,
-                data=report.to_data(),
-            ),
-            nl=False,
+        output_code = emit_stdout(
+            lambda: typer.echo(
+                JSONRenderer().render_success(
+                    command=VALIDATE_COMMAND_ID,
+                    data=report.to_data(),
+                ),
+                nl=False,
+            )
         )
+        if output_code is not ExitCode.SUCCESS:
+            return output_code
     elif not context.quiet:
         consoles = create_console_pair(color=context.color)
-        HumanRenderer(
-            stdout=consoles.stdout,
-            stderr=consoles.stderr,
-        ).render_schema_validation(report)
+        output_code = emit_stdout(
+            lambda: HumanRenderer(
+                stdout=consoles.stdout,
+                stderr=consoles.stderr,
+            ).render_schema_validation(report)
+        )
+        if output_code is not ExitCode.SUCCESS:
+            return output_code
 
     return ExitCode.SUCCESS
 
@@ -145,42 +128,62 @@ def render_schema_inspect(
     no_color: bool = False,
 ) -> ExitCode:
     """Inspect one explicit local schema and render the result."""
-    context = _context(
-        json_output=json_output,
-        quiet=quiet,
-        verbose=verbose,
-        debug=debug,
-        no_color=no_color,
-    )
+    try:
+        context = _context(
+            json_output=json_output,
+            quiet=quiet,
+            verbose=verbose,
+            debug=debug,
+            no_color=no_color,
+        )
+    except CLIUsageError as exc:
+        return render_cli_error(
+            exc,
+            command=INSPECT_COMMAND_ID,
+            json_output=json_output,
+            debug=debug,
+            no_color=no_color,
+            path=path,
+        )
     path_text = str(path)
 
     try:
         report = SchemaCLIService().inspect(path_text)
     except (Exception, KeyboardInterrupt) as exc:
-        return _render_schema_error(
+        return render_cli_error(
             exc,
-            path=path_text,
             command=INSPECT_COMMAND_ID,
-            context=context,
+            json_output=json_output,
+            debug=debug,
+            no_color=no_color,
+            path=path_text,
         )
 
     if context.output_mode is OutputMode.JSON:
-        typer.echo(
-            JSONRenderer().render_success(
-                command=INSPECT_COMMAND_ID,
-                data=report.to_data(),
-            ),
-            nl=False,
+        output_code = emit_stdout(
+            lambda: typer.echo(
+                JSONRenderer().render_success(
+                    command=INSPECT_COMMAND_ID,
+                    data=report.to_data(),
+                ),
+                nl=False,
+            )
         )
+        if output_code is not ExitCode.SUCCESS:
+            return output_code
     elif not context.quiet:
         consoles = create_console_pair(color=context.color)
-        HumanRenderer(
-            stdout=consoles.stdout,
-            stderr=consoles.stderr,
-        ).render_schema_inspection(
-            report,
-            include_details=context.verbose or context.debug,
+        output_code = emit_stdout(
+            lambda: HumanRenderer(
+                stdout=consoles.stdout,
+                stderr=consoles.stderr,
+            ).render_schema_inspection(
+                report,
+                include_details=context.verbose,
+            )
         )
+        if output_code is not ExitCode.SUCCESS:
+            return output_code
 
     return ExitCode.SUCCESS
 
@@ -193,27 +196,22 @@ def render_schema_format(
     no_color: bool = False,
 ) -> ExitCode:
     """Emit canonical declarative YAML or atomically replace the source."""
-    context = _context(
-        json_output=False,
-        quiet=False,
-        verbose=False,
-        debug=debug,
-        no_color=no_color,
-    )
     path_text = str(path)
 
     try:
         payload = SchemaCLIService().format(path_text, write=write)
     except (Exception, KeyboardInterrupt) as exc:
-        return _render_schema_error(
+        return render_cli_error(
             exc,
-            path=path_text,
             command=FORMAT_COMMAND_ID,
-            context=context,
+            json_output=False,
+            debug=debug,
+            no_color=no_color,
+            path=path_text,
         )
 
     if not write:
-        typer.echo(payload, nl=False)
+        return emit_stdout(lambda: typer.echo(payload, nl=False))
 
     return ExitCode.SUCCESS
 
@@ -230,13 +228,6 @@ def render_schema_convert(
     no_color: bool = False,
 ) -> ExitCode:
     """Convert one local Schema between declarative YAML and SchemaCodec JSON."""
-    context = _context(
-        json_output=False,
-        quiet=False,
-        verbose=False,
-        debug=debug,
-        no_color=no_color,
-    )
     input_text = str(input_path)
 
     try:
@@ -251,15 +242,17 @@ def render_schema_convert(
             force=force,
         )
     except (Exception, KeyboardInterrupt) as exc:
-        return _render_schema_error(
+        return render_cli_error(
             exc,
-            path=input_text,
             command=CONVERT_COMMAND_ID,
-            context=context,
+            json_output=False,
+            debug=debug,
+            no_color=no_color,
+            path=input_text,
         )
 
     if payload is not None:
-        typer.echo(payload, nl=False)
+        return emit_stdout(lambda: typer.echo(payload, nl=False))
 
     return ExitCode.SUCCESS
 

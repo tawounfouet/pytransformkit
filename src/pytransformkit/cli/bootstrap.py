@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import errno
 import importlib.util
 import sys
 from collections.abc import Sequence
@@ -44,6 +45,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = list(argv) if argv is not None else None
     try:
         app(args=args, prog_name="ptk", standalone_mode=True)
+    except BrokenPipeError:
+        return int(ExitCode.BROKEN_PIPE)
+    except OSError as exc:
+        if exc.errno == errno.EPIPE:
+            return int(ExitCode.BROKEN_PIPE)
+        raise
     except SystemExit as exc:
         code = exc.code
         return code if isinstance(code, int) else 1

@@ -595,7 +595,7 @@ jobs:
           retention-days: 30
 
 
-  cli-contract-inspect-contract:
+  cli-machine-output-contract:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -607,12 +607,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev,cli]"
-      - name: Run LOT-53 CLI tests
+      - name: Run LOT-54 CLI tests
         run: |
           pytest tests/unit/cli \
             tests/contract/cli \
             tests/architecture/test_cli_boundaries.py -ra
-      - name: Build LOT-53 wheel
+      - name: Build LOT-54 wheel
         run: |
           python -m build --wheel
       - name: Qualify core wheel without CLI extra
@@ -745,6 +745,29 @@ jobs:
             grep -F '"status": "candidate"' cli-contract.json
           )
           rm -rf "${TMP_DIR}"
+          .cli-extra-venv/bin/ptk contract inspect schema-wire --json > .machine-base.json
+          .cli-extra-venv/bin/ptk contract inspect schema-wire --json --quiet > .machine-quiet.json
+          .cli-extra-venv/bin/ptk contract inspect schema-wire --json --debug > .machine-debug.json 2> .machine-debug.err
+          .cli-extra-venv/bin/ptk contract inspect schema-wire --json --no-color > .machine-no-color.json
+          cmp .machine-base.json .machine-quiet.json
+          cmp .machine-base.json .machine-debug.json
+          cmp .machine-base.json .machine-no-color.json
+          test ! -s .machine-debug.err
+          set +e
+          .cli-extra-venv/bin/ptk contract inspect --json --verbose > .machine-error.json 2> .machine-error.err
+          STATUS=$?
+          set -e
+          test "${STATUS}" -eq 2
+          test ! -s .machine-error.err
+          grep -F '"ok": false' .machine-error.json
+          grep -F '"category": "invalid_usage"' .machine-error.json
+          NO_COLOR=1 .cli-extra-venv/bin/ptk contract inspect schema-wire > .machine-no-color-human.txt
+          .cli-extra-venv/bin/python - <<'PY'
+          from pathlib import Path
+
+          text = Path(".machine-no-color-human.txt").read_text(encoding="utf-8")
+          assert chr(27) not in text
+          PY
           .cli-extra-venv/bin/python -m pytransformkit.cli --help
       - name: Qualify wheel with CLI and YAML extras
         run: |
@@ -770,6 +793,26 @@ jobs:
             .cli-converted.json --to yaml --name customers \
             --output .cli-converted.yml
           .cli-yaml-venv/bin/ptk schema validate .cli-converted.yml --no-color
+          cat > .cli-unicode.yml <<'YAML'
+          version: 1
+          schema:
+            name: clients_été
+            fields:
+              - name: libellé
+                type: string
+                description: "[bold]Créé à Paris — 東京[/bold]"
+          YAML
+          .cli-yaml-venv/bin/ptk schema inspect .cli-unicode.yml --json             > .cli-unicode.json
+          grep -F 'clients_été' .cli-unicode.json
+          grep -F '東京' .cli-unicode.json
+          .cli-yaml-venv/bin/ptk schema format .cli-unicode.yml             > .cli-format-base.yml
+          .cli-yaml-venv/bin/ptk schema format .cli-unicode.yml --debug             > .cli-format-debug.yml 2> .cli-format-debug.err
+          cmp .cli-format-base.yml .cli-format-debug.yml
+          test ! -s .cli-format-debug.err
+          .cli-yaml-venv/bin/ptk schema convert .cli-unicode.yml --to json             > .cli-convert-base.json
+          .cli-yaml-venv/bin/ptk schema convert .cli-unicode.yml --to json --debug             > .cli-convert-debug.json 2> .cli-convert-debug.err
+          cmp .cli-convert-base.json .cli-convert-debug.json
+          test ! -s .cli-convert-debug.err
 
   build:
     runs-on: ubuntu-latest

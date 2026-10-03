@@ -8,8 +8,10 @@ from pytransformkit.cli.context import CLIContext, OutputMode
 from pytransformkit.cli.exceptions import CLIUsageError
 from pytransformkit.cli.exit_codes import ExitCode
 from pytransformkit.cli.rendering.console import create_console_pair
+from pytransformkit.cli.rendering.errors import render_cli_error
 from pytransformkit.cli.rendering.human import HumanRenderer
 from pytransformkit.cli.rendering.json import JSONRenderer
+from pytransformkit.cli.rendering.output import emit_stdout
 from pytransformkit.cli.services.doctor import DoctorService
 
 COMMAND_ID = "doctor"
@@ -23,16 +25,13 @@ def _context(
     debug: bool,
     no_color: bool,
 ) -> CLIContext:
-    try:
-        return CLIContext(
-            output_mode=OutputMode.JSON if json_output else OutputMode.HUMAN,
-            quiet=quiet,
-            verbose=verbose,
-            debug=debug,
-            color=not no_color,
-        )
-    except CLIUsageError as exc:
-        raise typer.BadParameter(str(exc)) from exc
+    return CLIContext.from_options(
+        json_output=json_output,
+        quiet=quiet,
+        verbose=verbose,
+        debug=debug,
+        no_color=no_color,
+    )
 
 
 def render_doctor(
@@ -44,34 +43,59 @@ def render_doctor(
     no_color: bool = False,
 ) -> ExitCode:
     """Collect and render deterministic local environment diagnostics."""
-    context = _context(
-        json_output=json_output,
-        quiet=quiet,
-        verbose=verbose,
-        debug=debug,
-        no_color=no_color,
-    )
-    report = DoctorService().inspect()
+    try:
+        context = _context(
+            json_output=json_output,
+            quiet=quiet,
+            verbose=verbose,
+            debug=debug,
+            no_color=no_color,
+        )
+    except CLIUsageError as exc:
+        return render_cli_error(
+            exc,
+            command=COMMAND_ID,
+            json_output=json_output,
+            debug=debug,
+            no_color=no_color,
+        )
+
+    try:
+        report = DoctorService().inspect()
+    except (Exception, KeyboardInterrupt) as exc:
+        return render_cli_error(
+            exc,
+            command=COMMAND_ID,
+            json_output=json_output,
+            debug=debug,
+            no_color=no_color,
+        )
 
     if context.output_mode is OutputMode.JSON:
-        typer.echo(
-            JSONRenderer().render_success(
-                command=COMMAND_ID,
-                data=report.to_data(),
-            ),
-            nl=False,
+        output_code = emit_stdout(
+            lambda: typer.echo(
+                JSONRenderer().render_success(
+                    command=COMMAND_ID,
+                    data=report.to_data(),
+                ),
+                nl=False,
+            )
         )
     else:
         consoles = create_console_pair(color=context.color)
-        HumanRenderer(
-            stdout=consoles.stdout,
-            stderr=consoles.stderr,
-        ).render_doctor(
-            report,
-            quiet=context.quiet,
-            include_detail=context.verbose or context.debug,
+        output_code = emit_stdout(
+            lambda: HumanRenderer(
+                stdout=consoles.stdout,
+                stderr=consoles.stderr,
+            ).render_doctor(
+                report,
+                quiet=context.quiet,
+                include_detail=context.verbose,
+            )
         )
 
+    if output_code is not ExitCode.SUCCESS:
+        return output_code
     if report.is_fatal:
         return ExitCode.GENERAL_ERROR
     return ExitCode.SUCCESS

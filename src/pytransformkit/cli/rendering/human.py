@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import json
+
 from rich.console import Console
 
 from pytransformkit.cli.models.errors import CLIErrorReport
 from pytransformkit.cli.models.reports import (
     DoctorReport,
+    SchemaInspectionReport,
     SchemaValidationReport,
     VersionReport,
 )
@@ -66,6 +69,49 @@ class HumanRenderer:
     def render_schema_validation(self, report: SchemaValidationReport) -> None:
         """Render a successful schema validation report."""
         self.write(f"Valid schema: {report.path}")
+
+    def render_schema_inspection(
+        self,
+        report: SchemaInspectionReport,
+        *,
+        include_details: bool = False,
+    ) -> None:
+        """Render one logical schema and its fields."""
+        self.write(f"Schema: {report.schema_name}")
+        self.write(f"Path: {report.path}")
+
+        columns = ["Name", "Type", "Nullable", "Description"]
+        if include_details:
+            columns.append("Type details")
+
+        rows: list[tuple[str, ...]] = []
+        for field in report.fields:
+            values = [
+                field.name,
+                field.type,
+                "yes" if field.nullable else "no",
+                field.description or "-",
+            ]
+            if include_details:
+                details = (
+                    json.dumps(
+                        field.type_details,
+                        ensure_ascii=False,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    )
+                    if field.type_details is not None
+                    else "-"
+                )
+                values.append(details)
+            rows.append(tuple(values))
+
+        self._stdout.print(
+            build_table(
+                columns=columns,
+                rows=rows,
+            )
+        )
 
     def render_error(self, report: CLIErrorReport) -> None:
         """Render a controlled error to stderr."""

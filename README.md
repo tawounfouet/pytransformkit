@@ -351,9 +351,9 @@ Current status:
 
 - V1 stable line: **LOT-00 → LOT-28 complete**;
 - Declarative Schema 1.1 line: **LOT-29 → LOT-43 complete**;
-- Developer CLI 1.2 line: **LOT-44 → LOT-57 complete; LOT-58 RC documentation closure in progress**;
+- Developer CLI 1.2 line: **LOT-44 → LOT-58 complete; LOT-59 stable release closure pending**;
 - current stable package: **1.1.0**;
-- current 1.2 release-candidate checkpoint: **1.2.0rc2**.
+- current 1.2 release-candidate checkpoint: **1.2.0rc3**.
 
 ## Development
 

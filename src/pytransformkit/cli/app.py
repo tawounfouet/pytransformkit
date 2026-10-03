@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import typer
 
+from pytransformkit.cli.commands.contract import contract_app
 from pytransformkit.cli.commands.doctor import doctor_command
 from pytransformkit.cli.commands.engines import engines_app
 from pytransformkit.cli.commands.schema import schema_app
@@ -42,3 +43,4 @@ app.command("version")(version_command)
 app.command("doctor")(doctor_command)
 app.add_typer(schema_app, name="schema")
 app.add_typer(engines_app, name="engines")
+app.add_typer(contract_app, name="contract")

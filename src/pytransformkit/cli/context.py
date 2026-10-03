@@ -35,7 +35,7 @@ class CLIContext:
         verbose: bool = False,
         debug: bool = False,
         no_color: bool = False,
-    ) -> "CLIContext":
+    ) -> CLIContext:
         """Build a presentation context from public CLI output options."""
         return cls(
             output_mode=OutputMode.JSON if json_output else OutputMode.HUMAN,

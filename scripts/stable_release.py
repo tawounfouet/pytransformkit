@@ -225,16 +225,18 @@ def _validate_v1_1(root: Path, manifest_path: Path) -> list[str]:
     with (root / "pyproject.toml").open("rb") as stream:
         project = tomllib.load(stream)["project"]
 
+    expected_version = manifest.get("project_version")
     current_version = project.get("version")
-    allowed_versions = {
-        manifest.get("release_candidate_version"),
-        manifest.get("project_version"),
-    }
-    if current_version not in allowed_versions:
+    if not isinstance(expected_version, str) or not isinstance(current_version, str):
         errors.append(
-            "1.1 stable promotion version drift: "
-            f"expected one of {sorted(str(v) for v in allowed_versions)!r}, "
-            f"got {current_version!r}"
+            "1.1 stable successor version drift: project and baseline versions "
+            "must be strings"
+        )
+    elif not _preserves_release_line(current_version, expected_version):
+        errors.append(
+            "1.1 stable successor version drift: "
+            f"expected frozen baseline {expected_version!r} or a later compatible "
+            f"1.x version, got {current_version!r}"
         )
 
     if project.get("requires-python") != manifest.get("requires_python"):

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytransformkit"
-version = "1.1.0"
+version = "1.2.0a1"
 description = "Engine-agnostic data transformation framework for Python."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -34,6 +34,10 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
+cli = [
+  "typer>=0.12,<1",
+  "rich>=13,<15",
+]
 yaml = [
   "PyYAML>=6,<7",
 ]
@@ -68,6 +72,9 @@ performance = [
   "pyarrow>=20,<26",
   "duckdb>=1.4,<2",
 ]
+
+[project.scripts]
+ptk = "pytransformkit.cli.bootstrap:main"
 
 [project.urls]
 Repository = "https://github.com/tawounfouet/pytransformkit"
@@ -117,5 +124,5 @@ show_missing = true
 skip_covered = true
 
 [[tool.mypy.overrides]]
-module = ["pandas", "pandas.*", "polars", "polars.*", "pyarrow", "pyarrow.*", "duckdb", "duckdb.*"]
+module = ["pandas", "pandas.*", "polars", "polars.*", "pyarrow", "pyarrow.*", "duckdb", "duckdb.*", "typer", "typer.*"]
 ignore_missing_imports = true

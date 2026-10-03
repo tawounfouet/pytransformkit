@@ -71,7 +71,6 @@ def test_json_renderer_is_deterministic_for_equivalent_input() -> None:
     assert first == second
 
 
-
 def test_json_renderer_normalizes_nested_mapping_order_and_unicode() -> None:
     renderer = JSONRenderer()
 

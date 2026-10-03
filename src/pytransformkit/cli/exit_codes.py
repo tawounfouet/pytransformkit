@@ -19,4 +19,5 @@ class ExitCode(IntEnum):
     INTERRUPTED = 130
     BROKEN_PIPE = 141
 
+
 __all__ = ["ExitCode"]

@@ -20,8 +20,9 @@ from pytransformkit.application.execution.results import (
     NamedEngineOutput,
 )
 from pytransformkit.application.ports.engines import PhysicalHandle
+from pytransformkit.conformance import engine_capabilities
 from pytransformkit.domain.data.schema import Schema
-from pytransformkit.domain.engines import EngineCapability, EngineDescriptor
+from pytransformkit.domain.engines import EngineDescriptor
 from pytransformkit.domain.expressions.aggregate import (
     AggregateExpression,
     AggregateFunction,
@@ -81,45 +82,6 @@ from pytransformkit.infrastructure.engines.polars.quality import PolarsQualityEv
 from pytransformkit.infrastructure.engines.polars.types import PolarsTypeMapper
 from pytransformkit.infrastructure.engines.polars.windows import PolarsWindowCompiler
 
-_POLARS_CAPABILITIES = frozenset(
-    {
-        EngineCapability.SELECT,
-        EngineCapability.DROP,
-        EngineCapability.RENAME,
-        EngineCapability.FILTER,
-        EngineCapability.LIMIT,
-        EngineCapability.DISTINCT,
-        EngineCapability.CAST,
-        EngineCapability.DERIVE,
-        EngineCapability.SORT,
-        EngineCapability.DEDUPLICATE,
-        EngineCapability.AGGREGATE,
-        EngineCapability.WINDOW,
-        EngineCapability.WINDOW_ROWS_CUMULATIVE,
-        EngineCapability.WINDOW_ROWS_MOVING,
-        EngineCapability.PIVOT,
-        EngineCapability.UNPIVOT,
-        EngineCapability.EXPLODE,
-        EngineCapability.FLATTEN,
-        EngineCapability.NESTED,
-        EngineCapability.TEMPORAL,
-        EngineCapability.DURATION,
-        EngineCapability.QUALITY,
-        EngineCapability.JOIN_INNER,
-        EngineCapability.JOIN_LEFT,
-        EngineCapability.JOIN_RIGHT,
-        EngineCapability.JOIN_FULL,
-        EngineCapability.JOIN_SEMI,
-        EngineCapability.JOIN_ANTI,
-        EngineCapability.JOIN_CROSS,
-        EngineCapability.UNION,
-        EngineCapability.INTERSECT,
-        EngineCapability.EXCEPT,
-        EngineCapability.LAZY,
-    }
-)
-
-
 class PolarsAdapter:
     """Polars adapter implementing portable Transformation semantics."""
 
@@ -140,7 +102,7 @@ class PolarsAdapter:
             id="polars",
             name="Polars",
             adapter_version=_package_version(),
-            capabilities=_POLARS_CAPABILITIES,
+            capabilities=engine_capabilities("polars"),
         )
 
     def bind_native(self, value: object) -> PhysicalHandle:

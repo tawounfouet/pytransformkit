@@ -132,7 +132,7 @@ def test_debug_does_not_change_successful_human_stdout() -> None:
 def test_debug_internal_error_keeps_json_on_stdout_and_traceback_on_stderr(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    def fail(self, contract_id: str):
+    def fail(self: object, contract_id: str) -> None:
         raise RuntimeError("synthetic internal failure")
 
     monkeypatch.setattr(

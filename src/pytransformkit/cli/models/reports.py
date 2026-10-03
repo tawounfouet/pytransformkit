@@ -64,8 +64,6 @@ class DoctorCheck:
         return payload
 
 
-
-
 @dataclass(frozen=True, slots=True)
 class EngineSummaryReport:
     """One official engine's installation and qualification summary."""
@@ -130,9 +128,7 @@ class EngineInspectionReport:
         payload = self.engine.to_data()
         payload["mandatory_for_v1"] = self.mandatory_for_v1
         payload["capabilities"] = list(self.capabilities)
-        payload["conformance"] = [
-            dimension.to_data() for dimension in self.conformance
-        ]
+        payload["conformance"] = [dimension.to_data() for dimension in self.conformance]
         return payload
 
 

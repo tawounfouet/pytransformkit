@@ -34,9 +34,7 @@ def root(
     """PyTransformKit developer CLI."""
     if version:
         exit_code = render_version()
-        raise typer.Exit(
-            code=0 if exit_code is ExitCode.SUCCESS else int(exit_code)
-        )
+        raise typer.Exit(code=0 if exit_code is ExitCode.SUCCESS else int(exit_code))
 
     if ctx.invoked_subcommand is None:
         typer.echo(ctx.get_help())
